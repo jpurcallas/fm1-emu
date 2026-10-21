@@ -1,0 +1,31 @@
+name: Compilar emulador FM-1 (Linux actual)
+on:
+  workflow_dispatch:
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Obtener codigo fuente
+        uses: actions/checkout@v4
+      - name: Instalar Rust estable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Compilar ejecutor de diagnostico x86_64
+        run: cargo build --locked --release -p fm1-emu
+      - name: Verificar el ejecutable
+        run: |
+          target/release/fm1-emu --version
+          file target/release/fm1-emu
+      - name: Preparar archivo para descarga
+        run: |
+          mkdir -p dist
+          cp target/release/fm1-emu dist/fm1-emu
+          (cd dist && sha256sum fm1-emu > SHA256SUMS.txt)
+          tar -czf fm1-emu-master-linux-x86_64.tar.gz -C dist fm1-emu SHA256SUMS.txt
+      - name: Publicar el archivo de diagnostico
+        uses: actions/upload-artifact@v4
+        with:
+          name: fm1-emu-master-linux-x86_64
+          path: fm1-emu-master-linux-x86_64.tar.gz
+          if-no-files-found: error
