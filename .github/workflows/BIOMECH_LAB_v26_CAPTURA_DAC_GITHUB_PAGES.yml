@@ -1,0 +1,382 @@
+# BIOMECH LAB - build a separate, experimental browser emulator with the FPU patch.
+# Does not modify or flash the physical FM-1. Does not publish the BIOMECH firmware.
+name: BIOMECH Lab v26 - Captura DAC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: biomech-lab-pages
+  cancel-in-progress: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obtener codigo fuente
+        uses: actions/checkout@v4
+      - name: Instalar Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Instalar destino WebAssembly
+        run: rustup target add wasm32-unknown-unknown
+      - name: Aplicar correccion de FPU solo al emulador
+        shell: bash
+        run: |
+          cat > /tmp/biomech-v24-fpu.patch <<'PATCH'
+          --- a/crates/fm1-isa/src/fpu.rs
+          +++ b/crates/fm1-isa/src/fpu.rs
+          @@ -43,6 +43,10 @@
+               e!("fpu_ftou", "R = ftou(R) (trunc)", 0x00ff_ffff, 0x005f_e53f),
+               e!("fpu_itof", "R = itof(R)", 0x00ff_ffff, 0x008f_e53f),
+               e!("fpu_utof", "R = utof(R)", 0x00ff_ffff, 0x009f_e53f),
+          +    // Verified with JieLi PI32v2 clang/assembler (-mcpu=r3) and vendor objdump bytes.
+          +    e!("fpu_floor", "R = ftof(R) (floor)", 0x00ff_ffff, 0x00ff_e53f),
+          +    e!("fpu_ceil", "R = ftof(R) (ceil)", 0x00ff_ffff, 0x00ef_e53f),
+          +    e!("fpu_trunc", "R = ftof(R) (trunc)", 0x00ff_ffff, 0x00df_e53f),
+               e!("iff_r_eq_r_goto_i", "iff (R == R) goto #i", 0x0800_ff70, 0x0800_e800),
+               e!("iff_r_uge_r_goto_i", "iff (R u>= R) goto #i", 0x0800_ff70, 0x0800_e900),
+               e!("iff_r_ugt_r_goto_i", "iff (R u> R) goto #i", 0x0800_ff70, 0x0800_ec00),
+          --- a/crates/fm1-core/src/lib.rs
+          +++ b/crates/fm1-core/src/lib.rs
+          @@ -4292,6 +4292,28 @@
+               }
+           
+               #[test]
+          +    fn vendor_fpu_floor_ceil_trunc() {
+          +        // JieLi -mcpu=r3 assembly for r0 = ftof(r1) floor/ceil/trunc.
+          +        // Exact bytes were verified independently against clang object code.
+          +        let mut mem = vec![0u8; 0x100];
+          +        mem[..12].copy_from_slice(&[
+          +            0x3f, 0xe5, 0xff, 0x01, // floor r1 -> r0
+          +            0x3f, 0xe5, 0xef, 0x01, // ceil r1 -> r0
+          +            0x3f, 0xe5, 0xdf, 0x01, // trunc r1 -> r0
+          +        ]);
+          +        for value in [1.75f32, -1.75, -0.0, 0.0, 3.0, -3.0] {
+          +            let mut ram = FlatRam::new(mem.clone());
+          +            let mut cpu = Cpu::new(0);
+          +            cpu.regs[1] = value.to_bits();
+          +            for (i, expected) in [value.floor(), value.ceil(), value.trunc()].iter().enumerate() {
+          +                cpu.step(&mut ram).unwrap();
+          +                assert_eq!(cpu.regs[0], expected.to_bits(), "value={value} instruction={i}");
+          +            }
+          +            assert_eq!(cpu.pc, 12);
+          +        }
+          +    }
+          +
+          +    #[test]
+               fn short_shift_by_32() {
+                   // `df a0` r7 = r5 >>> 32, `32 a0` r2 = r3 << 32 (count field 0 = 32)
+                   let mut mem = vec![0u8; 0x100];
+          @@ -5278,7 +5300,12 @@
+                   0x1f => x as i32 as u32,
+                   0x5f => x as u32,
+                   0x8f => (a as i32 as f32).to_bits(),
+          -        _ => (a as f32).to_bits(),
+          +        0x9f => (a as f32).to_bits(),
+          +        // Unary float -> float (not float -> integer): floor/ceil/trunc.
+          +        0xff => x.floor().to_bits(),
+          +        0xef => x.ceil().to_bits(),
+          +        0xdf => x.trunc().to_bits(),
+          +        _ => unreachable!("undecoded PI32v2 floating opcode {op:#x}"),
+               }
+           }
+           
+          --- a/crates/fm1-core/src/jit.rs
+          +++ b/crates/fm1-core/src/jit.rs
+          @@ -838,7 +838,7 @@
+                           g.chain(next_pc, count);
+                       }
+                       // (the multiply-accumulates 7 / 8 read d too: through the interpreter's executor)
+          -            Fast::FOp { d, a, b, op } if !matches!(op, 7 | 8) => {
+          +            Fast::FOp { d, a, b, op } if matches!(op, 0..=6 | 0x1f | 0x5f | 0x8f | 0x9f) => {
+                           g.ld_reg(0, a);
+                           match op {
+                               0x1f | 0x5f => {
+          --- a/crates/fm1-core/src/jit/x64.rs
+          +++ b/crates/fm1-core/src/jit/x64.rs
+          @@ -527,7 +527,7 @@
+                       }
+                       // (the multiply-accumulates 7 / 8 read d too, min / max are Rust's: through the
+                       // interpreter's executor)
+          -            Fast::FOp { d, a, b, op } if !matches!(op, 5..=8) => {
+          +            Fast::FOp { d, a, b, op } if matches!(op, 0..=3 | 0x1f | 0x5f | 0x8f | 0x9f) => {
+                           g.ld_reg(RAX, a);
+                           match op {
+                               0..=3 => {
+          PATCH
+          git apply --check /tmp/biomech-v24-fpu.patch
+          git apply /tmp/biomech-v24-fpu.patch
+      - name: Optimizar ruta FPU WebAssembly con semantica IEEE32
+        shell: bash
+        run: |
+          cat > /tmp/biomech-seq-v25.patch <<'PATCH'
+          --- a/crates/fm1-core/src/jit_wasm.rs
+          +++ b/crates/fm1-core/src/jit_wasm.rs
+          @@ -329,6 +329,14 @@
+           const I64_CONST: u8 = 0x42;
+           const I64_EQZ: u8 = 0x50;
+           const F32_REINTERPRET_I32: u8 = 0xbe;
+          +const I32_REINTERPRET_F32: u8 = 0xbc;
+          +const F32_ADD: u8 = 0x92;
+          +const F32_SUB: u8 = 0x93;
+          +const F32_MUL: u8 = 0x94;
+          +const F32_DIV: u8 = 0x95;
+          +const F32_CEIL: u8 = 0x8d;
+          +const F32_FLOOR: u8 = 0x8e;
+          +const F32_TRUNC: u8 = 0x8f;
+           const I32_EXTEND8_S: u8 = 0xc0;
+           const I32_EXTEND16_S: u8 = 0xc1;
+           const VOID: u8 = 0x40;
+          @@ -1356,6 +1364,33 @@
+                           g.jump_local(L_VAL, count);
+                           ended = true;
+                       }
+          +            // Native WASM float32 ops: same inputs, destinations and binary32
+          +            // rounding as the PI32 interpreter. This hot path is especially
+          +            // important with multiple sequencer voices: the previous fallback
+          +            // called the Rust interpreter for EVERY oscillator sample.
+          +            // Keep min/max, float->int, fused operations and other FPU shapes
+          +            // on the authoritative helper until their corner cases are proven.
+          +            Fast::FOp { d, a, b, op: fop @ (0..=3 | 0xdf | 0xef | 0xff) } => {
+          +                g.get(L_CPU); // destination address for i32.store
+          +                g.ld_reg(a);
+          +                g.op(F32_REINTERPRET_I32);
+          +                if fop <= 3 {
+          +                    g.ld_reg(b);
+          +                    g.op(F32_REINTERPRET_I32);
+          +                }
+          +                g.op(match fop {
+          +                    0 => F32_ADD,
+          +                    1 => F32_SUB,
+          +                    2 => F32_MUL,
+          +                    3 => F32_DIV,
+          +                    0xdf => F32_TRUNC,
+          +                    0xef => F32_CEIL,
+          +                    0xff => F32_FLOOR,
+          +                    _ => unreachable!(),
+          +                });
+          +                g.op(I32_REINTERPRET_F32);
+          +                g.mem_op(I32_STORE, 2, off_reg(d));
+          +            }
+                       // ---- everything else: the interpreter's executor for this one op
+                       other => {
+                           let p: &'static Fast = Box::leak(Box::new(other));
+          PATCH
+          git apply --check /tmp/biomech-seq-v25.patch
+          git apply /tmp/biomech-seq-v25.patch
+      - name: Probar instrucciones JieLi floor ceil trunc
+        run: cargo test --locked -p fm1-core --lib vendor_fpu_floor_ceil_trunc -- --nocapture
+      - name: Instalar captura diagnóstica de audio DAC (solo web)
+        shell: bash
+        run: |
+          cat > /tmp/aplicar_captura_biomech.py <<'PY'
+          from pathlib import Path
+          p=Path('web/worklet.js') if Path('web/worklet.js').exists() else Path('_site/worklet.js')
+          s=p.read_text()
+          a='    this.snapshots = [];\n    this.port.onmessageerror'
+          b='    this.snapshots = [];\n    this.biomechCapture = null;\n    this.port.onmessageerror'
+          assert s.count(a)==1,('worklet init anchor',s.count(a))
+          s=s.replace(a,b,1)
+          a='      } else if (m.type === "cancel-boot") {'
+          b='''      } else if (m.type === "biomech-capture" && this.x) {
+                  if (!this.biomechCapture) {
+                    const target = Math.min(44100 * 10, Math.max(128, Math.round(m.frames || 44100 * 8)));
+                    this.biomechCapture = { target, at: 0, real: 0, pcm: new Int16Array(target * 2),
+                      shortStart: this.short || 0, seq: this.seq };
+                    this.port.postMessage({ type: "biomech-capture-started", seq: this.seq });
+                  }
+                } else if (m.type === "cancel-boot") {'''
+          assert s.count(a)==1
+          s=s.replace(a,b,1)
+          a='    this.calls = 0;\n    this.busy = 0;'
+          b='    this.calls = 0;\n    this.biomechCapture = null;\n    this.busy = 0;'
+          assert s.count(a)==1
+          s=s.replace(a,b,1)
+          a='    if (out[1]) out[1].set(r);\n    this.short = (this.short || 0) + (have < n ? 1 : 0);'
+          b='''    if (out[1]) out[1].set(r);
+              // Diagnostic tap: the unmodified emulated DAC samples, before the browser
+              // mixes or plays them. Capture only on an explicit user request.
+              const capture = this.biomechCapture;
+              if (capture && capture.seq === this.seq) {
+                const take = Math.min(n, capture.target - capture.at);
+                for (let i = 0; i < take; i++) {
+                  capture.pcm[2 * (capture.at + i)] = Math.max(-32768, Math.min(32767, Math.round(l[i] * 32768)));
+                  capture.pcm[2 * (capture.at + i) + 1] = Math.max(-32768, Math.min(32767, Math.round(r[i] * 32768)));
+                }
+                capture.real += Math.min(have, take);
+                capture.at += take;
+                if (capture.at === capture.target) {
+                  this.biomechCapture = null;
+                  this.port.postMessage({ type: "biomech-capture-done", seq: this.seq,
+                    frames: capture.at, real: capture.real, shortBlocks: (this.short || 0) - capture.shortStart + (have < n ? 1 : 0),
+                    pcm: capture.pcm }, [capture.pcm.buffer]);
+                }
+              }
+              this.short = (this.short || 0) + (have < n ? 1 : 0);'''
+          assert s.count(a)==1
+          s=s.replace(a,b,1)
+          p.write_text(s)
+          # Page: one diagnostic button, not a replacement for UI
+          p=Path('web/index.html') if Path('web/index.html').exists() else Path('_site/index.html')
+          s=p.read_text(); a='        <span id="status">click Start to boot</span>'
+          b=a+'\n        <div id="biomech-capture-bar" style="margin-top:7px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">\n          <button type="button" id="biomech-capture" title="Graba solo la salida del DAC emulado sin modificar el sonido">Grabar 8 s de SEQ (WAV)</button>\n          <span id="biomech-capture-label" style="font-size:12px">Iniciá BIOMECH y pulsá PLAY antes de grabar.</span>\n        </div>'
+          assert s.count(a)==1
+          s=s.replace(a,b,1); p.write_text(s)
+          p=Path('web/main.js') if Path('web/main.js').exists() else Path('_site/main.js')
+          s=p.read_text()
+          a='// what the audio thread sends: the screen and LEDs with its timing, boot and error news'
+          assert s.count(a)==1
+          b='''// BIOMECH read-only diagnostic WAV capture. No DSP, timing, or firmware modifications.
+          const biomechCaptureButton = document.getElementById('biomech-capture');
+          const biomechCaptureLabel = document.getElementById('biomech-capture-label');
+          biomechCaptureButton.addEventListener('click', () => {
+            if (!node || !running) { biomechCaptureLabel.textContent = 'Iniciá el firmware primero.'; return; }
+            biomechCaptureButton.disabled = true;
+            biomechCaptureLabel.textContent = 'Grabando 8 segundos del DAC emulado...';
+            node.port.postMessage({ type: 'biomech-capture', frames: 44100 * 8 });
+          });
+          function biomechWav(pcm, frames) {
+            const dataSize = frames * 4; // stereo, signed little-endian PCM16
+            const buf = new ArrayBuffer(44 + dataSize);
+            const v = new DataView(buf);
+            const str = (off, text) => { for (let i=0;i<text.length;i++) v.setUint8(off+i,text.charCodeAt(i)); };
+            str(0, 'RIFF'); v.setUint32(4, 36 + dataSize, true); str(8, 'WAVE');
+            str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+            v.setUint16(22, 2, true); v.setUint32(24, 44100, true);
+            v.setUint32(28, 44100*4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true);
+            str(36, 'data'); v.setUint32(40, dataSize, true);
+            const bytes = new Uint8Array(buf,44);
+            bytes.set(new Uint8Array(pcm.buffer, pcm.byteOffset, pcm.byteLength));
+            return buf;
+          }
+          '''+a
+          s=s.replace(a,b,1)
+          a='  if (m.type === "error") {'
+          b='''  if (m.type === 'biomech-capture-started') {
+              if (running?.seq === m.seq) biomechCaptureLabel.textContent = 'Grabando...';
+              return;
+            }
+            if (m.type === 'biomech-capture-done') {
+              if (running?.seq !== m.seq) return;
+              const wav = new Blob([biomechWav(m.pcm, m.frames)], { type:'audio/wav' });
+              const url = URL.createObjectURL(wav);
+              const a = document.createElement('a');
+              a.href = url; a.download = 'BIOMECH_SEQ_DAC_v26_8s.wav';
+              document.body.appendChild(a); a.click(); a.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 30000);
+              biomechCaptureLabel.textContent = `WAV: 8 s; bloques incompletos ${m.shortBlocks}; muestras reales ${m.real}/${m.frames}.`;
+              biomechCaptureButton.disabled = false;
+              return;
+            }
+            if (m.type === 'error') {
+              biomechCaptureButton.disabled = false;'''
+          assert s.count(a)==1
+          s=s.replace(a,b,1)
+          p.write_text(s)
+          print('Parche capturador aplicado: worklet, página, UI')
+          PY
+          python /tmp/aplicar_captura_biomech.py
+          node --check web/main.js
+          node --check web/worklet.js
+          node --test web/worklet.test.mjs web/main.test.mjs
+          cat > web/biomech_capture.test.mjs <<'JS'
+          import { test } from 'node:test';
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import vm from 'node:vm';
+          
+          test('captura WAV diagnóstica copia el DAC stereo y no altera la salida audio', async () => {
+            let Fm1;
+            const posted=[];
+            const mem=new WebAssembly.Memory({initial:4});
+            const f=new Float32Array(mem.buffer); f[0]=0.25; f[1024]=-0.5;
+            const ctxt=vm.createContext({WebAssembly,Float32Array,Int16Array,Uint8Array,Uint16Array,Uint32Array,
+              sampleRate:44100,performance:{now:()=>0},
+              AudioWorkletProcessor:class { constructor(){this.port={postMessage:(m)=>posted.push(m)}} },
+              registerProcessor(_name,klass){Fm1=klass;}});
+            vm.runInContext(fs.readFileSync(new URL('./worklet.js',import.meta.url),'utf8'),ctxt);
+            const p=new Fm1();
+            p.x={memory:mem, fm1_render:(n)=>n, fm1_out_l:()=>0, fm1_out_r:()=>4096,
+              fm1_flash_revision:()=>0,fm1_flash_busy:()=>false,fm1_ms:()=>1000,
+              fm1_minsns:()=>5,fm1_halted:()=>false, fm1_lcd_revision:()=>0,
+              fm1_lcd:()=>8192,fm1_leds:()=>131072};
+            Object.assign(p,{seq:2,short:0,reportFrames:0,reportCalls:0, flashRevision:0,observedRevision:0,
+              flashChangedAt:0,lastSnapshot:0,busy:0,worst:0,budget:100000,board:0});
+            await p.port.onmessage({data:{type:'biomech-capture',frames:128}});
+            const outputs=[[new Float32Array(128),new Float32Array(128)]];
+            p.process([],outputs);
+            assert.equal(outputs[0][0][0],0.25);
+            assert.equal(outputs[0][1][0],-0.5);
+            const message=posted.find(x=>x.type==='biomech-capture-done');
+            assert.ok(message,'mensaje de captura al terminar');
+            assert.equal(message.frames,128);
+            assert.equal(message.shortBlocks,0);
+            assert.equal(message.real,128);
+            assert.equal(message.pcm[0],8192);
+            assert.equal(message.pcm[1],-16384);
+            assert.equal(message.pcm.byteLength,512);
+          });
+          JS
+          node --test web/biomech_capture.test.mjs
+      - name: Construir emulador para navegador
+        run: web/build.sh _site
+      - name: Mostrar carga y bloques de audio incompletos
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('_site/main.js')
+          js = p.read_text()
+          before = '`${(m.ms / 1000).toFixed(1)} s`;'
+          after = '`${(m.ms / 1000).toFixed(1)} s · short audio blocks ${m.short ?? 0}`;'
+          assert js.count(before)==1, 'La interfaz del emulador cambio: revisar antes de parchear'
+          p.write_text(js.replace(before,after))
+      - name: Identificar version de pruebas
+        shell: python
+        run: |
+          from pathlib import Path
+          page = Path('_site/index.html')
+          html = page.read_text()
+          html = html.replace('<title>FM-1 Emulator</title>', '<title>BIOMECH LAB v26 - Captura WAV DAC</title>', 1)
+          banner = ('<div role="note" style="padding:10px 18px;text-align:center;'
+                    'background:#18332c;color:#e8f6f1;font:14px system-ui">'
+                    'BIOMECH LAB v26 - Captura WAV PCM16 de la salida DAC. JIT FPU v25. '
+                    'Cargá tu firmware .fwsc local. No instala nada en hardware.</div>')
+          if '<main>' not in html:
+              raise SystemExit('No se encontro el contenedor del sitio')
+          html = html.replace('<main>', banner + '\n<main>', 1)
+          page.write_text(html)
+      - name: Comprobar archivos del sitio
+        run: |
+          test -s _site/index.html
+          test -s _site/fm1_web.wasm
+          test -s _site/main.js
+          test -s _site/worklet.js
+          touch _site/.nojekyll
+      - name: Guardar copia descargable del sitio
+        uses: actions/upload-artifact@v4
+        with:
+          name: biomech-lab-v26-captura-audio-web
+          path: _site
+          include-hidden-files: true
+      - name: Preparar GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Subir sitio a Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    needs: compile
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar sitio
+        id: deploy
+        uses: actions/deploy-pages@v4
