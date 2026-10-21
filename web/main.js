@@ -4,6 +4,7 @@
 // in the wasm: a catalog entry's fetched from its author's site, or one opened from this
 // computer (M-VAVE's own: their server does not let other pages fetch it).
 import { fetchPackage } from "./fwsc.js";
+import { DiagnosticTrace } from "./diagnostic-trace.js";
 import { SaveStore, packageHash, changedSectors, packSectors, exportSave, importSave } from "./persistence.js";
 
 const CLOCKS = [60, 80, 100, 120, 160, 200, 240];
@@ -580,6 +581,43 @@ midiChSel.addEventListener("change", () => {
   store("fm1.midich", midiCh);
 });
 
+// Optional status-only diagnostics: the audio engine and firmware are unchanged.
+const diagButton = document.getElementById("trace8");
+const diagStatus = document.getElementById("trace8-status");
+let diagCapture = null, diagCompleted = null;
+const setTraceReady = () => {
+  diagButton.textContent = "Download diagnostics CSV";
+  diagStatus.textContent = `${diagCompleted.rows.length} samples collected. Download and compare with the audio.`;
+};
+diagButton.addEventListener("click", () => {
+  if (diagCompleted) {
+    const url = URL.createObjectURL(new Blob([diagCompleted.toCSV()], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fm1-diagnostics-${diagCompleted.clockMHz}mhz-${diagCompleted.seq}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    diagCompleted = null;
+    diagButton.textContent = "Capture 8s diagnostics";
+    diagStatus.textContent = "Downloaded. Ready for another comparison.";
+    return;
+  }
+  if (diagCapture) {
+    diagCompleted = diagCapture;
+    diagCapture = null;
+    setTraceReady();
+    return;
+  }
+  if (!running || !node || !ac) {
+    diagStatus.textContent = "Start the firmware first.";
+    return;
+  }
+  diagCapture = new DiagnosticTrace({ seq: bootSeq, firmware: running.record.name,
+    packageHash: running.record.hash, clockMHz: mhz, latency });
+  diagButton.textContent = "Stop and prepare CSV";
+  diagStatus.textContent = "Capturing 8 seconds of emulator time. Play the same pattern as before.";
+});
+
 // ---------------------------------------------------------------- is the device keeping up?
 // Two measures, per second: the load (the share of the audio thread's time the emulation takes,
 // timed in the worklet; over ~100% and the sound must break up) and the drift of the audio
@@ -899,6 +937,11 @@ function onWorklet(e) {
   // Preserve an update not yet drawn when a status-only message arrives.
   if (!m.lcd && frame?.lcd) m.lcd = frame.lcd;
   frame = m;
+  if (diagCapture && diagCapture.seq === m.seq && diagCapture.add(m, performance.now())) {
+    diagCompleted = diagCapture;
+    diagCapture = null;
+    setTraceReady();
+  }
   perf.add(m);
   const now = performance.now();
   if (!last || now - last.t > 1000) {
