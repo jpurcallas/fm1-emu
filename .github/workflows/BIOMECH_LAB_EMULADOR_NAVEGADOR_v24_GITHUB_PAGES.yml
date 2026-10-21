@@ -1,0 +1,162 @@
+# BIOMECH LAB - build a separate, experimental browser emulator with the FPU patch.
+# Does not modify or flash the physical FM-1. Does not publish the BIOMECH firmware.
+name: BIOMECH Lab - Emulador web
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: biomech-lab-pages
+  cancel-in-progress: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obtener codigo fuente
+        uses: actions/checkout@v4
+      - name: Instalar Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Instalar destino WebAssembly
+        run: rustup target add wasm32-unknown-unknown
+      - name: Aplicar correccion de FPU solo al emulador
+        shell: bash
+        run: |
+          cat > /tmp/biomech-v24-fpu.patch <<'PATCH'
+          --- a/crates/fm1-isa/src/fpu.rs
+          +++ b/crates/fm1-isa/src/fpu.rs
+          @@ -43,6 +43,10 @@
+               e!("fpu_ftou", "R = ftou(R) (trunc)", 0x00ff_ffff, 0x005f_e53f),
+               e!("fpu_itof", "R = itof(R)", 0x00ff_ffff, 0x008f_e53f),
+               e!("fpu_utof", "R = utof(R)", 0x00ff_ffff, 0x009f_e53f),
+          +    // Verified with JieLi PI32v2 clang/assembler (-mcpu=r3) and vendor objdump bytes.
+          +    e!("fpu_floor", "R = ftof(R) (floor)", 0x00ff_ffff, 0x00ff_e53f),
+          +    e!("fpu_ceil", "R = ftof(R) (ceil)", 0x00ff_ffff, 0x00ef_e53f),
+          +    e!("fpu_trunc", "R = ftof(R) (trunc)", 0x00ff_ffff, 0x00df_e53f),
+               e!("iff_r_eq_r_goto_i", "iff (R == R) goto #i", 0x0800_ff70, 0x0800_e800),
+               e!("iff_r_uge_r_goto_i", "iff (R u>= R) goto #i", 0x0800_ff70, 0x0800_e900),
+               e!("iff_r_ugt_r_goto_i", "iff (R u> R) goto #i", 0x0800_ff70, 0x0800_ec00),
+          --- a/crates/fm1-core/src/lib.rs
+          +++ b/crates/fm1-core/src/lib.rs
+          @@ -4292,6 +4292,28 @@
+               }
+           
+               #[test]
+          +    fn vendor_fpu_floor_ceil_trunc() {
+          +        // JieLi -mcpu=r3 assembly for r0 = ftof(r1) floor/ceil/trunc.
+          +        // Exact bytes were verified independently against clang object code.
+          +        let mut mem = vec![0u8; 0x100];
+          +        mem[..12].copy_from_slice(&[
+          +            0x3f, 0xe5, 0xff, 0x01, // floor r1 -> r0
+          +            0x3f, 0xe5, 0xef, 0x01, // ceil r1 -> r0
+          +            0x3f, 0xe5, 0xdf, 0x01, // trunc r1 -> r0
+          +        ]);
+          +        for value in [1.75f32, -1.75, -0.0, 0.0, 3.0, -3.0] {
+          +            let mut ram = FlatRam::new(mem.clone());
+          +            let mut cpu = Cpu::new(0);
+          +            cpu.regs[1] = value.to_bits();
+          +            for (i, expected) in [value.floor(), value.ceil(), value.trunc()].iter().enumerate() {
+          +                cpu.step(&mut ram).unwrap();
+          +                assert_eq!(cpu.regs[0], expected.to_bits(), "value={value} instruction={i}");
+          +            }
+          +            assert_eq!(cpu.pc, 12);
+          +        }
+          +    }
+          +
+          +    #[test]
+               fn short_shift_by_32() {
+                   // `df a0` r7 = r5 >>> 32, `32 a0` r2 = r3 << 32 (count field 0 = 32)
+                   let mut mem = vec![0u8; 0x100];
+          @@ -5278,7 +5300,12 @@
+                   0x1f => x as i32 as u32,
+                   0x5f => x as u32,
+                   0x8f => (a as i32 as f32).to_bits(),
+          -        _ => (a as f32).to_bits(),
+          +        0x9f => (a as f32).to_bits(),
+          +        // Unary float -> float (not float -> integer): floor/ceil/trunc.
+          +        0xff => x.floor().to_bits(),
+          +        0xef => x.ceil().to_bits(),
+          +        0xdf => x.trunc().to_bits(),
+          +        _ => unreachable!("undecoded PI32v2 floating opcode {op:#x}"),
+               }
+           }
+           
+          --- a/crates/fm1-core/src/jit.rs
+          +++ b/crates/fm1-core/src/jit.rs
+          @@ -838,7 +838,7 @@
+                           g.chain(next_pc, count);
+                       }
+                       // (the multiply-accumulates 7 / 8 read d too: through the interpreter's executor)
+          -            Fast::FOp { d, a, b, op } if !matches!(op, 7 | 8) => {
+          +            Fast::FOp { d, a, b, op } if matches!(op, 0..=6 | 0x1f | 0x5f | 0x8f | 0x9f) => {
+                           g.ld_reg(0, a);
+                           match op {
+                               0x1f | 0x5f => {
+          --- a/crates/fm1-core/src/jit/x64.rs
+          +++ b/crates/fm1-core/src/jit/x64.rs
+          @@ -527,7 +527,7 @@
+                       }
+                       // (the multiply-accumulates 7 / 8 read d too, min / max are Rust's: through the
+                       // interpreter's executor)
+          -            Fast::FOp { d, a, b, op } if !matches!(op, 5..=8) => {
+          +            Fast::FOp { d, a, b, op } if matches!(op, 0..=3 | 0x1f | 0x5f | 0x8f | 0x9f) => {
+                           g.ld_reg(RAX, a);
+                           match op {
+                               0..=3 => {
+          PATCH
+          git apply --check /tmp/biomech-v24-fpu.patch
+          git apply /tmp/biomech-v24-fpu.patch
+      - name: Probar instrucciones JieLi floor ceil trunc
+        run: cargo test --locked -p fm1-core --lib vendor_fpu_floor_ceil_trunc -- --nocapture
+      - name: Construir emulador para navegador
+        run: web/build.sh _site
+      - name: Identificar version de pruebas
+        shell: python
+        run: |
+          from pathlib import Path
+          page = Path('_site/index.html')
+          html = page.read_text()
+          html = html.replace('<title>FM-1 Emulator</title>', '<title>BIOMECH LAB - Emulador FM-1 experimental</title>', 1)
+          banner = ('<div role="note" style="padding:10px 18px;text-align:center;'
+                    'background:#18332c;color:#e8f6f1;font:14px system-ui">'
+                    'BIOMECH LAB - Emulador experimental con parche FPU. '
+                    'Cargá tu firmware .fwsc local. No instala nada en hardware.</div>')
+          if '<main>' not in html:
+              raise SystemExit('No se encontro el contenedor del sitio')
+          html = html.replace('<main>', banner + '\n<main>', 1)
+          page.write_text(html)
+      - name: Comprobar archivos del sitio
+        run: |
+          test -s _site/index.html
+          test -s _site/fm1_web.wasm
+          test -s _site/main.js
+          test -s _site/worklet.js
+          touch _site/.nojekyll
+      - name: Guardar copia descargable del sitio
+        uses: actions/upload-artifact@v4
+        with:
+          name: biomech-lab-emulador-web
+          path: _site
+          include-hidden-files: true
+      - name: Preparar GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Subir sitio a Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    needs: compile
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar sitio
+        id: deploy
+        uses: actions/deploy-pages@v4
