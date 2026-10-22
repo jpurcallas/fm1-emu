@@ -309,6 +309,37 @@ pub extern "C" fn fm1_guest_ram_len() -> u32 {
     machine().map_or(0, |m| m.soc.ram.len() as u32)
 }
 
+
+static mut BIOMECH_SYMBOL_PROFILE_JSON: Vec<u8> = Vec::new();
+/// Enable (1) or pause (0) CPU0 per-instruction PC attribution. Existing counts preserved.
+#[no_mangle]
+pub extern "C" fn fm1_biomech_symbol_profile(on: u32) {
+    if let Some(m) = machine() {
+        if m.soc.biomech_cpu0_profile.is_none() {
+            m.soc.biomech_cpu0_profile = Some(fm1_soc::BiomechCpu0Profile::default());
+        }
+        if let Some(p) = m.soc.biomech_cpu0_profile.as_mut() {
+            p.enabled = on != 0;
+        }
+    }
+}
+/// Read-only report; disjoint PC-range bins, CPU0-only. Cumulative between profile=1/0.
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_biomech_symbol_report() -> *const u8 {
+    let report = machine().map(|m| {
+        let p = m.soc.biomech_cpu0_profile.as_ref();
+        let counts = p.map_or([0u64;9], |p| p.counts);
+        format!(r#"{{"available":{},"enabled":{},"bins":{:?},"cycle":{}}}"#,
+            p.is_some(), p.is_some_and(|p| p.enabled), counts, m.soc.periph.cycles)
+    }).unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe {
+        BIOMECH_SYMBOL_PROFILE_JSON = report.into_bytes();
+        BIOMECH_SYMBOL_PROFILE_JSON.push(0);
+        BIOMECH_SYMBOL_PROFILE_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {

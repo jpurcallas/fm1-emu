@@ -134,6 +134,33 @@ impl Board {
     }
 }
 
+
+/** CPU0 instruction attribution for BIOMECH v0.35 only, opt-in. These verified RAM
+ * intervals match the original FWSC's bytes (not blindly copied from a later ELF).
+ * Instruction *counts*, not cycle-accurate silicon timings or inclusive call stacks.
+ * CPU1 excluded. No guest RAM, firmware or DSP modifications.
+ */
+#[derive(Default)]
+pub struct BiomechCpu0Profile {
+    pub enabled: bool,
+    pub counts: [u64; 9],
+}
+impl BiomechCpu0Profile {
+    #[inline]
+    pub fn count(&mut self, pc: u32) {
+        let bucket = if (0x01c029ce..0x01c02f14).contains(&pc) { 0 } // br_one_voice
+        else if (0x01c0274e..0x01c0292e).contains(&pc) { 1 } // br_voice_env
+        else if (0x01c02964..0x01c029ce).contains(&pc) { 2 } // br_wave
+        else if (0x01c01536..0x01c016d4).contains(&pc) { 3 } // br_delay_compact
+        else if (0x01c030a6..0x01c0325e).contains(&pc) { 4 } // br_reverb_compact
+        else if (0x01c032a2..0x01c035d2).contains(&pc) { 5 } // br_render, excludes callees
+        else if (0x01c04682..0x01c0473e).contains(&pc) { 6 } // br_fm1_render_q23
+        else if (0x01c00cb8..0x01c00dd0).contains(&pc) { 7 } // output mix (4 bytes differ from v0.37)
+        else { 8 }; // all other CPU0 instructions
+        self.counts[bucket] += 1;
+    }
+}
+
 pub struct Soc {
     pub board: Board,
     /// The BT baseband's window base (0x2FC44), as the firmware set it.
@@ -153,6 +180,7 @@ pub struct Soc {
     pub ticks: u64,
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
+    pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -226,6 +254,7 @@ impl Soc {
             console: Vec::new(),
             ticks: 0,
             periph: Periph::default(),
+            biomech_cpu0_profile: None,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
