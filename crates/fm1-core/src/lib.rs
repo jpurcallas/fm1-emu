@@ -256,6 +256,15 @@ pub struct Cpu {
 }
 
 impl Cpu {
+    /// Passive JIT bookkeeping, independent of the high-overhead instruction profiler.
+    #[cfg(target_arch = "wasm32")]
+    pub fn jit_origin_diagnostic_json(&self) -> String {
+        self.wjit.as_ref().map_or_else(
+            || r#"{"available":false}"#.to_owned(),
+            |j| j.origin_stats_json()
+        )
+    }
+
     pub fn jit_profile_json(&self) -> String {
         let helpers = self.jit_helpers.iter().map(|(k, v)| format!("\"{k}\":{v}")).collect::<Vec<_>>().join(",");
         format!("{{\"entries\":{},\"instructions\":{},\"helpers\":{{{helpers}}}}}", self.jit_entries, self.jit_insns)
