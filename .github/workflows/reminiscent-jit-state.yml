@@ -1,0 +1,24 @@
+name: REMINISCENT JIT state divergence lab (diagnostic only)
+on:
+  pull_request:
+    paths:
+      - 'crates/fm1-web/src/lib.rs'
+      - '.github/workflows/reminiscent-jit-state.yml'
+permissions:
+  contents: read
+jobs:
+  artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add wasm32-unknown-unknown
+      - name: Build isolated WASM
+        run: tools/build_site.sh _site
+      - name: Verify read-only state probe exported
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const m=new WebAssembly.Module(readFileSync("_site/fm1_web.wasm")); const n=WebAssembly.Module.exports(m).map(x=>x.name); if(!n.includes("fm1_state_probe"))throw Error("No state probe"); console.log("Export verified");'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-jit-state-probe-wasm
+          path: _site/fm1_web.wasm
+          retention-days: 3
