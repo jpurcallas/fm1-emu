@@ -210,6 +210,9 @@ pub struct Cpu {
     bops: Vec<BOp>,
     blocks: Vec<(u32, u32, u32)>,
     bmap: Vec<u32>,
+    /// wasm32 experiment: a second direct-map cache way, without changing the block IDs.
+    #[cfg(target_arch = "wasm32")]
+    bmap_secondary: Vec<u32>,
     /// Diagnostic only: the direct-map's displaced hot address, not a JIT invalidation.
     #[cfg(target_arch = "wasm32")]
     bmap_collisions: u64,
@@ -607,12 +610,23 @@ impl Cpu {
             return Ok(None);
         }
         if !self.bmap.is_empty() {
-            let id = self.bmap[(pc >> 1) as usize & (self.bmap.len() - 1)];
+            let slot = (pc >> 1) as usize & (self.bmap.len() - 1);
+            let id = self.bmap[slot];
             if id != 0 {
                 let (bpc, start, len) = self.blocks[id as usize - 1];
                 if bpc == pc && (xip || self.ram_block_ok(bus, id as usize - 1)) {
-                    // (len 0: remembered that the first instruction here needs `step`)
+                    // (len 0: remembered that the first instruction needs `step`)
                     return Ok(if len == 0 { None } else { Some((id as usize - 1, start, len)) });
+                }
+            }
+            #[cfg(target_arch = "wasm32")]
+            {
+                let second = self.bmap_secondary[slot];
+                if second != 0 {
+                    let (bpc, start, len) = self.blocks[second as usize - 1];
+                    if bpc == pc && (xip || self.ram_block_ok(bus, second as usize - 1)) {
+                        return Ok(if len == 0 { None } else { Some((second as usize - 1, start, len)) });
+                    }
                 }
             }
         }
@@ -780,6 +794,8 @@ impl Cpu {
         const BITS: u32 = 18;
         if self.bmap.is_empty() {
             self.bmap = vec![0; 1 << BITS];
+            #[cfg(target_arch = "wasm32")]
+            { self.bmap_secondary = vec![0; 1 << BITS]; }
         }
         if self.bops.len() > 1 << 22 {
             // (cannot happen for one image, but never grow without bound)
@@ -789,6 +805,8 @@ impl Cpu {
             #[cfg(target_arch = "wasm32")]
             self.bver.clear();
             self.bmap.iter_mut().for_each(|x| *x = 0);
+            #[cfg(target_arch = "wasm32")]
+            self.bmap_secondary.iter_mut().for_each(|x| *x = 0);
             #[cfg(native_jit)]
             if let Some(j) = self.jit.as_mut() {
                 j.reset();
@@ -860,6 +878,24 @@ impl Cpu {
                 }
                 if pc == 0x0200_540c {
                     self.bmap_hot_rebuilt += 1;
+                }
+            }
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            let prev = self.bmap[slot];
+            if prev != 0 {
+                let prev_pc = self.blocks[prev as usize - 1].0;
+                if prev_pc != pc {
+                    // Preserve the displaced entry in the second way.
+                    self.bmap_secondary[slot] = prev;
+                } else {
+                    // Same PC rebuilt because its RAM code changed; never retain
+                    // a stale second-way entry for that exact PC.
+                    let alt = self.bmap_secondary[slot];
+                    if alt != 0 && self.blocks[alt as usize - 1].0 == pc {
+                        self.bmap_secondary[slot] = 0;
+                    }
                 }
             }
         }
