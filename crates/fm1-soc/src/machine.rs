@@ -166,6 +166,11 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
             // Exact PC accounting via the ordinary interpreted step; opt-in only.
             // No JIT allowed for this diagnostic: host verifies JIT=OFF explicitly.
             let pc = cpu.pc;
+            if pc == 0x01c0211c {
+                if let Some(p) = soc.biomech_cpu0_profile.as_mut() {
+                    p.record_exp_arg(cpu.regs[0], cpu.regs[1]);
+                }
+            }
             if let Err(e) = cpu.step(soc) {
                 return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
             }
