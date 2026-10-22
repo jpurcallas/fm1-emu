@@ -41,6 +41,8 @@ pub static FPU: &[IsaEntry] = &[
     e!("fpu_max", "R = fmax(R, R)", 0x000f_ffff, 0x0006_e53f),
     e!("fpu_ftoi", "R = ftoi(R) (trunc)", 0x00ff_ffff, 0x001f_e53f),
     e!("fpu_ftou", "R = ftou(R) (trunc)", 0x00ff_ffff, 0x005f_e53f),
+    // JieLi PI32v2 clang 4.0.1 -mcpu=r3 emits 3f e5 ff DS for __builtin_floorf.
+    e!("fpu_ftof_floor", "R = ftof(R) (floor)", 0x00ff_ffff, 0x00ff_e53f),
     e!("fpu_itof", "R = itof(R)", 0x00ff_ffff, 0x008f_e53f),
     e!("fpu_utof", "R = utof(R)", 0x00ff_ffff, 0x009f_e53f),
     e!("iff_r_eq_r_goto_i", "iff (R == R) goto #i", 0x0800_ff70, 0x0800_e800),
