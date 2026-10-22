@@ -146,8 +146,28 @@ pub struct BiomechCpu0Profile {
     pub counts: [u64; 15],
     /// br_env_exp_cached: function entries, fast return (hit), call-expf path (miss).
     pub exp_cache_paths: [u64; 3],
+    // Diagnostic shadow LRU only: no guest RAM writes, no DSP cache changes.
+    pub reuse_calls: u64,
+    pub reuse_hits: [u64; 7],
+    pub reuse_lru: [Vec<(u32, u32)>; 7],
 }
 impl BiomechCpu0Profile {
+    #[inline]
+    pub fn record_exp_arg(&mut self, engine: u32, bits: u32) {
+        self.reuse_calls += 1;
+        let value = f32::from_bits(bits);
+        if value.is_nan() { return; }
+        let key = (engine, if value == 0.0 { 0 } else { bits });
+        for (i, capacity) in [1usize, 2, 4, 8, 16, 32, 64].iter().enumerate() {
+            let lru = &mut self.reuse_lru[i];
+            if let Some(j) = lru.iter().position(|entry| *entry == key) {
+                self.reuse_hits[i] += 1;
+                lru.remove(j);
+            }
+            lru.insert(0, key);
+            lru.truncate(*capacity);
+        }
+    }
     #[inline]
     pub fn count(&mut self, pc: u32) {
         // v0.35 br_env_exp_cached code bytes match v0.37 at all three
