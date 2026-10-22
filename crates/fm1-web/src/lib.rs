@@ -241,6 +241,23 @@ pub extern "C" fn fm1_profile_report() -> *const u8 {
     }
 }
 
+static mut ORIGIN_JSON: Vec<u8> = Vec::new();
+/// Emulator-only JIT lineage information; the musical firmware is unchanged.
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_jit_origin_report() -> *const u8 {
+    let report = machine().map(|m| format!(
+        r#"{{"cpu0":{},"cpu1":{}}}"#,
+        m.cpu.jit_origin_diagnostic_json(),
+        m.cpu1.as_ref().map_or_else(|| "null".to_owned(), |c| c.jit_origin_diagnostic_json())
+    )).unwrap_or_else(|| r#"{"available":false}"#.to_owned());
+    unsafe {
+        ORIGIN_JSON = report.into_bytes();
+        ORIGIN_JSON.push(0);
+        ORIGIN_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
