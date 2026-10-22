@@ -241,6 +241,16 @@ pub extern "C" fn fm1_profile_report() -> *const u8 {
     }
 }
 
+/// Guest RAM borrowed read-only for the host diagnostic. Do not retain across boot.
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_ptr() -> *const u8 {
+    machine().map_or(std::ptr::null(), |m| m.soc.ram.as_mut_ptr())
+}
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_len() -> u32 {
+    machine().map_or(0, |m| m.soc.ram.len() as u32)
+}
+
 static mut STATE_JSON: Vec<u8> = Vec::new();
 /// Diagnostic ONLY. Read-only snapshot after a whole fm1_render, not instruction-level tracing.
 /// RAM FNV64 is an identity check for divergence localization, not a cryptographic digest.
