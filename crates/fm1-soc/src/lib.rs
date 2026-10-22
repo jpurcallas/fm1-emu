@@ -391,8 +391,8 @@ impl Soc {
             return;
         }
         if width == 0 { return; }
-        let targets=[TARGET,0x01c4_8ee9,0x01c4_8f0b,0x01c4_8f22,
-                     0x01c2_b93b,0x01c6_a070];
+        let targets=[TARGET,0x01c4_8ee0,0x01c4_8ee9,0x01c4_8eea,
+                     0x01c4_8f0b,0x01c4_8f22,0x01c2_b93b,0x01c6_a070];
         for &target in &targets {
             if addr>target || target-addr>=width as u32 { continue; }
             let shift=8*(target-addr);
