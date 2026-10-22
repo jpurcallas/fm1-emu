@@ -45,6 +45,15 @@ jobs:
       - name: Build the site
         run: tools/build_site.sh _site
 
+      # Build-only preview for this experimental PR; never deploys or changes master/Pages.
+      - name: Upload experimental browser preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: biomech-audio-preview
+          path: _site/
+          retention-days: 7
+
       # The emulator's wasm boots a real firmware (Felucca, fetched from its author's site like
       # the page does) to audio and a screen, and a MIDI note sounds.
       - name: Test the emulator page
