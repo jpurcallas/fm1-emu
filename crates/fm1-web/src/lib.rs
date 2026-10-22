@@ -331,8 +331,10 @@ pub extern "C" fn fm1_biomech_symbol_report() -> *const u8 {
         let p = m.soc.biomech_cpu0_profile.as_ref();
         let counts = p.map_or([0u64;15], |p| p.counts);
         let cache = p.map_or([0u64;3], |p| p.exp_cache_paths);
-        format!(r#"{{"available":{},"enabled":{},"bins":{:?},"expCache":{:?},"cycle":{}}}"#,
-            p.is_some(), p.is_some_and(|p| p.enabled), counts, cache, m.soc.periph.cycles)
+        let reuse_calls = p.map_or(0, |p| p.reuse_calls);
+        let reuse_hits = p.map_or([0u64;7], |p| p.reuse_hits);
+        format!(r#"{{"available":{},"enabled":{},"bins":{:?},"expCache":{:?},"reuseCalls":{},"reuseHits":{:?},"cycle":{}}}"#,
+            p.is_some(), p.is_some_and(|p| p.enabled), counts, cache, reuse_calls, reuse_hits, m.soc.periph.cycles)
     }).unwrap_or_else(||r#"{"available":false}"#.to_owned());
     unsafe {
         BIOMECH_SYMBOL_PROFILE_JSON = report.into_bytes();
