@@ -162,6 +162,7 @@ pub struct CoreWriterProbe {
     events: Vec<(u64,u64,u64,u32,u32,u32,u8,u8,u8)>,
     irq_counts: std::collections::BTreeMap<u8,u64>,
     irq_recent: std::collections::VecDeque<(u64,u8,u32,u32)>,
+    voice_irq_context: Vec<(u64,u8,u32,u32)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -176,8 +177,12 @@ impl CoreWriterProbe {
             r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
             cycle,irq,handler,return_pc
         )).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}]}}"#,
-            self.checks,events,counts,recent)
+        let at_voice=self.voice_irq_context.iter().map(|(cycle,irq,handler,return_pc)|format!(
+            r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
+            cycle,irq,handler,return_pc
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice)
     }
 }
 
@@ -375,6 +380,9 @@ impl Soc {
         if let Some(probe)=self.writer_probe.as_mut() {
             probe.checks+=1;
             if probe.last != Some(values) {
+                if values.1 == 1 && probe.last.map(|x|x.1)!=Some(1) {
+                    probe.voice_irq_context=probe.irq_recent.iter().copied().collect();
+                }
                 probe.last=Some(values);
                 if probe.events.len()<64 {
                     probe.events.push((
