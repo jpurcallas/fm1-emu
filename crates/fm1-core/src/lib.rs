@@ -5327,6 +5327,8 @@ fn fpu(op: u8, a: u32, b: u32) -> u32 {
         0x1f => x as i32 as u32,
         0x5f => x as u32,
         0x8f => (a as i32 as f32).to_bits(),
+        // Dedicated PI32v2 float->float round down (JieLi -mcpu=r3, b2=0xff).
+        0xff => x.floor().to_bits(),
         _ => (a as f32).to_bits(),
     }
 }
@@ -5827,4 +5829,21 @@ pub fn describe(win: u64, pc: u32) -> Option<String> {
         Fast::Ext { d, s, part, signed } => format!("E r{} r{} {} {}", d, s, ["b0", "l", "h"][part.min(2) as usize], sgn(signed)),
         _ => return None,
     })
+}
+
+#[cfg(test)]
+mod biomech_fpu_floor_tests {
+    use super::{decode_fpu, fpu};
+
+    #[test]
+    fn pi32v2_vendor_ftof_floor_encoding_and_values() {
+        // Emitted by the original JieLi pi32v2 compiler: "r0 = ftof(r1) (floor)".
+        assert_eq!(decode_fpu(0x01ff_e53f), (0xff, 0, 1, 0));
+        for (input, result) in [(-1.25_f32, -2.0_f32), (1.25_f32, 1.0_f32),
+                                 (-0.0_f32, -0.0_f32), (0.0_f32, 0.0_f32),
+                                 (-3.0_f32, -3.0_f32), (10.999_f32, 10.0_f32)] {
+            assert_eq!(fpu(0xff, input.to_bits(), 0), result.to_bits());
+        }
+        assert_eq!(fpu(0xff, f32::INFINITY.to_bits(), 0), f32::INFINITY.to_bits());
+    }
 }
