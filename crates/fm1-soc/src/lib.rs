@@ -144,10 +144,20 @@ impl Board {
 pub struct BiomechCpu0Profile {
     pub enabled: bool,
     pub counts: [u64; 15],
+    /// br_env_exp_cached: function entries, fast return (hit), call-expf path (miss).
+    pub exp_cache_paths: [u64; 3],
 }
 impl BiomechCpu0Profile {
     #[inline]
     pub fn count(&mut self, pc: u32) {
+        // v0.35 br_env_exp_cached code bytes match v0.37 at all three
+        // selected PCs. No invasive changes or opcode-specific assumptions.
+        match pc {
+            0x01c0211c => self.exp_cache_paths[0] += 1, // push: every call
+            0x01c02134 => self.exp_cache_paths[1] += 1, // fast cached return
+            0x01c02136 => self.exp_cache_paths[2] += 1, // miss: compute expf
+            _ => {}
+        }
         let bucket = if (0x01c029ce..0x01c02f14).contains(&pc) { 0 } // br_one_voice
         else if (0x01c0274e..0x01c0292e).contains(&pc) { 1 } // br_voice_env
         else if (0x01c02964..0x01c029ce).contains(&pc) { 2 } // br_wave
