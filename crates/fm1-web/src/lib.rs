@@ -33,6 +33,8 @@ struct Machine {
     /// interleaved L/R i16 not yet handed out
     audio: VecDeque<i16>,
     halted: bool,
+    /// Diagnostic-only: exact emulator error captured before halt.
+    halt_reason: Option<String>,
     flash0: Vec<u8>,
     usr: Option<usize>,
     started: bool,
@@ -55,7 +57,7 @@ impl Machine {
             cpu.regs[0] = fm1_soc::stock_boot(&mut soc, f, params, board);
         }
         let flash0 = soc.flash.mem.clone();
-        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false,
+        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None,
             flash0, usr: None, started: false }
     }
 
@@ -107,7 +109,20 @@ impl Machine {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)).is_err() {
+        if let Err(e) = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)) {
+            // Diagnose whether decode failed on genuine code or RAM overwritten by data.
+            // Read-only snapshot in the diagnostic branch; no CPU/SoC behavior is changed.
+            let bad_pc = cpu.pc;
+            let aligned_start = (bad_pc.saturating_sub(32)) & !3;
+            let ram_words = (0..17).map(|i| {
+                let at = aligned_start.wrapping_add(i * 4);
+                format!("{at:08x}:{:08x}", soc.read32(at))
+            }).collect::<Vec<_>>().join(",");
+            let pc1 = cpu1.as_ref().map_or_else(|| "none".to_owned(), |c| format!("0x{:08x}", c.pc));
+            self.halt_reason = Some(format!(
+                "{e}; cpu0_pc=0x{bad_pc:08x}; cpu0_sp=0x{:08x}; cpu0_lr=0x{:08x}; cpu1_pc={pc1}; RAM_around=[{ram_words}]",
+                cpu.sp, cpu.regs[15]
+            ));
             self.halted = true;
         }
     }
@@ -121,6 +136,7 @@ static mut OUT_R: [f32; 1024] = [0.0; 1024];
 static mut LEDS: [f32; 41] = [0.0; 41];
 static mut PADS: [u32; 16] = [0; 16];
 static mut INSNS: u64 = 0;
+static mut HALT_REASON_BYTES: Vec<u8> = Vec::new();
 
 #[allow(static_mut_refs)]
 fn machine() -> Option<&'static mut Machine> {
@@ -431,6 +447,18 @@ pub extern "C" fn fm1_minsns() -> u32 {
 #[no_mangle]
 pub extern "C" fn fm1_halted() -> u32 {
     machine().map_or(1, |m| m.halted as u32)
+}
+
+/// BIOMECH v0.35 diagnostic only. NUL-terminated halt reason, empty if not halted.
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_halt_reason() -> *const u8 {
+    let message = machine().and_then(|m| m.halt_reason.as_ref().cloned()).unwrap_or_default();
+    unsafe {
+        HALT_REASON_BYTES = message.into_bytes();
+        HALT_REASON_BYTES.push(0);
+        HALT_REASON_BYTES.as_ptr()
+    }
 }
 
 // ---------------------------------------------------------------- the front panel (page side)
