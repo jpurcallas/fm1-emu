@@ -125,6 +125,31 @@ const ENC: [[u8; 4]; 7] = [
 /// Quadrature states in turning order: (A, B).
 const GRAY: [(u8, u8); 4] = [(0, 0), (1, 0), (1, 1), (0, 1)];
 
+#[derive(Default)]
+pub struct KeyUpProbe {
+    pub down_cycle: Option<u64>,
+    pub release_cycle: Option<u64>,
+    pub pa_reads_after_release: u64,
+    pub c4_selected_reads: u64,
+    pub first_c4_read_cycle: Option<u64>,
+    pub samples: Vec<(u64, u16, u32, bool)>,
+}
+impl KeyUpProbe {
+    pub fn report(&self) -> String {
+        let entries = self.samples.iter().map(|(cycle, cols, pa, down)| format!(
+            r#"{{"cycle":{},"latchedColumns":{},"pa":{},"keyDown":{}}}"#,
+            cycle,cols,pa,down
+        )).collect::<Vec<_>>().join(",");
+        format!(
+            r#"{{"downCycle":{},"releaseCycle":{},"paReadsAfterRelease":{},"c4SelectedReads":{},"firstC4ReadCycle":{},"samples":[{}]}}"#,
+            self.down_cycle.map_or_else(||"null".to_owned(),|v|v.to_string()),
+            self.release_cycle.map_or_else(||"null".to_owned(),|v|v.to_string()),
+            self.pa_reads_after_release,self.c4_selected_reads,
+            self.first_c4_read_cycle.map_or_else(||"null".to_owned(),|v|v.to_string()),entries
+        )
+    }
+}
+
 pub struct Periph {
     pub cycles: u64,
     /// Emulated CPU clock (cycles per second of firmware time).
@@ -214,6 +239,8 @@ pub struct Periph {
     led_last: u64,
     led_since: u64,
     pub keys_down: [bool; 41],
+    /// Opt-in key-matrix observation; never enabled by normal firmware.
+    pub keyup_probe: Option<KeyUpProbe>,
     enc_state: [u8; 8],
     enc_pending: [i32; 8],
     enc_next: [u64; 8],
@@ -301,6 +328,7 @@ impl Default for Periph {
             led_last: 0,
             led_since: 0,
             keys_down: [false; 41],
+            keyup_probe: None,
             enc_state: [0; 8],
             enc_pending: [0; 8],
             enc_next: [0; 8],
@@ -488,6 +516,12 @@ impl Periph {
                     self.smk.key(id, down, self.cycles, self.smk_vel);
                 } else if (id as usize) < 41 {
                     self.keys_down[id as usize] = down;
+                    if id == 21 {
+                        if let Some(probe) = self.keyup_probe.as_mut() {
+                            if down { probe.down_cycle = Some(self.cycles) }
+                            else { probe.release_cycle = Some(self.cycles) }
+                        }
+                    }
                 }
             }
             Action::Enc { enc, clicks } => {
@@ -749,7 +783,22 @@ impl Periph {
             0x12128 => self.uart.hrxcnt,
             0x50004 if self.board == crate::Board::Smk37 => self.smk_pa_in(),
             0x501c4 if self.board == crate::Board::Smk37 => self.smk_ph_in(),
-            0x50004 => self.pa_in(),
+            0x50004 => {
+                let pa = self.pa_in();
+                if let Some(probe) = self.keyup_probe.as_mut() {
+                    if probe.release_cycle.is_some() {
+                        probe.pa_reads_after_release += 1;
+                        if self.sr_latched & (1 << 9) == 0 {
+                            probe.c4_selected_reads += 1;
+                            if probe.first_c4_read_cycle.is_none() { probe.first_c4_read_cycle = Some(self.cycles); }
+                            if probe.samples.len() < 48 {
+                                probe.samples.push((self.cycles,self.sr_latched,pa,self.keys_down[21]));
+                            }
+                        }
+                    }
+                }
+                pa
+            },
             0x50044 => self.pb_in(),
             _ => return None,
         })
