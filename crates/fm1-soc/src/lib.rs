@@ -134,6 +134,23 @@ impl Board {
     }
 }
 
+/// Emulator-only passive memory transition watcher. Off by default.
+#[derive(Default)]
+pub struct KeyVoiceWatch {
+    pub checks: u64,
+    prev: Option<(u8,u8,u8)>,
+    transitions: Vec<(u64,u64,u64,u8,u8,u8,bool)>,
+}
+impl KeyVoiceWatch {
+    pub fn report(&self) -> String {
+        let events = self.transitions.iter().map(|(cycle,ms,halves,key,voice,pitch,pending)|format!(
+            r#"{{"cycle":{},"ms":{},"halves":{},"keyFlag":{},"voiceFlag":{},"pitch":{},"osTickPending":{}}}"#,
+            cycle,ms,halves,key,voice,pitch,pending
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"transitions":[{}]}}"#,self.checks,events)
+    }
+}
+
 pub struct Soc {
     pub board: Board,
     /// The BT baseband's window base (0x2FC44), as the firmware set it.
@@ -153,6 +170,8 @@ pub struct Soc {
     pub ticks: u64,
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
+    /// Opt-in read-only guest RAM watch for key release; disabled normally.
+    pub keyvoice_watch: Option<KeyVoiceWatch>,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -226,6 +245,7 @@ impl Soc {
             console: Vec::new(),
             ticks: 0,
             periph: Periph::default(),
+            keyvoice_watch: None,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
@@ -291,6 +311,22 @@ impl Soc {
             for i in 0..words {
                 let w = self.read32(adr.wrapping_add(i * 4)) as i32;
                 self.periph.audio.push((w >> 8).clamp(-32768, 32767) as i16);
+            }
+        }
+        // Passive observation: no new guest writes, no clock or timing changes.
+        if let Some(probe) = self.keyvoice_watch.as_mut() {
+            let ms = self.periph.ms();
+            if (1350..=1550).contains(&ms) {
+                probe.checks += 1;
+                let values = (self.ram.read8(0x48f0b),
+                              self.ram.read8(0x1993f),
+                              self.ram.read8(0x19941));
+                if probe.prev != Some(values) && probe.transitions.len() < 128 {
+                    probe.prev = Some(values);
+                    let pending = self.periph.read(0x1eef0ec).unwrap_or(0) & 0x80 != 0;
+                    probe.transitions.push((self.periph.cycles, ms,
+                        self.periph.audio_halves, values.0, values.1, values.2, pending));
+                }
             }
         }
     }

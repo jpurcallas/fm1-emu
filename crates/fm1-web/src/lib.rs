@@ -251,6 +251,22 @@ pub extern "C" fn fm1_guest_ram_len() -> u32 {
     machine().map_or(0, |m| m.soc.ram.len() as u32)
 }
 
+static mut KEYVOICE_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_keyvoice_probe(on: u32) {
+    if let Some(m)=machine() {
+        m.soc.keyvoice_watch = if on != 0 { Some(fm1_soc::KeyVoiceWatch::default()) } else { None };
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_keyvoice_report() -> *const u8 {
+    let report=machine().map(|m| m.soc.keyvoice_watch.as_ref()
+        .map_or_else(||r#"{"available":false}"#.to_owned(),|w|w.report()))
+        .unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe { KEYVOICE_JSON=report.into_bytes();KEYVOICE_JSON.push(0);KEYVOICE_JSON.as_ptr() }
+}
+
 static mut KEYUP_JSON: Vec<u8> = Vec::new();
 #[no_mangle]
 pub extern "C" fn fm1_keyup_probe(on: u32) {
