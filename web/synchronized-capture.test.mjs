@@ -30,3 +30,15 @@ test('post-capture comparison recognizes 256-sample repeated nonzero data but ex
   assert.equal(csv.split(',').at(-2), '128');
   assert.equal(csv.split(',').at(-1), '3');
 });
+test('repeat analysis requires exact matches in both stereo channels', () => {
+  const left = new Float32Array(512), right = new Float32Array(512);
+  left.set([.25, .5], 0);
+  left.set([.25, .5], 256);
+  right.set([.4, .6], 0);
+  right.set([.9, .6], 256); // left matches at both frames; right only at the second
+  const row = synchronizedCSV({
+    packageHash:'h', firmware:'stereo-check', mhz:200, latency:'x', sampleRate:44100, left, right
+  }, [[256,2,2,1,100]]).trim().split('\n')[1];
+  assert.equal(row.split(',').at(-2), '1');
+  assert.equal(row.split(',').at(-1), '1');
+});
