@@ -86,7 +86,7 @@ async function page(disk = storage(), initialSearch = '', selected = '', manualB
     requestAnimationFrame() {}, addEventListener() {}, AudioContext, AudioWorkletNode,
     matchMedia: () => ({ matches: false }), confirm: () => true,
     fetchPackage: async f => ({ bytes: new Uint8Array(960).fill(f.id === 'a' ? 1 : 2), url: f.package }),
-    ...persistence, DiagnosticTrace, SaveStore: class { constructor() { return disk; } } };
+    ...persistence, DiagnosticTrace, encodeStereoWav, synchronizedCSV, SaveStore: class { constructor() { return disk; } } };
   const source = readFileSync(new URL('./main.js', import.meta.url), 'utf8').replace(/^import .*;$/gm, '');
   const run = new Function(...Object.keys(environment), `return (async () => { ${source}\nreturn {
     startAudio, boot, flushRunning, setLatency, get running() { return running; },
