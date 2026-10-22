@@ -1,0 +1,28 @@
+name: REMINISCENT exact store watch diagnostic (NO MERGE)
+on:
+  pull_request:
+    paths:
+      - 'crates/fm1-core/src/lib.rs'
+      - 'crates/fm1-core/src/jit_wasm.rs'
+      - 'crates/fm1-soc/src/lib.rs'
+      - 'crates/fm1-soc/src/machine.rs'
+      - '.github/workflows/reminiscent-exact-store.yml'
+permissions:
+  contents: read
+jobs:
+  artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: WASM target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Compile instrumented emulator
+        run: tools/build_site.sh _site
+      - name: Verify trace controls
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const m=new WebAssembly.Module(readFileSync("_site/fm1_web.wasm")); const e=WebAssembly.Module.exports(m).map(x=>x.name); for(const k of ["fm1_writer_probe","fm1_writer_report","fm1_render"]) if(!e.includes(k))throw Error(k);'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-exact-store-instrumented-wasm
+          path: _site/fm1_web.wasm
+          retention-days: 3

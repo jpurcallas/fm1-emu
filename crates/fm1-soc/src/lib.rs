@@ -163,6 +163,7 @@ pub struct CoreWriterProbe {
     irq_counts: std::collections::BTreeMap<u8,u64>,
     irq_recent: std::collections::VecDeque<(u64,u8,u32,u32)>,
     voice_irq_context: Vec<(u64,u8,u32,u32)>,
+    exact_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -181,8 +182,11 @@ impl CoreWriterProbe {
             r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
             cycle,irq,handler,return_pc
         )).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}]}}"#,
-            self.checks,events,counts,recent,at_voice)
+        let exact=self.exact_stores.iter().map(|(cycle,halves,pc,addr,width,before,after)|format!(
+            r#"{{"cycle":{},"half":{},"exactPc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{}}}"#,
+            cycle,halves,pc,addr,width,before,after)).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice,exact)
     }
 }
 
@@ -208,6 +212,7 @@ pub struct Soc {
     /// Opt-in read-only guest RAM watch for key release; disabled normally.
     pub keyvoice_watch: Option<KeyVoiceWatch>,
     pub writer_probe: Option<CoreWriterProbe>,
+    current_instruction_pc: u32,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -283,6 +288,7 @@ impl Soc {
             periph: Periph::default(),
             keyvoice_watch: None,
             writer_probe: None,
+            current_instruction_pc: 0,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
@@ -364,6 +370,29 @@ impl Soc {
                     probe.transitions.push((self.periph.cycles, ms,
                         self.periph.audio_halves, values.0, values.1, values.2, pending));
                 }
+            }
+        }
+    }
+
+    #[inline]
+    fn observe_target_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        const TARGET: u32 = 0x01c1_993f;
+        if self.writer_probe.is_none() || !(1380..=1540).contains(&self.periph.ms()) {
+            return;
+        }
+        if width == 0 || addr > TARGET || TARGET - addr >= width as u32 {
+            return;
+        }
+        let shift=8*(TARGET-addr);
+        let after=((value >> shift) & 0xff) as u8;
+        let before=self.ram.read8(TARGET-RAM_BASE);
+        if before == after { return; }
+        if let Some(probe)=self.writer_probe.as_mut() {
+            if probe.exact_stores.len()<40 {
+                probe.exact_stores.push((
+                    self.periph.cycles,self.periph.audio_halves,
+                    pc,addr,width,before,after
+                ));
             }
         }
     }
@@ -600,6 +629,14 @@ impl Soc {
 }
 
 impl Bus for Soc {
+    #[inline(always)]
+    fn trace_instruction_pc(&mut self, pc: u32) {
+        if self.writer_probe.is_some() { self.current_instruction_pc=pc; }
+    }
+    #[inline(always)]
+    fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.observe_target_store(pc,addr,width,value);
+    }
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
             self.periph.next_due = 0;
@@ -700,6 +737,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write8(&mut self, addr: u32, value: u8) {
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,1,value as u32); }
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
             return self.ram.write8(o, value);
@@ -709,6 +747,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write16(&mut self, addr: u32, value: u16) {
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,2,value as u32); }
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
         if o + 2 <= self.ram.len() && addr & 1 == 0 {
@@ -719,6 +758,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write32(&mut self, addr: u32, value: u32) {
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,4,value as u32); }
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
             return self.ram.write32(o as u32, value);
