@@ -164,6 +164,8 @@ pub struct CoreWriterProbe {
     irq_recent: std::collections::VecDeque<(u64,u8,u32,u32)>,
     voice_irq_context: Vec<(u64,u8,u32,u32)>,
     exact_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
+    irq11_snapshots: Vec<(u64,u64,u8,String,String,String,String)>,
+    other_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -185,8 +187,16 @@ impl CoreWriterProbe {
         let exact=self.exact_stores.iter().map(|(cycle,halves,pc,addr,width,before,after)|format!(
             r#"{{"cycle":{},"half":{},"exactPc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{}}}"#,
             cycle,halves,pc,addr,width,before,after)).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}]}}"#,
-            self.checks,events,counts,recent,at_voice,exact)
+        let snapshots=self.irq11_snapshots.iter().map(|(cycle,half,key,notes,keys,queues,aux)|format!(
+            r#"{{"cycle":{},"half":{},"physicalKey":{},"notes":"{}","keys":"{}","queues":"{}","aux":"{}"}}"#,
+            cycle,half,key,notes,keys,queues,aux
+        )).collect::<Vec<_>>().join(",");
+        let others=self.other_stores.iter().map(|(cycle,half,pc,addr,width,before,after)|format!(
+            r#"{{"cycle":{},"half":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{}}}"#,
+            cycle,half,pc,addr,width,before,after
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice,exact,snapshots,others)
     }
 }
 
@@ -380,19 +390,20 @@ impl Soc {
         if self.writer_probe.is_none() || !(1380..=1540).contains(&self.periph.ms()) {
             return;
         }
-        if width == 0 || addr > TARGET || TARGET - addr >= width as u32 {
-            return;
-        }
-        let shift=8*(TARGET-addr);
-        let after=((value >> shift) & 0xff) as u8;
-        let before=self.ram.read8(TARGET-RAM_BASE);
-        if before == after { return; }
-        if let Some(probe)=self.writer_probe.as_mut() {
-            if probe.exact_stores.len()<40 {
-                probe.exact_stores.push((
-                    self.periph.cycles,self.periph.audio_halves,
-                    pc,addr,width,before,after
-                ));
+        if width == 0 { return; }
+        let targets=[TARGET,0x01c6_a070,0x01c4_8f0b,0x01c4_8f22,
+                     0x01c1_9944,0x01c1_9949,0x01c2_b93b];
+        for &target in &targets {
+            if addr>target || target-addr>=width as u32 { continue; }
+            let shift=8*(target-addr);
+            let after=((value>>shift)&0xff) as u8;
+            let before=self.ram.read8(target-RAM_BASE);
+            if before==after { continue; }
+            if let Some(p)=self.writer_probe.as_mut() {
+                let ev=(self.periph.cycles,self.periph.audio_halves,pc,addr,width,before,after);
+                if target==TARGET {
+                    if p.exact_stores.len()<40 { p.exact_stores.push(ev); }
+                } else if p.other_stores.len()<250 { p.other_stores.push(ev); }
             }
         }
     }
@@ -427,6 +438,22 @@ impl Soc {
     /// peripheral action and no change to interrupt timing.
     pub fn observe_irq_entry(&mut self, irq: u8, handler: u32, return_pc: u32) {
         if !(1380..=1540).contains(&self.periph.ms()) { return; }
+        // RAM snapshot at IRQ11 entry, before the firmware receives the interrupt.
+        if irq==11 && self.writer_probe.is_some() && (1400..=1510).contains(&self.periph.ms()) {
+            fn dump(r:&Ram, start:u32, count:u32) -> String {
+                use std::fmt::Write;
+                let mut h=String::with_capacity(count as usize*2);
+                for i in 0..count { let _=write!(h,"{:02x}",r.read8(start+i)); }
+                h
+            }
+            let row=(self.periph.cycles,self.periph.audio_halves,
+                self.periph.keys_down[21] as u8,
+                dump(&self.ram,0x19900,0x80),dump(&self.ram,0x48ee0,0x90),
+                dump(&self.ram,0x2b900,0x80),dump(&self.ram,0x6a060,0x30));
+            if let Some(p)=self.writer_probe.as_mut() {
+                if p.irq11_snapshots.len()<64 { p.irq11_snapshots.push(row); }
+            }
+        }
         if let Some(p)=self.writer_probe.as_mut() {
             *p.irq_counts.entry(irq).or_default()+=1;
             if p.irq_recent.len()==64 { p.irq_recent.pop_front(); }
