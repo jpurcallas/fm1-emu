@@ -110,7 +110,19 @@ impl Machine {
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
         if let Err(e) = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)) {
-            self.halt_reason = Some(e);
+            // Diagnose whether decode failed on genuine code or RAM overwritten by data.
+            // Read-only snapshot in the diagnostic branch; no CPU/SoC behavior is changed.
+            let bad_pc = cpu.pc;
+            let aligned_start = (bad_pc.saturating_sub(32)) & !3;
+            let ram_words = (0..17).map(|i| {
+                let at = aligned_start.wrapping_add(i * 4);
+                format!("{at:08x}:{:08x}", soc.read32(at))
+            }).collect::<Vec<_>>().join(",");
+            let pc1 = cpu1.as_ref().map_or_else(|| "none".to_owned(), |c| format!("0x{:08x}", c.pc));
+            self.halt_reason = Some(format!(
+                "{e}; cpu0_pc=0x{bad_pc:08x}; cpu0_sp=0x{:08x}; cpu0_lr=0x{:08x}; cpu1_pc={pc1}; RAM_around=[{ram_words}]",
+                cpu.sp, cpu.regs[15]
+            ));
             self.halted = true;
         }
     }
