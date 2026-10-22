@@ -166,6 +166,7 @@ pub struct CoreWriterProbe {
     exact_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
     irq11_snapshots: Vec<(u64,u64,u8,String,String,String,String)>,
     other_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
+    schedule_events: Vec<(u64,u64,u8,u32,u32,u8,u8,u8)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -195,8 +196,12 @@ impl CoreWriterProbe {
             r#"{{"cycle":{},"half":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{}}}"#,
             cycle,half,pc,addr,width,before,after
         )).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}]}}"#,
-            self.checks,events,counts,recent,at_voice,exact,snapshots,others)
+        let schedule=self.schedule_events.iter().map(|(cycle,half,irq,handler,return_pc,panel,producer,voice)|format!(
+            r#"{{"cycle":{},"half":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}","panel":{},"producer":{},"voice":{}}}"#,
+            cycle,half,irq,handler,return_pc,panel,producer,voice
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice,exact,snapshots,others,schedule)
     }
 }
 
@@ -452,6 +457,16 @@ impl Soc {
                 dump(&self.ram,0x2b900,0x80),dump(&self.ram,0x6a060,0x30));
             if let Some(p)=self.writer_probe.as_mut() {
                 if p.irq11_snapshots.len()<64 { p.irq11_snapshots.push(row); }
+            }
+        }
+        if matches!(irq,3|5|11|127) && self.writer_probe.is_some()
+          && (1395..=1505).contains(&self.periph.ms()) {
+            // Read-only snapshot for task/IRQ correlation; no guest cycles.
+            let row=(self.periph.cycles,self.periph.audio_halves,irq,handler,return_pc,
+                     self.ram.read8(0x48f0b),self.ram.read8(0x48ee9),
+                     self.ram.read8(0x1993f));
+            if let Some(p)=self.writer_probe.as_mut() {
+                if p.schedule_events.len()<1024 { p.schedule_events.push(row); }
             }
         }
         if let Some(p)=self.writer_probe.as_mut() {
