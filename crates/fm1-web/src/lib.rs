@@ -107,7 +107,13 @@ impl Machine {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)).is_err() {
+        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| {
+            let result = machine::run_blocks(cpu, soc, k, pending_tick);
+            if result.is_ok() {
+                soc.observe_writer(0, cpu.pc, cpu.irq_levels.len() as u32);
+            }
+            result
+        }).is_err() {
             self.halted = true;
         }
     }
@@ -249,6 +255,22 @@ pub extern "C" fn fm1_guest_ram_ptr() -> *const u8 {
 #[no_mangle]
 pub extern "C" fn fm1_guest_ram_len() -> u32 {
     machine().map_or(0, |m| m.soc.ram.len() as u32)
+}
+
+static mut WRITER_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_writer_probe(on: u32) {
+    if let Some(m)=machine() {
+        m.soc.writer_probe=if on != 0 { Some(fm1_soc::CoreWriterProbe::default()) } else { None };
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_writer_report() -> *const u8 {
+    let report=machine().map(|m| m.soc.writer_probe.as_ref()
+        .map_or_else(||r#"{"available":false}"#.to_owned(),|p|p.report()))
+        .unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe { WRITER_JSON=report.into_bytes();WRITER_JSON.push(0);WRITER_JSON.as_ptr() }
 }
 
 static mut KEYVOICE_JSON: Vec<u8> = Vec::new();
