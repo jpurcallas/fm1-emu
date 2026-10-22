@@ -157,19 +157,21 @@ impl BiomechCpu0Profile {
         else if (0x01c04682..0x01c0473e).contains(&pc) { 6 } // br_fm1_render_q23
         else if (0x01c00cb8..0x01c00dd0).contains(&pc) { 7 } // output mix (4 bytes differ from v0.37)
         // Extra bins isolate native PI32v2 libm and single-entry math caches.
-        // These reference ranges are from verified baseline ELF symbols; each is
+        // These libm ranges were matched to the ORIGINAL v0.35 booted RAM:
+        // compare v0.37 ELF 12-byte function signatures (same libm code
+        // relocated by -0x5c). No broad ELF-address assumption. Each is
         // exclusive, and math work is deliberately NOT billed to br_one_voice.
         else if (0x01c0211c..0x01c02148).contains(&pc) { 8 } // br_env_exp_cached
         else if (0x01c0292e..0x01c02964).contains(&pc) { 9 } // br_pitch_pow_cached
-        else if (0x01c14298..0x01c1429c).contains(&pc)
-             || (0x01c142a4..0x01c14412).contains(&pc) { 10 } // expf and its implementation
-        else if (0x01c1429c..0x01c142a0).contains(&pc)
-             || (0x01c14412..0x01c145f6).contains(&pc) { 11 } // logf
-        else if (0x01c142a0..0x01c142a4).contains(&pc)
-             || (0x01c145f6..0x01c14ae6).contains(&pc) { 12 } // powf
-        else if (0x01c14192..0x01c141fe).contains(&pc)
-             || (0x01c14ae6..0x01c14d08).contains(&pc)
-             || (0x01c152e2..0x01c15380).contains(&pc) { 13 } // sine + argument reduction / kernel
+        else if (0x01c1423c..0x01c14240).contains(&pc)
+             || (0x01c14248..0x01c143b6).contains(&pc) { 10 } // expf and its implementation
+        else if (0x01c14240..0x01c14244).contains(&pc)
+             || (0x01c143b6..0x01c1459a).contains(&pc) { 11 } // logf
+        else if (0x01c14244..0x01c14248).contains(&pc)
+             || (0x01c1459a..0x01c14a8a).contains(&pc) { 12 } // powf
+        else if (0x01c14136..0x01c141a2).contains(&pc)
+             || (0x01c14a8a..0x01c14cac).contains(&pc)
+             || (0x01c15286..0x01c15324).contains(&pc) { 13 } // sine + argument reduction / kernel
         else { 14 }; // remainder, includes IRQs and all unclassified CPU0 work
         self.counts[bucket] += 1;
     }
