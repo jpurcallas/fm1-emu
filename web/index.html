@@ -76,9 +76,10 @@
 
       <section class="box" aria-labelledby="h-trace">
         <h2 class="eyebrow" id="h-trace">Emulator diagnostics</h2>
-        <button type="button" id="trace8">Capture 8s diagnostics</button>
-        <p id="trace8-status" role="status" aria-live="polite">Compare firmware/clock and short audio quanta without changing the sound.
-          Runs for 8 seconds of emulated time; download a CSV when it finishes.</p>
+        <button type="button" id="trace8">Capture synchronized 8s WAV + CSV</button>
+        <div class="row"><button type="button" id="trace8-wav" hidden>Download WAV</button>
+          <button type="button" id="trace8-csv" hidden>Download CSV</button></div>
+        <p id="trace8-status" role="status" aria-live="polite">Capture the same eight seconds of audio and per-block performance without resetting the firmware.</p>
       </section>
 
       <section class="box save-box" aria-labelledby="h-save">
