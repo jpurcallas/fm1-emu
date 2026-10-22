@@ -28,7 +28,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 #[link(wasm_import_module = "env")]
 extern "C" {
     /// Compile a module and install its `run` in the function table: the table index, 0 on failure.
-    fn fm1_jit_compile(bytes: *const u8, len: usize) -> u32;
+    fn fm1_jit_compile(bytes: *const u8, len: usize, origin_pc: u32, ram_blocks: u32) -> u32;
 }
 
 /// Compiles still allowed (the host refills it: compiling in the audio thread must not hold up a
@@ -58,6 +58,11 @@ pub struct Jit {
     pub(crate) rinfo: Vec<(Box<[usize]>, u64)>,
     pub regions: u32,
     pub bytes: usize,
+    /// Diagnostic counters, passive except on region compilation/invalidation.
+    pub drops: u64,
+    pub resets: u64,
+    pub ram_installs: u64,
+    pub xip_installs: u64,
     /// compile helper calls that count themselves (`Cpu::profile` when the JIT was made)
     profile: bool,
 }
@@ -70,7 +75,7 @@ impl std::fmt::Debug for Jit {
 
 impl Jit {
     pub fn new(profile: bool) -> Option<Jit> {
-        Some(Jit { state: Vec::new(), rinfo: Vec::new(), regions: 0, bytes: 0, profile })
+        Some(Jit { state: Vec::new(), rinfo: Vec::new(), regions: 0, bytes: 0, drops: 0, resets: 0, ram_installs: 0, xip_installs: 0, profile })
     }
 
     fn at(&mut self, id: usize) -> &mut Entry {
@@ -101,12 +106,15 @@ impl Jit {
         COMPILE_BUDGET.fetch_sub(1, Ordering::Relaxed);
         let m = compile::<B>(blocks, mem, self.profile);
         // SAFETY: a plain byte slice; the host copies it before returning
-        let f = unsafe { fm1_jit_compile(m.as_ptr(), m.len()) };
+        let origin_pc = blocks.first().map(|b| b.1).unwrap_or(0);
+        let ram_count = blocks.iter().filter(|b| !(0x0200_0000..0x0400_0000).contains(&b.1)).count() as u32;
+        let f = unsafe { fm1_jit_compile(m.as_ptr(), m.len(), origin_pc, ram_count) };
         if f == 0 {
             return false;
         }
         self.regions += 1;
         self.bytes += m.len();
+        if ram_count > 0 { self.ram_installs += 1 } else { self.xip_installs += 1 }
         let r = self.rinfo.len() as u32;
         let ram = blocks.iter().filter(|b| !(0x0200_0000..0x0400_0000).contains(&b.1)).map(|b| b.0).collect();
         self.rinfo.push((ram, ver));
@@ -120,6 +128,7 @@ impl Jit {
 
     /// Region `r` ran from RAM that has changed: its blocks are hot again, to be compiled anew.
     pub(crate) fn drop_region(&mut self, r: u32) {
+        self.drops += 1;
         for e in self.state.iter_mut() {
             if matches!(*e, Entry::In(_, _, q) if q == r) {
                 *e = Entry::Cold(0);
@@ -135,8 +144,16 @@ impl Jit {
 
     /// Forget every compiled block (the block table was rebuilt; the table slots stay in use).
     pub fn reset(&mut self) {
+        self.resets += 1;
         self.state.clear();
         self.rinfo.clear();
+    }
+    pub fn origin_stats_json(&self) -> String {
+        format!(
+            r#"{{"installed":{},"bytes":{},"drops":{},"resets":{},"ramInstalls":{},"xipInstalls":{}}}"#,
+            self.regions, self.bytes, self.drops, self.resets,
+            self.ram_installs, self.xip_installs
+        )
     }
 }
 
