@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as persistence from './persistence.js';
 import { DiagnosticTrace } from './diagnostic-trace.js';
+import { encodeStereoWav, synchronizedCSV } from './synchronized-capture.js';
 const settle = () => new Promise(resolve => setImmediate(resolve));
 class Element {
   constructor(text = '', value = '') {
@@ -199,4 +200,23 @@ test('a boot timeout cancels the machine and the next firmware selection recover
   assert.ok(p.audio.messages.some(m => m.type === 'cancel-boot'));
   p.audio.hangBoot = false; p.api.setFirmware('b');
   assert.equal(await p.api.boot(), true);
+});
+
+test('synchronized capture uses current firmware and exposes two downloads without reboot', async () => {
+  const p = await page();
+  await p.api.startAudio();
+  await p.api.boot();
+  const old = p.api.running;
+  p.elements.get('trace8').listeners.click();
+  const msg = p.audio.messages.at(-1);
+  assert.equal(msg.type, 'capture-audio');
+  assert.equal(msg.seq, old.seq);
+  assert.equal(p.api.running, old);
+  const a = new Float32Array(8), b = new Float32Array(8);
+  p.audio.port.onmessage({ data: { type:'capture-audio-done', seq:msg.seq, id:msg.id,
+    sampleRate:44100, frames:8, left:a.buffer, right:b.buffer, records:[[0,8,8,0.05,200]] } });
+  assert.equal(p.elements.get('trace8-wav').hidden, false);
+  assert.equal(p.elements.get('trace8-csv').hidden, false);
+  assert.ok(p.elements.get('trace8-status').textContent.includes('Download BOTH'));
+  assert.equal(p.api.running, old);
 });
