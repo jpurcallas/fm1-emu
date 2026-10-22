@@ -283,6 +283,7 @@ pub fn run_dual(
         done += k;
         let dt = soc.periph.cycles - c0;
         run_cpu1(c1, soc, dt)?;
+        soc.observe_writer(1, c1.pc, c1.irq_levels.len() as u32);
     }
     Ok(())
 }
