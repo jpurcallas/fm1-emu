@@ -241,6 +241,30 @@ pub extern "C" fn fm1_profile_report() -> *const u8 {
     }
 }
 
+static mut DMA_JSON: Vec<u8> = Vec::new();
+/// Opt-in low-level ALNK consumption snapshots; the normal emulator stays untouched.
+#[no_mangle]
+pub extern "C" fn fm1_dma_probe(on: u32) {
+    if let Some(m) = machine() {
+        m.soc.dma_probe = if on != 0 { Some(fm1_soc::DmaProbe::default()) } else { None };
+    }
+}
+/// Read-and-clear the last 1024 ALNK half observations. Not a firmware
+/// DMA-copy acknowledgement or proof of real DAC playback.
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_dma_report() -> *const u8 {
+    let report = machine().map(|m| m.soc.dma_probe.as_mut().map_or_else(
+        || r#"{"available":false}"#.to_owned(),
+        |p| p.drain_json()
+    )).unwrap_or_else(|| r#"{"available":false}"#.to_owned());
+    unsafe {
+        DMA_JSON = report.into_bytes();
+        DMA_JSON.push(0);
+        DMA_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
