@@ -162,18 +162,29 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
                 }
             }
         }
-        match cpu.run_fast(soc, n - done) {
-            Ok((0, _)) => {
-                if let Err(e) = cpu.step(soc) {
-                    return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+        if soc.biomech_cpu0_profile.as_ref().is_some_and(|p| p.enabled) {
+            // Exact PC accounting via the ordinary interpreted step; opt-in only.
+            // No JIT allowed for this diagnostic: host verifies JIT=OFF explicitly.
+            let pc = cpu.pc;
+            if let Err(e) = cpu.step(soc) {
+                return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+            }
+            if let Some(p) = soc.biomech_cpu0_profile.as_mut() { p.count(pc); }
+            done += 1;
+        } else {
+            match cpu.run_fast(soc, n - done) {
+                Ok((0, _)) => {
+                    if let Err(e) = cpu.step(soc) {
+                        return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+                    }
+                    done += 1;
                 }
-                done += 1;
+                Ok((k, due)) => {
+                    done += k;
+                    ticked = due;
+                }
+                Err(e) => return Err(format!("{e:?} at pc {:#010x}", cpu.pc)),
             }
-            Ok((k, due)) => {
-                done += k;
-                ticked = due;
-            }
-            Err(e) => return Err(format!("{e:?} at pc {:#010x}", cpu.pc)),
         }
         if soc.cpu1_release {
             break; // core 1 starts now (run_dual)
