@@ -6,8 +6,8 @@ export function encodeStereoWav(left, right, sampleRate = 44100) {
   const buf = new ArrayBuffer(44 + size * 4);
   const v = new DataView(buf);
   const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-  str(0, 'RIFF'); v.setUint32(4, 36 + size * 4, true); str(8, 'WAVE');
-  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  str(0, 'RIFF'); v.setUint32(4, 36 + size * 4, true); str(8, 'WAVE'); str(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true);
   v.setUint16(22, 2, true); v.setUint32(24, sampleRate, true);
   v.setUint32(28, sampleRate * 4, true); v.setUint16(32, 4, true);
   v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, size * 4, true);
