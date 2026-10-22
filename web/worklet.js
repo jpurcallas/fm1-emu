@@ -42,6 +42,7 @@ class Fm1 extends AudioWorkletProcessor {
     this.calls = 0;
     this.bootToken = 0;
     this.snapshots = [];
+    this.audioCapture = null;
     this.port.onmessageerror = () => this.port.postMessage({ type: "error", message: "a message could not be read" });
     this.port.onmessage = async (e) => {
       const m = e.data;
@@ -55,10 +56,21 @@ class Fm1 extends AudioWorkletProcessor {
           this.paused = false;
           this.port.postMessage({ type: "error", seq: m.seq, message: `boot: ${err}` });
         }
+      } else if (m.type === "capture-audio") {
+        // Eight seconds of worklet output plus per-quantum timings, no DSP changes.
+        if (this.x && !this.paused && m.seq === this.seq && !this.audioCapture) {
+          const frames = Math.round(sampleRate * 8);
+          this.audioCapture = { id: m.id, seq: m.seq, frames, offset: 0,
+            left: new Float32Array(frames), right: new Float32Array(frames), records: [] };
+          this.port.postMessage({ type: "capture-audio-started", id: m.id, seq: this.seq, sampleRate });
+        }
+      } else if (m.type === "cancel-capture-audio") {
+        if (this.audioCapture?.id === m.id) this.audioCapture = null;
       } else if (m.type === "cancel-boot") {
         ++this.bootToken;
         this.x = null;
         this.snapshots = [];
+        this.audioCapture = null;
       } else if (m.type === "snapshot" && !this.x) {
         this.port.postMessage({ type: "snapshot", seq: m.seq, request: m.request, unavailable: true });
       } else if (this.x) {
@@ -121,6 +133,7 @@ class Fm1 extends AudioWorkletProcessor {
     this.seq = m.seq;
     this.paused = false;
     this.snapshots = [];
+    this.audioCapture = null;
     this.flashRevision = x.fm1_flash_revision();
     this.observedRevision = this.flashRevision;
     this.flashChangedAt = this.lastSnapshot = now();
@@ -173,6 +186,8 @@ class Fm1 extends AudioWorkletProcessor {
     const n = out[0].length;
     const t0 = now();
     let have;
+    const captureInsns = this.audioCapture ? x.fm1_minsns() : 0;
+    const renderStart = this.audioCapture ? now() : 0;
     try {
       have = x.fm1_render(n, this.budget);
     } catch (err) {                       // a trap in the emulator: stop and say so
@@ -183,6 +198,8 @@ class Fm1 extends AudioWorkletProcessor {
       this.port.postMessage({ type: "error", seq: this.seq, fatal: true, message: `render: ${err}` });
       return true;
     }
+    const renderMs = this.audioCapture ? now() - renderStart : 0;
+    const captureInsnsDelta = this.audioCapture ? x.fm1_minsns() - captureInsns : 0;
     const buffer = x.memory.buffer, lp = x.fm1_out_l(), rp = x.fm1_out_r();
     if (!this.views || this.views.l.buffer !== buffer || this.views.l.length !== n ||
         this.views.l.byteOffset !== lp || this.views.r.byteOffset !== rp) {
@@ -191,6 +208,19 @@ class Fm1 extends AudioWorkletProcessor {
     const { l, r } = this.views;
     out[0].set(l);
     if (out[1]) out[1].set(r);
+    const cap = this.audioCapture;
+    let captureDone = null;
+    if (cap && cap.seq === this.seq) {
+      const count = Math.min(n, cap.frames - cap.offset);
+      cap.left.set(l.subarray(0, count), cap.offset);
+      cap.right.set(r.subarray(0, count), cap.offset);
+      cap.records.push([cap.offset, count, Math.min(count, have), renderMs, captureInsnsDelta]);
+      cap.offset += count;
+      if (cap.offset === cap.frames) {
+        captureDone = cap;
+        this.audioCapture = null;
+      }
+    }
     this.short = (this.short || 0) + (have < n ? 1 : 0);
     this.reportFrames += n;
     this.reportCalls++;
@@ -225,6 +255,12 @@ class Fm1 extends AudioWorkletProcessor {
       const took = now() - t0;
       this.busy += took;
       this.worst = Math.max(this.worst, took);
+    }
+    if (captureDone) {
+      this.port.postMessage({ type: 'capture-audio-done', seq: captureDone.seq, id: captureDone.id,
+        sampleRate, frames: captureDone.frames, left: captureDone.left.buffer,
+        right: captureDone.right.buffer, records: captureDone.records },
+        [captureDone.left.buffer, captureDone.right.buffer]);
     }
     return true;
   }

@@ -160,3 +160,38 @@ test('a firmware without a user bank still boots when a DX7 bank is selected', a
   assert.ok(h.messages.some(m => m.type === 'booted' && m.seq === 2));
   assert.equal(h.messages.some(m => m.type === 'error'), false);
 });
+
+test('synchronized eight-second capture is sample aligned and does not alter output', async () => {
+  const h = harness();
+  h.p.seq = 1;
+  new Float32Array(h.memory.buffer, 0, 128).fill(0.125);
+  new Float32Array(h.memory.buffer, 4096, 128).fill(-0.25);
+  h.p.x.fm1_minsns = () => h.p.calls * 20000;
+  let once = false;
+  h.p.x.fm1_render = n => (once = !once) ? n : n - 16;
+  await h.p.port.onmessage({ data: { type: 'capture-audio', seq: 1, id: 37 } });
+  const size = Math.round(44100 * 8);
+  for (let i = 0; i < Math.ceil(size / 128); i++) h.render();
+  const a = h.messages.filter(m => m.type === 'capture-audio-done');
+  assert.equal(a.length, 1);
+  assert.equal(a[0].frames, size);
+  assert.equal(new Float32Array(a[0].left).length, size);
+  assert.equal(new Float32Array(a[0].left)[0], .125);
+  assert.equal(new Float32Array(a[0].right)[0], -.25);
+  assert.equal(a[0].records.length, Math.ceil(size / 128));
+  assert.equal(a[0].records[0][0], 0);
+  assert.equal(a[0].records.at(-1)[0], 352768);
+  assert.equal(a[0].records.at(-1)[1], 32);
+  assert.ok(a[0].records.some(row => row[2] === 112));
+  assert.equal(h.p.audioCapture, null);
+});
+test('cancelled capture produces no WAV package and keeps running', async () => {
+  const h = harness(); h.p.seq = 1;
+  await h.p.port.onmessage({ data: { type:'capture-audio', seq:1, id:2 } });
+  h.render();
+  await h.p.port.onmessage({ data: { type:'cancel-capture-audio', id:2 } });
+  for (let i=0; i<30; i++) h.render();
+  assert.equal(h.p.audioCapture, null);
+  assert.ok(h.p.x);
+  assert.equal(h.messages.filter(m=>m.type==='capture-audio-done').length,0);
+});

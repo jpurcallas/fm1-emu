@@ -4,6 +4,8 @@
 // in the wasm: a catalog entry's fetched from its author's site, or one opened from this
 // computer (M-VAVE's own: their server does not let other pages fetch it).
 import { fetchPackage } from "./fwsc.js";
+import { DiagnosticTrace } from "./diagnostic-trace.js";
+import { encodeStereoWav, synchronizedCSV } from "./synchronized-capture.js";
 import { SaveStore, packageHash, changedSectors, packSectors, exportSave, importSave } from "./persistence.js";
 
 const CLOCKS = [60, 80, 100, 120, 160, 200, 240];
@@ -580,6 +582,56 @@ midiChSel.addEventListener("change", () => {
   store("fm1.midich", midiCh);
 });
 
+// Synchronized WAV and per-block CSV from AudioWorklet output, without rebooting.
+const diagButton = document.getElementById("trace8");
+const diagStatus = document.getElementById("trace8-status");
+const diagWav = document.getElementById("trace8-wav");
+const diagCsv = document.getElementById("trace8-csv");
+let captureRequested = null, captureComplete = null, nextCaptureId = 1;
+const saveCapture = (content, filename, mime) => {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+};
+const resetCaptureButtons = () => {
+  if (diagWav) diagWav.hidden = !captureComplete;
+  if (diagCsv) diagCsv.hidden = !captureComplete;
+};
+diagButton?.addEventListener('click', () => {
+  if (captureRequested) {
+    node?.port.postMessage({ type: 'cancel-capture-audio', id: captureRequested.id });
+    captureRequested = null;
+    diagButton.textContent = 'Capture synchronized 8s WAV + CSV';
+    diagStatus.textContent = 'Cancelled without changing the firmware.';
+    return;
+  }
+  if (!running || !node || !ac || booting) {
+    diagStatus.textContent = 'Start the firmware first.';
+    return;
+  }
+  captureComplete = null;
+  resetCaptureButtons();
+  const id = nextCaptureId++;
+  captureRequested = { id, seq: running.seq, firmware: running.record.name,
+    packageHash: running.record.hash, mhz, latency };
+  node.port.postMessage({ type: 'capture-audio', seq: running.seq, id });
+  diagButton.textContent = 'Cancel capture';
+  diagStatus.textContent = 'Recording exactly 8 seconds of emulator output and block timings…';
+});
+diagWav?.addEventListener('click', () => {
+  const c = captureComplete;
+  if (!c) return;
+  saveCapture(encodeStereoWav(c.left, c.right, c.sampleRate),
+    `fm1-sync-${c.seq}-${c.id}.wav`, 'audio/wav');
+});
+diagCsv?.addEventListener('click', () => {
+  const c = captureComplete;
+  if (!c) return;
+  saveCapture(synchronizedCSV(c, c.records),
+    `fm1-sync-${c.seq}-${c.id}.csv`, 'text/csv;charset=utf-8');
+});
+resetCaptureButtons();
+
 // ---------------------------------------------------------------- is the device keeping up?
 // Two measures, per second: the load (the share of the audio thread's time the emulation takes,
 // timed in the worklet; over ~100% and the sound must break up) and the drift of the audio
@@ -848,6 +900,22 @@ async function startAudio() {
 // what the audio thread sends: the screen and LEDs with its timing, boot and error news
 function onWorklet(e) {
   const m = e.data;
+  if (m.type === 'capture-audio-started') {
+    if (captureRequested?.id === m.id && captureRequested.seq === m.seq)
+      diagStatus.textContent = 'Capturing real output… play the pattern normally.';
+    return;
+  }
+  if (m.type === 'capture-audio-done') {
+    if (captureRequested?.id === m.id && captureRequested.seq === m.seq) {
+      captureComplete = { ...captureRequested, sampleRate: m.sampleRate,
+        left: new Float32Array(m.left), right: new Float32Array(m.right), records: m.records };
+      captureRequested = null;
+      diagButton.textContent = 'Capture synchronized 8s WAV + CSV';
+      diagStatus.textContent = `Captured ${m.frames} stereo frames and ${m.records.length} aligned block records. Download BOTH files.`;
+      resetCaptureButtons();
+    }
+    return;
+  }
   if (m.type === "error") {
     if (m.fatal && running?.seq === m.seq) {
       running = null;
