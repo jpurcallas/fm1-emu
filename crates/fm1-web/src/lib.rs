@@ -241,6 +241,48 @@ pub extern "C" fn fm1_profile_report() -> *const u8 {
     }
 }
 
+/// Guest RAM borrowed read-only for the host diagnostic. Do not retain across boot.
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_ptr() -> *const u8 {
+    machine().map_or(std::ptr::null(), |m| m.soc.ram.as_mut_ptr())
+}
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_len() -> u32 {
+    machine().map_or(0, |m| m.soc.ram.len() as u32)
+}
+
+static mut STATE_JSON: Vec<u8> = Vec::new();
+/// Diagnostic ONLY. Read-only snapshot after a whole fm1_render, not instruction-level tracing.
+/// RAM FNV64 is an identity check for divergence localization, not a cryptographic digest.
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_state_probe() -> *const u8 {
+    fn core(c: &Cpu) -> String {
+        format!(
+            r#"{{"pc":{},"regs":{:?},"sp":{},"ssp":{},"usp":{},"rets":{},"user":{},"flags":{},"cc":{},"ie":{},"repStart":{},"repEnd":{},"repCount":{},"holdIrq":{},"irqLevels":{:?},"nestOk":{},"insnCount":{}}}"#,
+            c.pc,c.regs,c.sp,c.ssp,c.usp,c.rets,c.user,c.flags,c.cc,c.ie,
+            c.rep_start,c.rep_end,c.rep_count,c.hold_irq,c.irq_levels,c.nest_ok,c.insn_count
+        )
+    }
+    let report = machine().map(|m| {
+        let len = m.soc.ram.len();
+        // No RAM writes, no clock changes, no emulated instructions.
+        let ram = unsafe { std::slice::from_raw_parts(m.soc.ram.as_mut_ptr(), len) };
+        let mut checksum = 0xcbf29ce484222325u64;
+        for &b in ram { checksum ^= u64::from(b); checksum=checksum.wrapping_mul(0x100000001b3); }
+        format!(
+            r#"{{"cycle":{},"ms":{},"audioHalves":{},"periphAudioWords":{},"queueWords":{},"codeWrites":{},"ramFnv64":"{:016x}","cpu0":{},"cpu1":{}}}"#,
+            m.soc.periph.cycles,m.soc.periph.ms(),m.soc.periph.audio_halves,
+            m.soc.periph.audio.len(),m.audio.len(),m.soc.ram.code_writes,
+            checksum,core(&m.cpu),
+            m.cpu1.as_ref().map_or_else(|| "null".to_owned(),core)
+        )
+    }).unwrap_or_else(|| r#"{"available":false}"#.to_owned());
+    unsafe {
+        STATE_JSON = report.into_bytes(); STATE_JSON.push(0); STATE_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
