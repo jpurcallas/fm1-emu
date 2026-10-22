@@ -298,6 +298,17 @@ pub extern "C" fn fm1_jit_origin_report() -> *const u8 {
     }
 }
 
+/// Diagnostic-only borrowed guest RAM pointer. Call only AFTER fm1_render completes.
+/// Read-only host usage; no firmware, DSP or emulated-cycle changes. Never store pointer across boot.
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_ptr() -> *const u8 {
+    machine().map_or(std::ptr::null(), |m| m.soc.ram.as_mut_ptr())
+}
+#[no_mangle]
+pub extern "C" fn fm1_guest_ram_len() -> u32 {
+    machine().map_or(0, |m| m.soc.ram.len() as u32)
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
