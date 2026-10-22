@@ -251,6 +251,28 @@ pub extern "C" fn fm1_guest_ram_len() -> u32 {
     machine().map_or(0, |m| m.soc.ram.len() as u32)
 }
 
+static mut KEYUP_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_keyup_probe(on: u32) {
+    if let Some(m) = machine() {
+        m.soc.periph.keyup_probe = if on != 0 {
+            Some(fm1_soc::periph::KeyUpProbe::default())
+        } else { None };
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_keyup_report() -> *const u8 {
+    let report = machine().map(|m| m.soc.periph.keyup_probe.as_ref()
+        .map_or_else(||r#"{"available":false}"#.to_owned(),|p|p.report())
+    ).unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe {
+        KEYUP_JSON=report.into_bytes();
+        KEYUP_JSON.push(0);
+        KEYUP_JSON.as_ptr()
+    }
+}
+
 static mut STATE_JSON: Vec<u8> = Vec::new();
 /// Diagnostic ONLY. Read-only snapshot after a whole fm1_render, not instruction-level tracing.
 /// RAM FNV64 is an identity check for divergence localization, not a cryptographic digest.
