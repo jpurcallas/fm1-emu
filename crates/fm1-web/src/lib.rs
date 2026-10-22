@@ -243,6 +243,28 @@ pub extern "C" fn fm1_profile(on: u32) {
     if let Some(m) = machine() { m.cpu.profile = on != 0; }
 }
 
+static mut KEYUP_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_keyup_probe(on: u32) {
+    if let Some(m) = machine() {
+        m.soc.periph.keyup_probe = if on != 0 {
+            Some(fm1_soc::periph::KeyUpProbe::default())
+        } else { None };
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_keyup_report() -> *const u8 {
+    let report = machine().map(|m| m.soc.periph.keyup_probe.as_ref()
+        .map_or_else(||r#"{"available":false}"#.to_owned(),|p|p.report())
+    ).unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe {
+        KEYUP_JSON=report.into_bytes();
+        KEYUP_JSON.push(0);
+        KEYUP_JSON.as_ptr()
+    }
+}
+
 static mut PROFILE_JSON: Vec<u8> = Vec::new();
 /// NUL-terminated JSON valid until the next report call.
 #[no_mangle]
