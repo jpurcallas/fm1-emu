@@ -134,6 +134,39 @@ impl Board {
     }
 }
 
+/// Optional emulator-only DMA half snapshot. It does NOT claim that the firmware
+/// committed or rendered a block, only what the ALNK consumer read from RAM.
+#[derive(Default)]
+pub struct DmaProbe {
+    pub seen: u64,
+    pub equal_to_prior: u64,
+    pub silent: u64,
+    pub discarded: u64,
+    last_hash: [Option<u64>; 2],
+    events: std::collections::VecDeque<DmaHalfEvent>,
+}
+pub struct DmaHalfEvent {
+    seq: u64, ms: u64, cycle: u64, half: u32, addr: u32, words: u32,
+    hash: u64, nonzero: u32, had_prior: bool, equal_to_prior: bool,
+}
+impl DmaProbe {
+    /// Read-and-clear bounded raw events; cumulative totals remain.
+    pub fn drain_json(&mut self) -> String {
+        let mut events = Vec::new();
+        while let Some(e) = self.events.pop_front() {
+            events.push(format!(
+                r#"{{"seq":{},"ms":{},"cycle":{},"half":{},"addr":{},"words":{},"hash":"{:016x}","nonzero":{},"hadPrior":{},"sameAsPrior":{}}}"#,
+                e.seq, e.ms, e.cycle, e.half, e.addr, e.words, e.hash,
+                e.nonzero, e.had_prior, e.equal_to_prior
+            ));
+        }
+        format!(
+            r#"{{"seen":{},"sameAsPrior":{},"silent":{},"discarded":{},"events":[{}]}}"#,
+            self.seen, self.equal_to_prior, self.silent, self.discarded, events.join(",")
+        )
+    }
+}
+
 pub struct Soc {
     pub board: Board,
     /// The BT baseband's window base (0x2FC44), as the firmware set it.
@@ -170,6 +203,8 @@ pub struct Soc {
     cpu1_released_once: bool,
     /// FM1_AUDIO_TRACE: log each audio half-buffer (debugging the DMA's pace).
     audio_trace: bool,
+    /// Only enabled by a diagnostic wasm export; no cost in normal runs.
+    pub dma_probe: Option<DmaProbe>,
     /// The CRC-16 unit's register (0x13504).
     crc: u16,
     /// The random number generator's state (JL_RAND, 0x13B00: R64L / R64H).
@@ -234,6 +269,7 @@ impl Soc {
             cpu1_release: false,
             cpu1_released_once: false,
             audio_trace: std::env::var_os("FM1_AUDIO_TRACE").is_some(),
+            dma_probe: None,
             xip_flash: true,
             gpio_writes: std::env::var("FM1_GPIO_TRACE").ok().map(|_| Default::default()),
             unknown_log: Vec::new(),
@@ -288,9 +324,39 @@ impl Soc {
             if self.audio_trace {
                 eprintln!("half {} ms {}", self.periph.ms(), self.periph.cycles);
             }
+            // Trace the ALNK DMA *consumption* side, not a claim of DSP render
+            // or copy completion. Equal checksums are only circumstantial.
+            let tracing = self.dma_probe.is_some();
+            let mut hash = 0xcbf29ce484222325u64;
+            let mut nonzero = 0u32;
             for i in 0..words {
                 let w = self.read32(adr.wrapping_add(i * 4)) as i32;
-                self.periph.audio.push((w >> 8).clamp(-32768, 32767) as i16);
+                let sample = (w >> 8).clamp(-32768, 32767) as i16;
+                if tracing {
+                    hash ^= w as u32 as u64;
+                    hash = hash.wrapping_mul(0x100000001b3);
+                    if sample != 0 { nonzero += 1; }
+                }
+                self.periph.audio.push(sample);
+            }
+            if let Some(probe) = self.dma_probe.as_mut() {
+                let seq = probe.seen + 1;
+                let half = ((seq - 1) & 1) as usize;
+                let prev = probe.last_hash[half];
+                let same = prev == Some(hash);
+                probe.last_hash[half] = Some(hash);
+                probe.seen = seq;
+                probe.equal_to_prior += u64::from(same);
+                probe.silent += u64::from(nonzero == 0);
+                if probe.events.len() >= 1024 {
+                    probe.events.pop_front();
+                    probe.discarded += 1;
+                }
+                probe.events.push_back(DmaHalfEvent {
+                    seq, ms: self.periph.ms(), cycle: self.periph.cycles,
+                    half: half as u32, addr: adr, words,
+                    hash, nonzero, had_prior: prev.is_some(), equal_to_prior: same,
+                });
             }
         }
     }
