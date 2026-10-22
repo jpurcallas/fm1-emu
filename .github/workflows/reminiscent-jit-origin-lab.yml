@@ -1,0 +1,27 @@
+name: REMINISCENT JIT origin lab (diagnostic only)
+on:
+  pull_request:
+    paths:
+      - 'crates/fm1-core/src/lib.rs'
+      - 'crates/fm1-core/src/jit_wasm.rs'
+      - 'crates/fm1-web/src/lib.rs'
+      - '.github/workflows/reminiscent-jit-origin-lab.yml'
+permissions:
+  contents: read
+jobs:
+  artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install WASM target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Build standalone diagnostic site
+        run: tools/build_site.sh _site
+      - name: Check read-only diagnostic export
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const m=new WebAssembly.Module(readFileSync("_site/fm1_web.wasm")); const names=WebAssembly.Module.exports(m).map(x=>x.name); for(const n of ["fm1_jit_origin_report","fm1_render"]) if(!names.includes(n)) throw Error("Missing "+n); console.log("Diagnostic exports OK");'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-jit-origins-wasm
+          path: _site/fm1_web.wasm
+          retention-days: 3
