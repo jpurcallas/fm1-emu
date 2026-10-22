@@ -57,6 +57,9 @@ pub trait Bus {
     fn write8(&mut self, addr: u32, value: u8);
     fn write16(&mut self, addr: u32, value: u16);
     fn write32(&mut self, addr: u32, value: u32);
+    /// Optional read-only diagnostics; a normal Bus ignores these.
+    fn trace_instruction_pc(&mut self, _pc: u32) {}
+    fn trace_guest_store(&mut self, _pc: u32, _addr: u32, _width: u8, _value: u32) {}
     /// One clock cycle passed (one instruction). True when something timed
     /// is due, or a peripheral was touched, so the caller must service the
     /// SoC before the next instruction. Buses without a clock never are.
@@ -538,6 +541,7 @@ impl Cpu {
                     return Ok((n, true));
                 }
                 let next_pc = pc + op.len as u32;
+                bus.trace_instruction_pc(pc);
                 if !(careful || op.careful) {
                     // plain micro-op: cannot start or end a pair, block or loop
                     pc = self.exec_fast(bus, op.fast, next_pc).unwrap_or(next_pc);
