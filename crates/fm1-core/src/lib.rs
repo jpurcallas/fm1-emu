@@ -210,6 +210,15 @@ pub struct Cpu {
     bops: Vec<BOp>,
     blocks: Vec<(u32, u32, u32)>,
     bmap: Vec<u32>,
+    /// Diagnostic only: the direct-map's displaced hot address, not a JIT invalidation.
+    #[cfg(target_arch = "wasm32")]
+    bmap_collisions: u64,
+    #[cfg(target_arch = "wasm32")]
+    bmap_hot_evicted: u64,
+    #[cfg(target_arch = "wasm32")]
+    bmap_hot_rebuilt: u64,
+    #[cfg(target_arch = "wasm32")]
+    bmap_hot_evictors: std::collections::BTreeMap<u32, u64>,
     /// Per block: for one over RAM code, the bytes it was built from. RAM can change (code
     /// copied in, overlays), so such a block is checked against memory before every entry
     /// and rebuilt when they differ. AArch64 chain targets validate their own snapshots;
@@ -256,6 +265,32 @@ pub struct Cpu {
 }
 
 impl Cpu {
+    /// Passive JIT bookkeeping, independent of the high-overhead instruction profiler.
+    #[cfg(target_arch = "wasm32")]
+    pub fn jit_origin_diagnostic_json(&self) -> String {
+        self.wjit.as_ref().map_or_else(
+            || r#"{"available":false}"#.to_owned(),
+            |j| j.origin_stats_json()
+        )
+    }
+
+    /// Keep native/unit-test builds compatible; this probe exists only in WebAssembly.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn jit_origin_diagnostic_json(&self) -> String {
+        r#"{"available":false}"#.to_owned()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn jit_bmap_diagnostic_json(&self) -> String {
+        let pairs = self.bmap_hot_evictors.iter().map(|(pc, n)| format!(r#""0x{pc:08x}":{n}"#)).collect::<Vec<_>>().join(",");
+        format!(r#"{{"collisions":{},"hotEvicted":{},"hotRebuilt":{},"evictors":{{{}}}}}"#,
+            self.bmap_collisions, self.bmap_hot_evicted, self.bmap_hot_rebuilt, pairs)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn jit_bmap_diagnostic_json(&self) -> String {
+        r#"{"available":false}"#.to_owned()
+    }
+
     pub fn jit_profile_json(&self) -> String {
         let helpers = self.jit_helpers.iter().map(|(k, v)| format!("\"{k}\":{v}")).collect::<Vec<_>>().join(",");
         format!("{{\"entries\":{},\"instructions\":{},\"helpers\":{{{helpers}}}}}", self.jit_entries, self.jit_insns)
@@ -814,6 +849,20 @@ impl Cpu {
             self.bver.push(bus.code_writes().unwrap_or(u64::MAX));
         }
         let slot = (pc >> 1) as usize & ((1 << BITS) - 1);
+        #[cfg(target_arch = "wasm32")]
+        if self.bmap[slot] != 0 {
+            let old_pc = self.blocks[self.bmap[slot] as usize - 1].0;
+            if old_pc != pc {
+                self.bmap_collisions += 1;
+                if old_pc == 0x0200_540c {
+                    self.bmap_hot_evicted += 1;
+                    *self.bmap_hot_evictors.entry(pc).or_default() += 1;
+                }
+                if pc == 0x0200_540c {
+                    self.bmap_hot_rebuilt += 1;
+                }
+            }
+        }
         self.bmap[slot] = self.blocks.len() as u32;
         Ok(if len == 0 { None } else { Some((self.blocks.len() - 1, start, len)) })
     }
