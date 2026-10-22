@@ -158,6 +158,7 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
             if let Some((irq, prio)) = soc.pending_irq() {
                 if cpu.irq_ready(prio) {
                     let handler = soc.read32(VEC_BASE + 4 * irq as u32);
+                    soc.observe_irq_entry(irq, handler, cpu.pc);
                     cpu.interrupt(handler, prio);
                 }
             }
