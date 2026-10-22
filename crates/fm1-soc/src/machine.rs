@@ -158,6 +158,7 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
             if let Some((irq, prio)) = soc.pending_irq() {
                 if cpu.irq_ready(prio) {
                     let handler = soc.read32(VEC_BASE + 4 * irq as u32);
+                    soc.observe_irq_entry(irq, handler, cpu.pc);
                     cpu.interrupt(handler, prio);
                 }
             }
@@ -283,6 +284,7 @@ pub fn run_dual(
         done += k;
         let dt = soc.periph.cycles - c0;
         run_cpu1(c1, soc, dt)?;
+        soc.observe_writer(1, c1.pc, c1.irq_levels.len() as u32);
     }
     Ok(())
 }

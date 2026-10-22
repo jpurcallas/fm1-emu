@@ -151,6 +151,41 @@ impl KeyVoiceWatch {
     }
 }
 
+/// A passive, optional transition sampler at CPU0/CPU1 scheduling boundaries.
+/// The reported PC is AFTER the slice, never claimed to be the instruction
+/// performing the write. This narrows which core and scheduling window changed
+/// the voice-state byte; it does not alter any guest instruction or memory.
+#[derive(Default)]
+pub struct CoreWriterProbe {
+    pub checks: u64,
+    last: Option<(u8,u8,u8)>,
+    events: Vec<(u64,u64,u64,u32,u32,u32,u8,u8,u8)>,
+    irq_counts: std::collections::BTreeMap<u8,u64>,
+    irq_recent: std::collections::VecDeque<(u64,u8,u32,u32)>,
+    voice_irq_context: Vec<(u64,u8,u32,u32)>,
+}
+impl CoreWriterProbe {
+    pub fn report(&self) -> String {
+        let events = self.events.iter().map(
+            |(cycle,ms,halves,core,pc,irqdepth,key,voice,note)|format!(
+                r#"{{"cycle":{},"ms":{},"halves":{},"stageCore":{},"pcAfterSlice":"0x{:08x}","irqDepth":{},"key":{},"voice":{},"note":{}}}"#,
+                cycle,ms,halves,core,pc,irqdepth,key,voice,note
+            )
+        ).collect::<Vec<_>>().join(",");
+        let counts=self.irq_counts.iter().map(|(irq,n)|format!(r#""{}":{}"#,irq,n)).collect::<Vec<_>>().join(",");
+        let recent=self.irq_recent.iter().map(|(cycle,irq,handler,return_pc)|format!(
+            r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
+            cycle,irq,handler,return_pc
+        )).collect::<Vec<_>>().join(",");
+        let at_voice=self.voice_irq_context.iter().map(|(cycle,irq,handler,return_pc)|format!(
+            r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
+            cycle,irq,handler,return_pc
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice)
+    }
+}
+
 pub struct Soc {
     pub board: Board,
     /// The BT baseband's window base (0x2FC44), as the firmware set it.
@@ -172,6 +207,7 @@ pub struct Soc {
     pub periph: Periph,
     /// Opt-in read-only guest RAM watch for key release; disabled normally.
     pub keyvoice_watch: Option<KeyVoiceWatch>,
+    pub writer_probe: Option<CoreWriterProbe>,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -246,6 +282,7 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             keyvoice_watch: None,
+            writer_probe: None,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
@@ -328,6 +365,43 @@ impl Soc {
                         self.periph.audio_halves, values.0, values.1, values.2, pending));
                 }
             }
+        }
+    }
+
+    /// Observe only after an unmodified CPU scheduling slice; no emulated writes
+    /// and no profile-on instrumentation. Disabled by default.
+    pub fn observe_writer(&mut self, core: u32, pc: u32, irq_depth: u32) {
+        if !(1380..=1540).contains(&self.periph.ms()) || self.writer_probe.is_none() {
+            return;
+        }
+        let values=(self.ram.read8(0x48f0b),
+                    self.ram.read8(0x1993f),
+                    self.ram.read8(0x19941));
+        if let Some(probe)=self.writer_probe.as_mut() {
+            probe.checks+=1;
+            if probe.last != Some(values) {
+                if values.1 == 1 && probe.last.map(|x|x.1)!=Some(1) {
+                    probe.voice_irq_context=probe.irq_recent.iter().copied().collect();
+                }
+                probe.last=Some(values);
+                if probe.events.len()<64 {
+                    probe.events.push((
+                        self.periph.cycles,self.periph.ms(),self.periph.audio_halves,
+                        core,pc,irq_depth,values.0,values.1,values.2
+                    ));
+                }
+            }
+        }
+    }
+
+    /// Record CPU0 IRQ entry at its existing interrupt dispatch point; no
+    /// peripheral action and no change to interrupt timing.
+    pub fn observe_irq_entry(&mut self, irq: u8, handler: u32, return_pc: u32) {
+        if !(1380..=1540).contains(&self.periph.ms()) { return; }
+        if let Some(p)=self.writer_probe.as_mut() {
+            *p.irq_counts.entry(irq).or_default()+=1;
+            if p.irq_recent.len()==64 { p.irq_recent.pop_front(); }
+            p.irq_recent.push_back((self.periph.cycles,irq,handler,return_pc));
         }
     }
 
