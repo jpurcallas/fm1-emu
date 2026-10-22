@@ -247,9 +247,11 @@ static mut ORIGIN_JSON: Vec<u8> = Vec::new();
 #[allow(static_mut_refs)]
 pub extern "C" fn fm1_jit_origin_report() -> *const u8 {
     let report = machine().map(|m| format!(
-        r#"{{"cpu0":{},"cpu1":{}}}"#,
+        r#"{{"cpu0":{},"cpu1":{},"bmap0":{},"bmap1":{}}}"#,
         m.cpu.jit_origin_diagnostic_json(),
-        m.cpu1.as_ref().map_or_else(|| "null".to_owned(), |c| c.jit_origin_diagnostic_json())
+        m.cpu1.as_ref().map_or_else(|| "null".to_owned(), |c| c.jit_origin_diagnostic_json()),
+        m.cpu.jit_bmap_diagnostic_json(),
+        m.cpu1.as_ref().map_or_else(|| "null".to_owned(), |c| c.jit_bmap_diagnostic_json())
     )).unwrap_or_else(|| r#"{"available":false}"#.to_owned());
     unsafe {
         ORIGIN_JSON = report.into_bytes();
