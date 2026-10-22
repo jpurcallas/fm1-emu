@@ -28,7 +28,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 #[link(wasm_import_module = "env")]
 extern "C" {
     /// Compile a module and install its `run` in the function table: the table index, 0 on failure.
-    fn fm1_jit_compile(bytes: *const u8, len: usize, origin_pc: u32, ram_blocks: u32) -> u32;
+    fn fm1_jit_compile(bytes: *const u8, len: usize, origin_pc: u32, ram_blocks: u32, root_block_id: u32) -> u32;
 }
 
 /// Compiles still allowed (the host refills it: compiling in the audio thread must not hold up a
@@ -108,7 +108,8 @@ impl Jit {
         // SAFETY: a plain byte slice; the host copies it before returning
         let origin_pc = blocks.first().map(|b| b.1).unwrap_or(0);
         let ram_count = blocks.iter().filter(|b| !(0x0200_0000..0x0400_0000).contains(&b.1)).count() as u32;
-        let f = unsafe { fm1_jit_compile(m.as_ptr(), m.len(), origin_pc, ram_count) };
+        let root_block_id = blocks.first().map(|b| b.0 as u32).unwrap_or(u32::MAX);
+        let f = unsafe { fm1_jit_compile(m.as_ptr(), m.len(), origin_pc, ram_count, root_block_id) };
         if f == 0 {
             return false;
         }
