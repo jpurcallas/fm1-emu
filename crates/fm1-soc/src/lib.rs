@@ -167,6 +167,7 @@ pub struct CoreWriterProbe {
     irq11_snapshots: Vec<(u64,u64,u8,String,String,String,String)>,
     other_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
     schedule_events: Vec<(u64,u64,u8,u32,u32,u8,u8,u8)>,
+    irq127_writes: Vec<(u64,u64,u32,u32,u8,u32,u32,u8,u8)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -200,8 +201,12 @@ impl CoreWriterProbe {
             r#"{{"cycle":{},"half":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}","panel":{},"producer":{},"voice":{}}}"#,
             cycle,half,irq,handler,return_pc,panel,producer,voice
         )).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}]}}"#,
-            self.checks,events,counts,recent,at_voice,exact,snapshots,others,schedule)
+        let requests=self.irq127_writes.iter().map(|(cycle,half,pc,addr,width,value,ilat,panel,producer)|format!(
+            r#"{{"cycle":{},"half":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"value":{},"ilatBefore":{},"panel":{},"producer":{}}}"#,
+            cycle,half,pc,addr,width,value,ilat,panel,producer
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}],"irq127Writes":[{}]}}"#,
+            self.checks,events,counts,recent,at_voice,exact,snapshots,others,schedule,requests)
     }
 }
 
@@ -396,6 +401,19 @@ impl Soc {
             return;
         }
         if width == 0 { return; }
+        // IRQ 120..127 are software interrupts in the ILAT write register.
+        // Capture the request/acknowledgement guest store PC through both the
+        // interpreter and inline JIT paths, without reading or writing guest IO.
+        if addr==0x1eef_1a0 || addr==0x1eef_1a4 {
+            if value & (1<<7) != 0 {
+                let row=(self.periph.cycles,self.periph.audio_halves,pc,addr,
+                    width,value,self.periph.ilat,
+                    self.ram.read8(0x48f0b),self.ram.read8(0x48ee9));
+                if let Some(p)=self.writer_probe.as_mut() {
+                    if p.irq127_writes.len()<384 { p.irq127_writes.push(row); }
+                }
+            }
+        }
         let targets=[TARGET,0x01c4_8ee0,0x01c4_8ee9,0x01c4_8eea,
                      0x01c4_8f0b,0x01c4_8f22,0x01c2_b93b,0x01c6_a070];
         for &target in &targets {
