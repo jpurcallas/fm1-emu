@@ -160,6 +160,8 @@ pub struct CoreWriterProbe {
     pub checks: u64,
     last: Option<(u8,u8,u8)>,
     events: Vec<(u64,u64,u64,u32,u32,u32,u8,u8,u8)>,
+    irq_counts: std::collections::BTreeMap<u8,u64>,
+    irq_recent: std::collections::VecDeque<(u64,u8,u32,u32)>,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -169,7 +171,13 @@ impl CoreWriterProbe {
                 cycle,ms,halves,core,pc,irqdepth,key,voice,note
             )
         ).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}]}}"#,self.checks,events)
+        let counts=self.irq_counts.iter().map(|(irq,n)|format!(r#""{}":{}"#,irq,n)).collect::<Vec<_>>().join(",");
+        let recent=self.irq_recent.iter().map(|(cycle,irq,handler,return_pc)|format!(
+            r#"{{"cycle":{},"irq":{},"handler":"0x{:08x}","returnPc":"0x{:08x}"}}"#,
+            cycle,irq,handler,return_pc
+        )).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}]}}"#,
+            self.checks,events,counts,recent)
     }
 }
 
@@ -375,6 +383,17 @@ impl Soc {
                     ));
                 }
             }
+        }
+    }
+
+    /// Record CPU0 IRQ entry at its existing interrupt dispatch point; no
+    /// peripheral action and no change to interrupt timing.
+    pub fn observe_irq_entry(&mut self, irq: u8, handler: u32, return_pc: u32) {
+        if !(1380..=1540).contains(&self.periph.ms()) { return; }
+        if let Some(p)=self.writer_probe.as_mut() {
+            *p.irq_counts.entry(irq).or_default()+=1;
+            if p.irq_recent.len()==64 { p.irq_recent.pop_front(); }
+            p.irq_recent.push_back((self.periph.cycles,irq,handler,return_pc));
         }
     }
 
