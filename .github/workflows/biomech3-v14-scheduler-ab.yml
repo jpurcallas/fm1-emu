@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/biomech3-v14-scheduler-ab.yml'
       - 'experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs'
-      -   workflow_dispatch:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -84,7 +84,8 @@ jobs:
           grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source' /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
           python3 - <<'PY'
           from pathlib import Path
-          for line in Path('/tmp/br3-v14-${BR3_ROUTE}/sdk.nm').read_text().splitlines():
+          import os
+          for line in Path('/tmp/br3-v14-'+os.environ['BR3_ROUTE']+'/sdk.nm').read_text().splitlines():
               if line.endswith(' _MALLOC_SIZE'):
                   size=int(line.split()[0],16)
                   print('BR3_SCHEDULER_AB_HEAP',size,'48KiB_GATE',size>=49152)
@@ -112,10 +113,10 @@ jobs:
         with:
           name: BIOMECH3_V14_SCHEDULER_AB_${{ matrix.route }}_NO_INSTALL
           path: |
-            /tmp/br3-v14-${BR3_ROUTE}/probe/*.json
-            /tmp/br3-v14-${BR3_ROUTE}/probe/*.wav
-            /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
-            /tmp/br3-v14-${BR3_ROUTE}/build.log
-            /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+            /tmp/br3-v14-${{ matrix.route }}/probe/*.json
+            /tmp/br3-v14-${{ matrix.route }}/probe/*.wav
+            /tmp/br3-v14-${{ matrix.route }}/sdk.nm
+            /tmp/br3-v14-${{ matrix.route }}/build.log
+            /tmp/br3-v14-${{ matrix.route }}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
           retention-days: 14
           if-no-files-found: warn
