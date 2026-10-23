@@ -32,10 +32,16 @@ try {
   const obj=JSON.parse(readFileSync(path,"utf8"));
   console.log("BLACKBOX_EXPORT",{format:obj.format,ram_bytes:obj.ram_bytes,emulator:obj.emulator?.schema,firmware:obj.candidate,error:obj.error,note:obj.note});
   if(obj.ram_bytes!==1048576 || !obj.emulator?.cpu0 || !obj.ram_base64)throw new Error("BLACK BOX missing CPU0/RAM");
-  console.log("PRESET_KNOB_DIAG",{events:obj.emulator.control_events?.slice(-4),branches:obj.emulator.cpu0_branches?.length,armed:obj.emulator.branch_trace_armed});
+  console.log("PRESET_KNOB_DIAG",{events:obj.emulator.control_events?.slice(-4),
+    branches:obj.emulator.cpu0_branches?.length,
+    armed:obj.emulator.branch_trace_armed,jit:obj.emulator.cpu0_jit_enabled,
+    timeout:obj.emulator.trace_until_ms});
   if(!obj.emulator?.control_events?.some(e=>e[0]===1 && e[2]!==0) ||
-     !obj.emulator?.branch_trace_armed || !obj.emulator?.cpu0_branches?.length)
+     !obj.emulator?.cpu0_branches?.length)
     throw new Error("BLACK BOX missing actual knob action / CPU0 branch trace");
+  if(obj.emulator.branch_trace_armed || !obj.emulator.cpu0_jit_enabled ||
+     obj.emulator.trace_until_ms !== null)
+    throw new Error("CPU0 trace kept interpreter enabled after 250 ms; audio load may be contaminated");
   const audio=obj.audio_metrics;
   console.log("PCM_DIAGNOSTICS",{quanta:audio?.quanta,shortQuanta:audio?.shortQuanta,missingFrames:audio?.missingFrames,peak:audio?.peak,trace:audio?.quantumTrace?.length});
   if(!audio || audio.quanta<=0 || !audio.quantumTrace?.length || audio.availableWavFrames<=0)
