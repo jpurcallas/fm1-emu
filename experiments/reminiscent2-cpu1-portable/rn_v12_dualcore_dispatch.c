@@ -2,6 +2,9 @@
 int rn_dc_render_dispatch(rn_v12_dsp *s,int32_t *out,unsigned frames,
                           rn_dc_job *job,const rn_dc_executor *executor){
  if(!executor||!executor->submit||!executor->wait_done)return -1;
+ /* If a previous job may still be running, do not even prepare the next
+  * block: preparation mutates shared DSP state and voice ownership. */
+ if(executor->ready && !executor->ready(executor->context))return -5;
  int prep=rn_dc_prepare(s,out,frames,job);
  if(prep!=0)return prep==1?0:prep;
  /* CPU0 may continue only if CPU1 accepted immutable, published work. */
