@@ -1576,8 +1576,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 g.set(L_A);
                 // if divisor != 0, divide; else zero
                 g.get(L_A);
-                g.if_();
-                g.op(T_I64);
+                g.op(IF); g.op(T_I64); g.nest += 1;
                 if signed {
                     // Guard i64 MIN/-1; modulo signed overflow returns MIN.
                     g.get(L_OPRES);
@@ -1588,8 +1587,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                     g.i32c(u32::MAX);
                     g.op(I32_EQ);
                     g.op(I32_AND);
-                    g.if_();
-                    g.op(T_I64);
+                    g.op(IF); g.op(T_I64); g.nest += 1;
                     g.c.push(I64_CONST);
                     sleb(&mut g.c, i64::MIN);
                     g.op(ELSE);
