@@ -37,3 +37,20 @@ El menor heap V14 **STOCK** ensayado con audio, MIDI y pantalla fue 116.300 B. C
 Próximo paso conservador: capturar **lecturas y escrituras reales** del intervalo de RAM de FX heredados por ambos CPU, con JIT OFF, en boot/UI, MIDI, audio, Flash/BT si es emulable; antes de estudiar reutilizarlo o dividir el objeto SDK. La aceptación exige recuperar el espacio físico con memoria y coherencia verificadas, restaurar callbacks MIDI/control y PCM/DMA bajo firmware real, y conservar las seis pistas y FX exactamente. No aplicar un patch binario cooperativo CPU1 de REM a BIOMECH.
 
 **Estados:** optimización ROM construida y probada como LAB; banco byte exacto; recuperó 16.512 B; acceso fábrica 3; seguridad Flash desconocida; firmware musical controlable NO recuperado; CPU1 3+3 V14 NO aprobado. Madres SDK, BIOMECH, REminiSCENT y `master` intactas.
+
+## Comprobación adicional: región SDK FX en RAM huésped (candidatos originales y ROM)
+
+Se implementó y ejecutó `trace_v14_fx_ram.mjs`, que localiza `fm1_fx_states` mediante el mapa de símbolos PI32v2 de cada build y comprueba sus **48.832 bytes** tras cada quantum de render V14, JIT OFF, con notas MIDI y controles físicos inyectados. La traza reporta modificación de **8 bytes** en ambos candidatos:
+
+| FWSC | Dirección enlazada de `fm1_fx_states` | Modificaciones observadas | Frames renderizados | Halt |
+|---|---|---:|---:|---|
+| BIOMECH 3 sin cambios | `0x01C4F6A0` | 8 | 793 bloques | No |
+| Variante ROM experimental | `0x01C4B620` | 8 | 793 bloques | No |
+
+En ambos casos la huella RAM pasó de `c3759cc5` (inicialmente cero) a `bdbda7fd`. Es evidencia de actividad real del SDK en una región etiquetada como estado de efectos heredados. No afirma qué función produjo la escritura, y tampoco demuestra que las otras 48.824 posiciones jamás se lean. Por tanto se descarta **solapar todo el bloque** con `effects` de BIOMECH sin instrumentación de lecturas/escrituras por CPU0/CPU1 y garantía de no interferencia. No se tocaron ni deshabilitaron los efectos de BIOMECH.
+
+- [BLACK BOX FX RAM del firmware original — CI PASS](https://github.com/jpurcallas/fm1-emu/actions/runs/40033782232)
+- [BLACK BOX FX RAM de ROM experimental — CI PASS](https://github.com/jpurcallas/fm1-emu/actions/runs/40033761181)
+- [Código de comparación de RAM, JIT OFF, símbolos por ELF](https://github.com/jpurcallas/fm1-emu/blob/experiment/biomech3-v14-memory-recovery-20261023/experiments/biomech-rhythm-3/sdk-v14/trace_v14_fx_ram.mjs)
+
+**Situación:** 16.512 bytes recuperados experimentalmente pero no aprobados por seguridad Flash; no se han recuperado los 37.600 bytes restantes ni restaurado entrada musical externa. Se requiere ingeniería de servicios y memoria verificable, no un alias de bloques.
