@@ -199,3 +199,19 @@ test('a boot timeout cancels the machine and the next firmware selection recover
   p.audio.hangBoot = false; p.api.setFirmware('b');
   assert.equal(await p.api.boot(), true);
 });
+
+test('BLACK BOX survives a CPU-halt and reboot with export enabled', async () => {
+  const p = await page(); await p.api.startAudio(); await p.api.boot();
+  p.audio.port.onmessage({ data: { type: 'blackbox', seq: p.audio.seq,
+    trigger: 'cpu-halted', ram: new Uint8Array(1024),
+    cpu: { cpu0: { pc:'0x01234567' }, cpu1: null }, trace: [] } });
+  assert.equal(p.elements.get('blackbox-export').disabled, false);
+  assert.match(p.elements.get('blackbox-status').textContent, /1024 RAM bytes/);
+  p.api.setFirmware('b'); await p.api.boot();
+  assert.equal(p.elements.get('blackbox-export').disabled, false);
+});
+test('manual BLACK BOX capture uses current boot sequence', async () => {
+  const p = await page(); await p.api.startAudio(); await p.api.boot();
+  await p.elements.get('blackbox-capture').listeners.click();
+  assert.ok(p.audio.messages.some(m => m.type === 'blackbox-capture' && m.seq === p.audio.seq));
+});
