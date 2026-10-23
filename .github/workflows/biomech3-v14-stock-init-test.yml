@@ -1,0 +1,111 @@
+name: BIOMECH3 V14 stock screen init continuation A/B (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-v14-musical-blackbox-20261023]
+    paths:
+      - '.github/workflows/biomech3-v14-stock-init-test.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/diagnose_fwsc_cpu0_pc.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deferred:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned source and verified PI32 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage original unchanged musical DSP and signed V14 adapter
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Preserve stock groove_screen_init tail behind BIOMECH init (LAB ONLY)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/fm1-v14/app')
+          p=root/'screen.c';s=p.read_text()
+          old='    biomech_sdk_init(); return; /* BIOMECH experimental control front-end */'
+          new='    biomech_sdk_init(); /* LAB: continue original SDK V14 screen startup to identify missing dependency */'
+          if s.count(old)!=1:raise SystemExit('Unexpected BIOMECH SDK screen entry')
+          s=s.replace(old,new,1)
+          incl='#include "biomech/biomech_sdk_port.h"'
+          if s.count(incl)!=1:raise SystemExit('Missing screen adapter header')
+          s=s.replace(incl,incl+'\nvolatile unsigned br3_screen_call_count;',1)
+          ctl='    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */'
+          if s.count(ctl)!=1:raise SystemExit('Missing control adapter')
+          s=s.replace(ctl,'    ++br3_screen_call_count;\n'+ctl,1)
+          p.write_text(s)
+          p=root/'midi_router.c';s=p.read_text()
+          incl='#include "biomech/biomech_sdk_port.h"'
+          if s.count(incl)!=1:raise SystemExit('Missing MIDI adapter header')
+          s=s.replace(incl,incl+'\nvolatile unsigned br3_midi_callback_count,br3_midi_last_source,br3_midi_last_length;',1)
+          fun='    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */'
+          if s.count(fun)!=1:raise SystemExit('Missing MIDI adapter')
+          s=s.replace(fun,'    ++br3_midi_callback_count;\n    br3_midi_last_source=source;\n    br3_midi_last_length=(unsigned)n;\n'+fun,1)
+          p.write_text(s)
+          print('BR3_STOCK_SCREEN_TAIL_LAB: BR3 original DSP + SDK audio unchanged; original stock setup allowed to continue')
+          PY
+      - name: Compile, link, measure 48KiB heap, pack no-install FWSC
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-stock-tail
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-stock-tail/sdk.elf > /tmp/br3-v14-stock-tail/sdk.nm
+          grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source' /tmp/br3-v14-stock-tail/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          for line in Path('/tmp/br3-v14-stock-tail/sdk.nm').read_text().splitlines():
+              if line.endswith(' _MALLOC_SIZE'):
+                  size=int(line.split()[0],16)
+                  print('BR3_STOCK_TAIL_HEAP',size,'48KiB_GATE',size>=49152)
+                  if size<49152:raise SystemExit('Heap below SDK floor')
+          PY
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-stock-tail
+          sha256sum /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Real SDK stock-init-tail test: callbacks MIDI keys PCM DMA
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          mkdir -p /tmp/br3-v14-stock-tail/probe
+          BR3_ROUTE_ONLY=1 node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
+            /tmp/fm1_web.wasm \
+            /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-tail/probe \
+            /tmp/br3-v14-stock-tail/sdk.nm \
+            "" "" \
+            /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-tail/sdk.nm
+      - name: Sample guest CPU0 PC and native ELF symbols during stalled startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          node experiments/biomech-rhythm-3/sdk-v14/diagnose_fwsc_cpu0_pc.mjs \
+            /tmp/fm1_web.wasm \
+            /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-tail/sdk.nm
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_V14_DEFERRED_INIT_AUDIO_SDK_LAB_NO_INSTALL
+          path: |
+            /tmp/br3-v14-stock-tail/probe/*.json
+            /tmp/br3-v14-stock-tail/probe/*.wav
+            /tmp/br3-v14-stock-tail/sdk.nm
+            /tmp/br3-v14-stock-tail/build.log
+            /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+          retention-days: 14
+          if-no-files-found: warn
