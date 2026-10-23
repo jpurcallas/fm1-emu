@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/biomech3-v14-deferred-audio-test.yml'
       - 'experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/diagnose_fwsc_cpu0_pc.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -90,6 +91,14 @@ jobs:
             /tmp/br3-v14-deferred/probe \
             /tmp/br3-v14-deferred/sdk.nm \
             "" "" \
+            /tmp/br3-v14-deferred/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-deferred/sdk.nm
+      - name: Sample guest CPU0 PC and native ELF symbols during stalled startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          node experiments/biomech-rhythm-3/sdk-v14/diagnose_fwsc_cpu0_pc.mjs \
+            /tmp/fm1_web.wasm \
             /tmp/br3-v14-deferred/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-deferred/sdk.nm
       - uses: actions/upload-artifact@v4
