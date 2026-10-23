@@ -1548,6 +1548,41 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 }
                 bus_used = true;
             }
+            // PI32v2 Raw18/19: decoded single-register pre/post-increment
+            // and offset loads/stores. Use the exact exec_raw decode and
+            // existing JIT memory/bus helpers. Save both base and next before
+            // modifying destination: d==b cases have specific write ordering.
+            Fast::Raw { route: route @ (18 | 19), raw } => {
+                let m = crate::decode_inc_mem(route, raw as u64);
+                let b = m.b as u8;
+                let d = m.d as u8;
+                // The base is captured first, even if destination aliases b.
+                g.ld_reg(b);
+                g.set(L_A);
+                g.get(L_A);
+                g.i32c(m.inc as u32);
+                g.op(I32_ADD);
+                g.set(L_B);
+                if m.pre {
+                    g.st_reg_from(b, L_B);
+                }
+                g.get(if m.post { L_A } else { L_B });
+                g.set(L_ADDR);
+                if m.store {
+                    // For pre-increment stores d==b, source is updated base.
+                    g.ld_reg(d);
+                    g.set(L_VAL);
+                    g.store(m.w, idx, pc);
+                } else {
+                    g.load(m.w, m.signed, idx, pc);
+                    g.st_reg_from(d, L_VAL);
+                }
+                if m.post {
+                    // Post-update wins over the destination when d == b.
+                    g.st_reg_from(b, L_B);
+                }
+                bus_used = true;
+            }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
             // The underlying PI32v2 interpreter uses x+y, x-y, x*y, x/y as
