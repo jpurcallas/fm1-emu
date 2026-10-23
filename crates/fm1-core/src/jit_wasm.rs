@@ -172,6 +172,8 @@ pub struct Ctx {
     /// left inside an if-else block's then-part: its skip (then end, else end), for `run` to
     /// put in `Cpu::pred_skips` as the interpreter has it there (0: none)
     pred: [u32; 2],
+    /// Sampled at each JIT run; never suppress an enabled BIOMECH watch.
+    trace_active: u32,
 }
 
 /// Run compiled code: returns the instructions executed; cpu.pc is set. At most `cap`
@@ -182,7 +184,7 @@ pub struct Ctx {
 pub(crate) unsafe fn run<B: Bus>(f: u32, start: u32, cpu: &mut Cpu, bus: &mut B, extra: u32, cap: u32) -> u32 {
     // instructions this call may run: their ticks ((k - 1) + extra) must all fit tick_room
     let limit = (bus.tick_room() + 1).saturating_sub(extra as u64).min(1 << 30).min(cap as u64) as u32;
-    let mut ctx = Ctx { cpu: cpu as *mut Cpu, bus: bus as *mut B as *mut (), extra, synced: 0, brk: 0, pred: [0; 2] };
+    let mut ctx = Ctx { cpu: cpu as *mut Cpu, bus: bus as *mut B as *mut (), extra, synced: 0, brk: 0, pred: [0; 2], trace_active: bus.guest_trace_enabled() as u32 };
     // SAFETY: on wasm32 a function pointer is its index in the function table, where the host
     // installed this block's `run` with exactly this signature
     let code: extern "C" fn(*mut Cpu, *mut Ctx, u32, u32) -> u32 = unsafe { std::mem::transmute(f as usize) };
@@ -415,6 +417,7 @@ fn off_hold() -> u32 {
     offset_of!(Cpu, hold_irq) as u32
 }
 const OFF_BRK: u32 = offset_of!(Ctx, brk) as u32;
+const OFF_TRACE: u32 = offset_of!(Ctx, trace_active) as u32;
 const OFF_PRED: u32 = offset_of!(Ctx, pred) as u32;
 
 struct Gen<'a> {
@@ -732,23 +735,34 @@ impl Gen<'_> {
         self.set(L_VAL);
         self.end();
         self.end();
+        // Passive diagnostics do not participate in CPU or bus semantics.
+        // Without an active coordinate watch, avoid the very expensive
+        // Wasm -> Rust helper call on every inline RAM/XIP read.
+        self.get(L_CTX);
+        self.mem_op(I32_LOAD, 2, OFF_TRACE);
+        self.if_();
         self.get(L_CTX);
         self.get(L_ADDR);
         self.get(L_VAL);
         self.i32c(pc);
         self.i32c(w as u32);
         self.call_ind(TY_WRITE, self.h_guest_read);
+        self.end();
     }
 
     /// store(w) of local val at guest address local addr: inline RAM, else the bus (and so is a
     /// store to a word of RAM code: the bus counts it, see `Bus::code_writes`).
     fn store(&mut self, w: u8, idx: u32, pc: u32) {
         self.get(L_CTX);
+        self.mem_op(I32_LOAD, 2, OFF_TRACE);
+        self.if_();
+        self.get(L_CTX);
         self.get(L_ADDR);
         self.get(L_VAL);
         self.i32c(pc);
         self.i32c(w as u32);
         self.call_ind(TY_WRITE, self.h_guest_store);
+        self.end();
         let mem = *self.mem;
         self.get(L_ADDR);
         self.i32c(mem.ram_base);
