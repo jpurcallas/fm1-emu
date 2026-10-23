@@ -1,0 +1,46 @@
+name: REminiSCENT 2 LAB PI32 Toolchain Diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/reminiscent-2-lab-cpu1-libre-20261022
+    paths:
+      - .github/workflows/rem2-pi32-toolchain-diagnostic.yml
+permissions:
+  contents: read
+jobs:
+  tools:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch JieLi compiler and check binary tool dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/jieli"
+          curl -fL --retry 3 --connect-timeout 20 --max-time 240 https://pkgman.jieliapp.com/s/linux-toolchain | tar -xJ -C "$RUNNER_TEMP/jieli"
+          TC="$(find "$RUNNER_TEMP/jieli" -maxdepth 1 -type d -name 'jieli-linux-toolchains-*' | sort | tail -1)"
+          echo "TC=$TC" >> "$GITHUB_ENV"
+          echo "Total toolchain:"; du -sh "$TC"
+          echo "Key binaries:"; ls -lh "$TC/common/bin/clang" "$TC/pi32v2/bin/ld" "$TC/pi32v2/bin/LLVMgold.so" "$TC/pi32v2/bin/nm"
+          echo "Clang dependencies:"; ldd "$TC/common/bin/clang" || true
+          echo "Linker dependencies:"; ldd "$TC/pi32v2/bin/ld" || true
+          echo "Plugin dependencies:"; ldd "$TC/pi32v2/bin/LLVMgold.so" || true
+      - name: Archive minimal PI32v2 tools for isolated reproducibility audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/rem2_tools"
+          cp -a "$TC/common" "$RUNNER_TEMP/rem2_tools/"
+          cp -a "$TC/pi32v2" "$RUNNER_TEMP/rem2_tools/"
+          du -sh "$RUNNER_TEMP/rem2_tools"
+          tar -C "$RUNNER_TEMP/rem2_tools" -cJf "$RUNNER_TEMP/rem2_tools.tar.xz" .
+          ls -lh "$RUNNER_TEMP/rem2_tools.tar.xz"
+          cp "$RUNNER_TEMP/rem2_tools.tar.xz" rem2_tools.tar.xz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem2-jieli-pi32-build-dependencies-internal
+          path: rem2_tools.tar.xz
+          if-no-files-found: error
+          retention-days: 1
