@@ -27,6 +27,9 @@ impl Bus for Core1Bus<'_> {
     fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
         self.soc.record_biomech_coord(1, pc, addr, width, value);
     }
+    fn trace_guest_read(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.soc.record_biomech_coord_read(1, pc, addr, width, value);
+    }
     fn read8(&mut self, a: u32) -> u8 {
         let value = self.soc.core1_read8(a);
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 1, value as u32);
