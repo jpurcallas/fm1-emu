@@ -30,6 +30,26 @@ with tarfile.open(fileobj=io.BytesIO(blob),mode="r:gz") as tar:
    dest.parent.mkdir(parents=True,exist_ok=True)
    dest.write_bytes(data)
    patched.append(entry.name)
+# The legacy visual-only copy of the 6-track engine occupies ~21 KiB
+# of scarce RAM0 but is NEVER read by the audio thread nor CPU1. For this
+# emulator-only diagnostic, relocate only that UI mirror into the SDK V14
+# cache_ram_bss region (28 KiB available), then explicitly zero it before
+# first use. The musical owner and effect buffers remain in original RAM0.
+# We do not change track count, render, mixer, serialization or presets.
+import os
+if os.getenv("BR3_DISPLAY_CACHE_SHADOW")=="1":
+ ui=ROOT/"app/biomech/biomech_sdk_port.c"
+ code=ui.read_text()
+ old="static BREngine shadow_engine BRSDK_STATIC;"
+ new='static BREngine shadow_engine __attribute__((section(".memp_memory_x"),aligned(32)));'
+ if code.count(old)!=1:raise SystemExit("Cannot identify visual-only shadow engine")
+ code=code.replace(old,new)
+ old2="    shadow_panel.engine=&shadow_engine;"
+ new2="    memset(&shadow_engine,0,sizeof(shadow_engine));\n    shadow_panel.engine=&shadow_engine;"
+ if code.count(old2)!=1:raise SystemExit("Cannot identify snapshot init")
+ code=code.replace(old2,new2)
+ ui.write_text(code)
+ print("BR3_DISPLAY_CACHE_SHADOW 21376 byte visual mirror now in .cache_ram_bss; DSP untouched")
 # Reuse the exact, versioned six-track CPU0/CPU1 music and blackbox files in
 # this same repository. No placeholder DSP, fake panel, or substituted FX.
 engine=REPO/"experiments/biomech-rhythm-3/musical-3plus3"
