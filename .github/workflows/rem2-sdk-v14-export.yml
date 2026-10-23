@@ -19,7 +19,20 @@ jobs:
           set -euo pipefail
           curl -fL --retry 4 --connect-timeout 20 --max-time 120 -o /tmp/v14.zip 'https://github.com/m-vave/fm1_open/releases/download/V14/FM1-Open-V14-Development-Kit.zip'
           mkdir -p /tmp/v14
-          unzip -q /tmp/v14.zip -d /tmp/v14
+          python3 - <<'PY'
+          import zipfile, pathlib
+          dest=pathlib.Path('/tmp/v14')
+          with zipfile.ZipFile('/tmp/v14.zip') as z:
+              for item in z.infolist():
+                  if item.is_dir(): continue
+                  rel=pathlib.PurePosixPath(item.filename.replace('\\\\','/'))
+                  if '..' in rel.parts: raise ValueError(item.filename)
+                  dst=dest.joinpath(*rel.parts)
+                  dst.parent.mkdir(parents=True,exist_ok=True)
+                  with z.open(item) as inp,open(dst,'wb') as out:
+                      import shutil
+                      shutil.copyfileobj(inp,out)
+          PY
           echo "V14 tree:"; find /tmp/v14 -maxdepth 4 -type f | head -60
           tar -cJf /tmp/rem2-v14-sdk.tar.xz -C /tmp/v14 .
           ls -l /tmp/rem2-v14-sdk.tar.xz
