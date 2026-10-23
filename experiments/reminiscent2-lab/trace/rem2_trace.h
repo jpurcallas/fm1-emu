@@ -66,15 +66,15 @@ typedef struct rem2_fields {
  uint32_t last_valid_block, fault_reason, extra;
 } rem2_fields;
 
-static inline void rem2_barrier(void) {
+static inline __attribute__((always_inline)) void rem2_barrier(void) {
 #if defined(__GCC_PI32V2__)
  __asm__ volatile("csync" ::: "memory");
 #elif defined(__GNUC__) || defined(__clang__)
  __sync_synchronize();
 #endif
 }
-static inline uint32_t rem2_rot(uint32_t x) {return (x<<7)|(x>>25);}
-static inline uint32_t rem2_crc(const rem2_record *r) {
+static inline __attribute__((always_inline)) uint32_t rem2_rot(uint32_t x) {return (x<<7)|(x>>25);}
+static inline __attribute__((always_inline)) uint32_t rem2_crc(const rem2_record *r) {
  uint32_t h=0xA72D19E5u;
 #define RMIX(v) (h=rem2_rot(h)^(v))
  RMIX(r->cycle);RMIX(r->block);RMIX(r->job);RMIX(r->event);
@@ -85,7 +85,7 @@ static inline uint32_t rem2_crc(const rem2_record *r) {
  return h;
 }
 static inline void rem2_init(rem2_blackbox *b,const char *ver,const char *sha) {
- uint8_t *p=(uint8_t*)b;
+ volatile uint8_t *p=(volatile uint8_t*)b;
  for(size_t i=0;i<sizeof(*b);i++) p[i]=0;
  b->magic=REM2_TRACE_MAGIC; b->schema=REM2_TRACE_SCHEMA;
  b->bytes=(uint32_t)sizeof(*b); b->enabled=1;
