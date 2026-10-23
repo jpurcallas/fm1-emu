@@ -26,3 +26,14 @@ Success only if better audible results with full functionality. No BIOMECH 3 fir
 - Evidencia CI: https://github.com/jpurcallas/fm1-emu/actions/runs/39986469523
 - **No es FWSC musical ni prueba 3+3 ni validación de hardware físico.** Tampoco prueba coherencia de caché bajo carga ni disponibilidad de CPU1 dentro del SDK original. Los resultados de CPU1 no autorizan reemplazar el motor de BIOMECH 2.
 - Siguiente implementación: preservar y recuperar el código C99 exacto del DSP de v0.2 y montar la entrada CPU1 propia en un FWSC experimental separado; primero trabajo sin DSP, luego transferencia de voces con igualdad funcional y audio comparado.
+
+
+## Segundo resultado: DSP musical nativo 3+3 vs serial en PI32v2 (23/oct/2026)
+
+**EJECUTADO Y COMPILADO:** [GitHub Actions](https://github.com/jpurcallas/fm1-emu/actions/runs/39998936634) valida el mismo motor musical C99 de seis pistas, con la versión original serial y la versión repartida CPU0 (pistas 1–3) / CPU1 (4–6), ambas realmente compiladas como PI32v2 y ejecutadas bajo el emulador a 200 MHz. Se contrastaron 32 bloques × 128 frames = **4096 frames**, sin ISR de DAC.
+
+- Referencia serial: `br3_test_checksum=4134146915`, pico float32 bits `1063004406`, `br3_test_rendered=32`, sin halt.
+- Reparto 3+3: **mismo checksum y pico**, `br3_completed_jobs=128`, `br3_timeouts=0`, `br3_fallback_jobs=0`, sin halt. BLACK BOX `BR3BBX01` visible en SRAM.
+- La comparación HOST anterior fue byte a byte para tres escenarios con secuenciador, MIDI, robos de voz y fallback. La nueva comparación PI32v2 valida **hash + pico**, no byte a byte de muestras volcadas; no extrapolar más allá del corpus probado.
+- **Limitaciones vigentes:** ejecutable PI32v2 independiente: todavía no es FWSC con panel, audio ISR, DMA, servicios SDK ni una demostración de rendimiento en hardware. Tampoco verifica igualdad con el firmware audible BIOMECH 2 v0.2, cuyas fuentes precisas siguen sin estar disponibles.
+- No solicitar al autor ninguna prueba de este binario aislado. Próxima implementación: integrar la misma ruta 3+3 en la aplicación FM-1 completa con secuenciador/UI/FX, entrega DMA y BLACK BOX, compilar, probar internamente y solo entonces generar un .fwsc SOLO EMULADOR.
