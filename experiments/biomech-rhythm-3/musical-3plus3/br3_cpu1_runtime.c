@@ -106,6 +106,19 @@ void __attribute__((noreturn,section(".br3_cpu1_text"))) br3_cpu1_main(void){
    quiescing the SDK worker in a separately linked application. */
 int br3_cpu1_start(void){
   if(br3_enabled)return 1;
+  /* SDK V14 (or another firmware service) may already own this core.
+   * The standalone CPU1 proof used a clean boot, so NEVER pulse HOLD,
+   * reset the CPU1 IRQs or write ENTRY when RUN/HOLD or the release clock
+   * is already asserted by an unknown owner. This is a refusal gate, not
+   * proof that a nominally idle CPU1 can be reserved inside V14: a
+   * separately ordered early-boot handoff is still mandatory. */
+  const uint32_t prior_con=R32(C1_CON), prior_clk=R32(C1_CLK);
+  if ((prior_con & 0x0au)!=0u || (prior_clk & 8u)!=0u) {
+    br3_bb_init(0x0003E002u);
+    br3_blackbox.last_error=0xB330F103u;
+    br3_bb_event(0,BR3_BB_OWNER_UNCLAIMED,R32(TMR4),0,prior_con,prior_clk);
+    return 0;
+  }
   br3_hold();
   br3_bb_init(0x00030001u);
   br3_bb_event(0,BR3_BB_BOOT,R32(TMR4),0,(uint32_t)(uintptr_t)&br3_cpu1_entry,0);
@@ -185,6 +198,8 @@ void br3_cpu1_attach(void){
 }
 void br3_cpu1_detach(void){
   if(br3_inflight)(void)br3_wait();
-  br3_hold();
+  /* Not owner? Do not halt an SDK-owned CPU1 while detaching an inert
+     dispatcher. This was possible in the older native experiment. */
+  if(br3_enabled) br3_hold();
   br3_set_executor(NULL);
 }
