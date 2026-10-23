@@ -61,6 +61,10 @@ pub trait Bus {
     fn trace_instruction_pc(&mut self, _pc: u32) {}
     fn trace_guest_store(&mut self, _pc: u32, _addr: u32, _width: u8, _value: u32) {}
     fn trace_guest_read(&mut self, _pc: u32, _addr: u32, _width: u8, _value: u32) {}
+    /// Opt-in passive memory-access tracing. JIT uses this per-run value to
+    /// avoid cross-module trace callbacks when the Bus has no active watch.
+    /// Defaults off; buses with active tracers override the method.
+    fn guest_trace_enabled(&self) -> bool { false }
     /// One clock cycle passed (one instruction). True when something timed
     /// is due, or a peripheral was touched, so the caller must service the
     /// SoC before the next instruction. Buses without a clock never are.
