@@ -1,0 +1,3 @@
+Native PI32v2 CPU1 self-test: CI PASS in fm1-emu WASM.
+This is NOT BIOMECH musical firmware; it does not synthesize voices.
+Raw .bin is for isolated emulator tests ONLY. DO NOT FLASH HARDWARE.
