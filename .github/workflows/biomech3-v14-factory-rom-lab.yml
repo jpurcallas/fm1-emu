@@ -168,10 +168,11 @@ jobs:
           p=original.index('FM1_DSP_CODE const uint8_t *groove_fm_factory_raw')
           new='/* DIAGNOSTIC ONLY, NEVER HARDWARE: ROM reads may fail during Flash programming. */\n'
           new+='#include "fm_patch.h"\n#include <stdint.h>\n'
-          new+='static const uint8_t factory_raw[16384] = {\n'
+          new+='volatile unsigned br3_factory_reads;\nstatic const uint8_t factory_raw[16384] = {\n'
           new+=''.join('  '+','.join(str(x) for x in dec[i:i+32])+',\n' for i in range(0,len(dec),32))
           new+='};\n'
           new+=original[p:].replace('    factory_init();','    /* Exact factory bytes provided from ROM rather than startup SRAM expansion. */')
+          new=new.replace('    return factory_raw+(program%FM1_FM_PROGRAMS)*128;', '    ++br3_factory_reads; return factory_raw+(program%FM1_FM_PROGRAMS)*128;')
           (root/'fm_factory.c').write_text(new)
           print('BR3_FACTORY_ROM_LAB 16384B source BSS removed; unchanged 128 factory programs; Flash safety NOT PROVEN')
           PY
