@@ -399,7 +399,8 @@ const L_VAL: u32 = 7;
 const L_OFF: u32 = 8;
 const L_DONE: u32 = 9;
 const L_CUR: u32 = 10;
-const L_OPRES: u32 = 11;
+const L_TRACE: u32 = 11;
+const L_OPRES: u32 = 12;
 
 fn off_reg(r: u8) -> u32 {
     (offset_of!(Cpu, regs) + 4 * (r & 15) as usize) as u32
@@ -738,8 +739,7 @@ impl Gen<'_> {
         // Passive diagnostics do not participate in CPU or bus semantics.
         // Without an active coordinate watch, avoid the very expensive
         // Wasm -> Rust helper call on every inline RAM/XIP read.
-        self.get(L_CTX);
-        self.mem_op(I32_LOAD, 2, OFF_TRACE);
+        self.get(L_TRACE);
         self.if_();
         self.get(L_CTX);
         self.get(L_ADDR);
@@ -753,8 +753,7 @@ impl Gen<'_> {
     /// store(w) of local val at guest address local addr: inline RAM, else the bus (and so is a
     /// store to a word of RAM code: the bus counts it, see `Bus::code_writes`).
     fn store(&mut self, w: u8, idx: u32, pc: u32) {
-        self.get(L_CTX);
-        self.mem_op(I32_LOAD, 2, OFF_TRACE);
+        self.get(L_TRACE);
         self.if_();
         self.get(L_CTX);
         self.get(L_ADDR);
@@ -846,6 +845,11 @@ fn compile<B: Bus>(blocks: &[(usize, u32, Vec<crate::BOp>)], mem: &JitMem, profi
     // loop { block_{n-1} { .. block_0 { br_table cur } code_0 } code_1 .. } code_{n-1} }: a br
     // to depth k from the innermost block lands on code_k; code_k reaches the loop through the
     // n - 1 - k blocks still open
+    // The trace state is sampled once per call in Ctx::trace_active.
+    // Keep an i32 local for the region; preserve live watch semantics across runs.
+    g.get(L_CTX);
+    g.mem_op(I32_LOAD, 2, OFF_TRACE);
+    g.set(L_TRACE);
     g.get(L_START);
     g.set(L_CUR);
     g.op(LOOP);
@@ -1700,9 +1704,9 @@ fn module(body: &[u8]) -> Vec<u8> {
     name(&mut ex, "run");
     ex.extend_from_slice(&[0x00, 0x00]);
     section(&mut m, 7, &ex);
-    // code: locals a, b, addr, val, off, done, cur (i32) and the op result (i64)
+    // code: locals a, b, addr, val, off, done, cur, trace (i32) and the op result (i64)
     let mut f = Vec::new();
-    f.extend_from_slice(&[2, 7, T_I32, 1, T_I64]);
+    f.extend_from_slice(&[2, 8, T_I32, 1, T_I64]);
     f.extend_from_slice(body);
     let mut code = Vec::new();
     uleb(&mut code, 1);
