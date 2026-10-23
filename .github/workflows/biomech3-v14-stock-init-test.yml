@@ -74,7 +74,7 @@ jobs:
           PY
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-stock-tail
           sha256sum /tmp/br3-v14-stock-tail/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
-      - name: Real SDK stock-init-tail test: callbacks MIDI keys PCM DMA
+      - name: Real SDK stock-init-tail test (callbacks MIDI keys PCM DMA)
         shell: bash
         run: |
           set -euo pipefail
@@ -100,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BIOMECH3_V14_DEFERRED_INIT_AUDIO_SDK_LAB_NO_INSTALL
+          name: BIOMECH3_V14_STOCK_SCREEN_TAIL_LAB_NO_INSTALL
           path: |
             /tmp/br3-v14-stock-tail/probe/*.json
             /tmp/br3-v14-stock-tail/probe/*.wav
