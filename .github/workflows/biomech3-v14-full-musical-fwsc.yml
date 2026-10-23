@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          BR3_DISPLAY_CACHE_SHADOW=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
       - name: Compile and link ALL BIOMECH musical, UI and DMA sources
         shell: bash
         run: |
@@ -76,6 +76,13 @@ jobs:
             print('BR3_FULL_V14_8FRAMES_HEAP',eight['_MALLOC_SIZE'],
                   'passes_48KiB',eight['_MALLOC_SIZE']>=49152)
           PY
+      - name: Package full V14 with sixteen-frame DSP and relocated UI mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-full
+          mv /tmp/br3-v14-full/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
+          sha256sum /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
       - name: Package experimental eight-frame V14 into real emulator FWSC
         shell: bash
         run: |
@@ -101,6 +108,7 @@ jobs:
             /tmp/br3-v14-full/sdk.elf
             /tmp/br3-v14-full/sdk.map
             /tmp/br3-v14-full/sdk.nm
+            /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-full-8/build.log
             /tmp/br3-v14-full-8/sdk.elf
             /tmp/br3-v14-full-8/sdk.map
