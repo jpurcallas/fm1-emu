@@ -37,3 +37,24 @@ Success only if better audible results with full functionality. No BIOMECH 3 fir
 - La comparación HOST anterior fue byte a byte para tres escenarios con secuenciador, MIDI, robos de voz y fallback. La nueva comparación PI32v2 valida **hash + pico**, no byte a byte de muestras volcadas; no extrapolar más allá del corpus probado.
 - **Limitaciones vigentes:** ejecutable PI32v2 independiente: todavía no es FWSC con panel, audio ISR, DMA, servicios SDK ni una demostración de rendimiento en hardware. Tampoco verifica igualdad con el firmware audible BIOMECH 2 v0.2, cuyas fuentes precisas siguen sin estar disponibles.
 - No solicitar al autor ninguna prueba de este binario aislado. Próxima implementación: integrar la misma ruta 3+3 en la aplicación FM-1 completa con secuenciador/UI/FX, entrega DMA y BLACK BOX, compilar, probar internamente y solo entonces generar un .fwsc SOLO EMULADOR.
+
+
+## Puerta nueva: coste real del reparto y protección del propietario de CPU1 (23/oct/2026)
+
+**HALLAZGO EJECUTADO — NO PROMOVER COMO MEJORA DE VELOCIDAD.** [CI 40011478497](https://github.com/jpurcallas/fm1-emu/actions/runs/40011478497) comparó 4096 frames con el mismo DSP, PI32v2 a 200 MHz en WASM y paridad de checksum y pico:
+
+| Variante | CPU0 instrucciones | CPU1 instrucciones | Tiempo emulado |
+|---|---:|---:|---:|
+| Serial original | 14.534.284 | 0 | 72 ms |
+| CPU0 1–3 / CPU1 4–6, lotes 32 | 17.877.992 | 5.398.439 | 89 ms |
+| Reparto 3+3, lotes 16 | 19.254.688 | 5.740.562 | 96 ms |
+| Reparto 3+3, lotes 8 | 21.352.858 | 6.451.500 | 106 ms |
+| Lotes 32 + muestra solo 1/16 de eventos BLACK BOX normales | 17.878.482 | 5.406.708 | 89 ms |
+
+La huella PCM y el pico coinciden en las variantes probadas, y CPU1 trabajó. Sin embargo, hay sobrecarga: **3+3 nativo aislado es más lento que serial en este corpus.** La instrumentación detallada por trabajo no explica esa diferencia; bajar su frecuencia no ahorra tiempo. Mantener de momento el registro completo por defecto (1/1), los 32 frames por lote y las seis pistas. Estos números NO son mediciones de deadline IRQ/DMA del firmware V14 completo ni permiten extrapolar automáticamente el rendimiento del hardware.
+
+**Protección nueva implementada:** `br3_cpu1_start` verifica C1_CON y reloj de liberación antes de cualquier HOLD, IRQ clear o ENTRY; si detecta señal de ocupación ajena, falla sin apropiarse del núcleo, y registra error `0xB330F103` en BLACK BOX. `br3_cpu1_detach` ya no detiene CPU1 si este ejecutor nunca lo poseyó. [CI normal](https://github.com/jpurcallas/fm1-emu/actions/runs/40010968144) compiló/ejecutó el caso libre; el rechazo de propietario ajeno aún requiere un caso de emulación dedicado. Un registro libre a la lectura no demuestra que la coordinación SDK vaya a respetar esa reserva: **handoff/propiedad dentro de V14 sigue pendiente**.
+
+**Cruce con PR #24 y #26:** adoptamos la advertencia de REMINISCENT: solo reutilizar scratch de CPU1 después de detenerlo y verificar que no seguirá escribiendo; su 2+2 HOST no prueba disponibilidad de CPU1 en V14. No reabrir el ACK SDK (no es API de trabajos DSP).
+
+**Siguiente barrera:** disminuir preparación/polling y demostrar ventaja end-to-end sin alterar timbre; luego enlazar V14 con exclusividad SDK, DMA y panel, firmware `.fwsc` SOLO EMULADOR. **Aún no hay FWSC.**
