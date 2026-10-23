@@ -38,6 +38,8 @@ const canvas = document.getElementById("panel");
 const ctx = canvas.getContext("2d");
 const status = document.getElementById("status");
 const bbexport = document.getElementById("bbexport");
+const wavexport = document.getElementById("wavexport");
+const wavstate = document.getElementById("wavstate");
 const bbstate = document.getElementById("bbstate");
 let lastBlackbox = null, blackboxRequested = false;
 function saveBlackbox(snapshot) {
@@ -62,7 +64,8 @@ function saveBlackbox(snapshot) {
   const report = { format: "BIOMECH-RHYTHM-2-WEB-BLACKBOX-v1",
     candidate: fw.name, firmwareId: fw.id, clockMHz: mhz, capturedAt: snapshot.capturedAt,
     note: snapshot.note, error: snapshot.error, emulator: snapshot.machine || null,
-    jit: snapshot.jit || null, bb2_signatures: found, ram_base: "0x01c00000",
+    jit: snapshot.jit || null, audio_metrics: snapshot.audio_metrics || null,
+    bb2_signatures: found, ram_base: "0x01c00000",
     ram_encoding: "base64", ram_bytes: bytes.length, ram_base64: btoa(binary) };
   const json = JSON.stringify(report, null, 2), blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -73,10 +76,19 @@ function saveBlackbox(snapshot) {
   bbstate.textContent = "BLACK BOX downloaded: attach the JSON to the chat for analysis";
 }
 bbexport.addEventListener("click", () => {
-  if (lastBlackbox) saveBlackbox(lastBlackbox);
-  else { blackboxRequested = true; bbstate.textContent = "Capturing CPU0, CPU1 and guest RAM...";
-    if (node) node.port.postMessage({ type: "blackbox-request", seq: bootSeq });
-    else bbstate.textContent = "Press Start first, then export."; }
+  // A manual export is fresh even after a previous manual one; only a halted
+  // machine falls back to the crash snapshot captured automatically.
+  if (lastBlackbox?.machine?.halted) {saveBlackbox(lastBlackbox);return;}
+  blackboxRequested = true;
+  bbstate.textContent = "Capturing CPU0, CPU1, RAM and PCM statistics...";
+  if (node) node.port.postMessage({ type: "blackbox-request", seq: bootSeq });
+  else bbstate.textContent = "Press Start first, then export.";
+});
+wavexport.addEventListener("click", () => {
+  if (node) {
+    wavstate.textContent = "Capturing recent emulator audio...";
+    node.port.postMessage({type:"wav-request",seq:bootSeq});
+  } else wavstate.textContent = "Press Start and play a pattern first.";
 });
 const startBtn = document.getElementById("start");
 const fwSel = document.getElementById("fw");
@@ -909,6 +921,17 @@ async function startAudio() {
 // what the audio thread sends: the screen and LEDs with its timing, boot and error news
 function onWorklet(e) {
   const m = e.data;
+  if (m.type === "wav") {
+    if (m.error) {wavstate.textContent=m.error;return;}
+    const blob=new Blob([m.buffer],{type:"audio/wav"});
+    const url=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=url;
+    a.download="BIOMECH2_AUDIO_"+mhz+"MHz_"+new Date().toISOString().replace(/[:.]/g,"-")+".wav";
+    document.body.append(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    wavstate.textContent="WAV downloaded: "+(m.frames/m.sampleRate).toFixed(2)+" s. Attach with BLACK BOX.";
+    return;
+  }
   if (m.type === "blackbox") {
     lastBlackbox = m;
     bbstate.textContent = m.machine?.halted
@@ -954,6 +977,7 @@ function onWorklet(e) {
     if (!session || !waiter) return;
     running = session;
     lastBlackbox = null; blackboxRequested = false;
+    wavstate.textContent = "Play a sequence; WAV captures last 6 seconds of emulator audio.";
     bbstate.textContent = "Capture armed from boot. Click Export BLACK BOX at any time.";
     for (const key of sessions.keys()) if (key !== m.seq) sessions.delete(key);
     session.base = m.base;
