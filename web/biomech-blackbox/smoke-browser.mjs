@@ -16,8 +16,9 @@ try {
   await page.locator("#start").click();
   await page.waitForTimeout(5000);
   const status=await page.locator("#status").innerText();
+  const chosen=await page.locator("#fw").inputValue();
   const bbstate=await page.locator("#bbstate").innerText();
-  console.log(JSON.stringify({selected,status,bbstate,errors,failed},null,2));
+  console.log(JSON.stringify({selected,chosen,status,bbstate,errors,failed},null,2));
   if(errors.length || /boot:|not an FM-1|could not|error/i.test(status)||!/Capture armed|BLACK BOX captured|CPU halted/.test(bbstate)) {
      throw new Error("Web page did not boot a real .fwsc and arm the BLACK BOX");
   }
