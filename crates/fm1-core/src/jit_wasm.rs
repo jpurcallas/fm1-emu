@@ -1494,6 +1494,60 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 g.op(I32_WRAP_I64);
                 g.mem_op(I32_STORE, 2, off_reg(hi));
             }
+            // PI32v2 Raw16 paired 32-bit memory accesses (64-bit load/store).
+            // Decode at JIT compile time and use existing JIT bus/RAM handlers:
+            // preserve updates to the base before the transfer (pre/post),
+            // source-index reading before base changes, word ordering and
+            // IRQ checks after the complete guest instruction. Do not bypass
+            // the normal bus or its code-write tracking.
+            Fast::Raw { route: 16, raw } => {
+                let m = crate::decode_pair_mem(raw as u64);
+                let lo = (2 * m.pair) as u8;
+                let hi = lo + 1;
+                if let Some(b) = m.base {
+                    g.ld_reg(b as u8);
+                } else {
+                    g.ld_field(off_sp());
+                }
+                g.set(L_A);
+                if let Some(i) = m.index {
+                    g.ld_reg(i as u8);
+                } else {
+                    g.i32c(m.off as u32);
+                }
+                g.set(L_B);
+                g.get(L_A);
+                g.get(L_B);
+                g.op(I32_ADD);
+                g.set(L_CUR);
+                if let Some(b) = m.base.filter(|_| m.pre || m.post) {
+                    g.st_reg_from(b as u8, L_CUR);
+                }
+                g.get(if m.post { L_A } else { L_CUR });
+                g.set(L_ADDR);
+                if m.store {
+                    g.ld_reg(lo);
+                    g.set(L_VAL);
+                    g.store(4, idx, pc);
+                    g.get(L_ADDR);
+                    g.i32c(4);
+                    g.op(I32_ADD);
+                    g.set(L_ADDR);
+                    g.ld_reg(hi);
+                    g.set(L_VAL);
+                    g.store(4, idx, pc);
+                } else {
+                    g.load(4, false, idx, pc);
+                    g.st_reg_from(lo, L_VAL);
+                    g.get(L_ADDR);
+                    g.i32c(4);
+                    g.op(I32_ADD);
+                    g.set(L_ADDR);
+                    g.load(4, false, idx, pc);
+                    g.st_reg_from(hi, L_VAL);
+                }
+                bus_used = true;
+            }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
             // The underlying PI32v2 interpreter uses x+y, x-y, x*y, x/y as
