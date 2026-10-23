@@ -9,6 +9,8 @@ ROOT=pathlib.Path(sys.argv[1]).resolve()
 TOOL=pathlib.Path(sys.argv[2]).resolve()
 BUILD=pathlib.Path(sys.argv[3]).resolve()
 SDK=ROOT/"sdk";APP=ROOT/"app";BIN=TOOL/"pi32v2/bin"
+BR3_LINK=os.getenv("BR3_LINK_ENGINE","0")=="1"
+BR3_SRC=pathlib.Path(__file__).resolve().parents[1]/"musical-3plus3"
 BUILD.mkdir(parents=True,exist_ok=True)
 OBJ=BUILD/"obj";OBJ.mkdir(exist_ok=True)
 GEN=BUILD/"generated";GEN.mkdir(exist_ok=True)
@@ -77,6 +79,16 @@ identitycode+='const unsigned char fm1_update_identity[27]="'+product.group(1)+'
 (GEN/"build_identity.c").write_text(identitycode)
 run([BIN/"clang",*flags,"-c",GEN/"build_identity.c","-o",OBJ/"build_identity.o"])
 objs.append(OBJ/"build_identity.o")
+if BR3_LINK:
+ note("LINK EXPERIMENT: COMPILE REAL BR3 SIX-TRACK DSP + PRIVATE CPU1, NO UI OR DMA YET")
+ for name in ("biomech.c","br3_blackbox.c","br3_cpu1_runtime.c","br3_cpu1_entry.S"):
+  source=BR3_SRC/name
+  out=OBJ/("br3_"+name.replace(".","_")+".o")
+  args=list(flags)+["-I"+str(BR3_SRC),"-DBR3_DUAL_CORE","-DBR3_PI32V2","-DBR3_ACTIVE_SLOTS_LAB",
+                    "-fwrapv","-fno-fast-math","-ffp-contract=off"]
+  run([BIN/"clang",*args,"-c",source,"-o",out])
+  objs.append(out)
+
 ld=(SDK/"config/linker.ld.in").read_text()
 ld=ld.replace("@SBC_DECODER@","sbc_decoder\n").replace("@ACL_TX_EXTRA@"," + 1024").replace("@ACL_RX_EXTRA@"," + 4096")
 (GEN/"linker").write_text(ld)
@@ -96,8 +108,20 @@ link=[BIN/"ld","--plugin",BIN/"LLVMgold.so","-o","sdk.elf",*objs,"-flto",
  "--undefined=connectivity_wl82_bluetooth_start",
  "--undefined=audio_app_bluetooth_open",
  "--undefined=bt_get_local_name","--undefined=bt_get_mac_addr"]
-note("LINK ORIGINAL SDK ONLY")
+if BR3_LINK:
+ # Force both music and CPU1 work symbols to be retained. Otherwise
+ # --gc-sections could fake a successful integration by dropping all BR3.
+ link+=["--undefined=br_render","--undefined=br3_cpu1_start",
+        "--undefined=br3_cpu1_main","--undefined=br3_blackbox"]
+note("LINK STOCK V14 + REAL BR3 OBJECTS" if BR3_LINK else "LINK ORIGINAL SDK ONLY")
 run(link)
 run([BIN/"nm","-n","sdk.elf"])
-note("LINK VERIFIED STOCK SDK ORIGINAL NO BIOMECH 3 FWSC")
+if BR3_LINK:
+ out=run([BIN/"nm","-n","sdk.elf"])
+ for symbol in ("br_render","br3_cpu1_start","br3_cpu1_main","br3_blackbox"):
+  if not any(line.strip().endswith(" "+symbol) for line in out.splitlines()):
+   raise RuntimeError("BR3 symbol lost in SDK link: "+symbol)
+ note("BR3 V14 REAL DSP + CPU1 OBJECT LINKED; GUI/DMA HANDOFF NOT YET ATTACHED")
+else:
+ note("LINK VERIFIED STOCK SDK ORIGINAL NO BIOMECH 3 FWSC")
 LOG.close()
