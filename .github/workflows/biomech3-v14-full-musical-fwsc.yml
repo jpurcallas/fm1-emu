@@ -76,6 +76,13 @@ jobs:
             print('BR3_FULL_V14_8FRAMES_HEAP',eight['_MALLOC_SIZE'],
                   'passes_48KiB',eight['_MALLOC_SIZE']>=49152)
           PY
+      - name: Package experimental eight-frame V14 into real emulator FWSC
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v pwsh
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-full-8
+          sha256sum /tmp/br3-v14-full-8/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -90,5 +97,6 @@ jobs:
             /tmp/br3-v14-full-8/sdk.elf
             /tmp/br3-v14-full-8/sdk.map
             /tmp/br3-v14-full-8/sdk.nm
+            /tmp/br3-v14-full-8/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
           if-no-files-found: warn
           retention-days: 14
