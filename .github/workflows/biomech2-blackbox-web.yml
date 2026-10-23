@@ -26,6 +26,12 @@ jobs:
           grep -q 'Export BLACK BOX' _site/biomech-blackbox/index.html
           grep -q 'captureBlackbox' _site/biomech-blackbox/worklet.js
           grep -q 'saveBlackbox' _site/biomech-blackbox/main.js
+      - name: Real Chrome test — open FWSC and download BLACK BOX
+        run: |
+          npm install --no-save playwright
+          python3 -m http.server 8642 --bind 127.0.0.1 --directory _site >/tmp/biomech-web.log 2>&1 &
+          sleep 2
+          node web/biomech-blackbox/smoke-browser.mjs
       - name: Upload offline diagnostic emulator ZIP
         uses: actions/upload-artifact@v4
         with:
