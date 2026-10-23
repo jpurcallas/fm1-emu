@@ -1,0 +1,24 @@
+name: BIOMECH CPU1 read-only gate (NO MERGE)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: WASM target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Compile instrumented emulator
+        run: tools/build_site.sh _site
+      - name: Verify passive status export
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs";const m=new WebAssembly.Module(readFileSync("_site/fm1_web.wasm"));if(!WebAssembly.Module.exports(m).some(e=>e.name==="fm1_biomech_cpu1_status"))throw Error("missing CPU1 status");'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: biomech-cpu1-passive-status-wasm
+          path: _site/fm1_web.wasm
+          retention-days: 3
