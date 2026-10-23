@@ -133,7 +133,7 @@ jobs:
           p=Path('/tmp/fm1-v14-direct-note/app/biomech/biomech_sdk_port.c')
           src=p.read_text()
           old='    (void)fm1_audio_start();'
-          new='    /* DIRECT-NOTE DIAGNOSTIC ONLY: real six-track C99 DSP, input bypassed. */\\n    br_trigger(&runtime.engine,0,110,60);\\n    (void)fm1_audio_start();'
+          new='    /* DIRECT-NOTE DIAGNOSTIC ONLY: real six-track C99 DSP, input bypassed. */\n    br_trigger(&runtime.engine,0,110,60);\n    (void)fm1_audio_start();'
           if src.count(old)!=1:raise SystemExit("Refusing ambiguous direct-note patch")
           p.write_text(src.replace(old,new,1))
           print('BR3_DIRECT_NOTE_LAB patched in disposable SDK only; original DSP untouched')
