@@ -1583,6 +1583,35 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 }
                 bus_used = true;
             }
+            // Raw32: PI32v2 pre/post indexed memory access. The source
+            // index is captured before the destination/base write. The
+            // incremented base overwrites the destination for d==b,
+            // exactly as Cpu::exec_raw. Use the same bus tracking helpers.
+            Fast::Raw { route: 32, raw } if crate::idx_inc(raw as u64).is_some() => {
+                let m = crate::idx_inc(raw as u64).unwrap();
+                g.ld_reg(m.b as u8);
+                g.set(L_A);
+                g.ld_reg(m.i as u8);
+                g.get(L_A);
+                g.op(I32_ADD);
+                g.set(L_B);
+                g.get(if m.pre { L_B } else { L_A });
+                g.set(L_ADDR);
+                if m.store {
+                    g.ld_reg(m.d as u8);
+                    if m.high {
+                        g.i32c(16);
+                        g.op(I32_SHR_U);
+                    }
+                    g.set(L_VAL);
+                    g.store(m.w, idx, pc);
+                } else {
+                    g.load(m.w, m.signed, idx, pc);
+                    g.st_reg_from(m.d as u8, L_VAL);
+                }
+                g.st_reg_from(m.b as u8, L_B);
+                bus_used = true;
+            }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
             // The underlying PI32v2 interpreter uses x+y, x-y, x*y, x/y as
