@@ -97,6 +97,16 @@ jobs:
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-stock
           mv /tmp/br3-v14-stock/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc
           sha256sum /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc
+      - name: Boot actual stock and BIOMECH3 16F FWSC on emulator with BLACK BOX
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 \
+            https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/biomech3-fm1-web.wasm
+          BR3_SMOKE=1 node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_blackbox.mjs \
+            /tmp/biomech3-fm1-web.wasm \
+            /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
       - uses: actions/upload-artifact@v4
         if: always()
         with:
