@@ -351,6 +351,10 @@ const F32_GE: u8 = 0x60;
 const I32_ADD: u8 = 0x6a;
 const I32_SUB: u8 = 0x6b;
 const I32_MUL: u8 = 0x6c;
+const I32_DIV_S: u8 = 0x6d;
+const I32_DIV_U: u8 = 0x6e;
+const I32_REM_S: u8 = 0x6f;
+const I32_REM_U: u8 = 0x70;
 const I32_AND: u8 = 0x71;
 const I32_OR: u8 = 0x72;
 const I32_XOR: u8 = 0x73;
@@ -358,7 +362,11 @@ const I32_SHL: u8 = 0x74;
 const I32_SHR_S: u8 = 0x75;
 const I32_SHR_U: u8 = 0x76;
 const I32_WRAP_I64: u8 = 0xa7;
+const I64_EXTEND_I32_S: u8 = 0xac;
 const I64_EXTEND_I32_U: u8 = 0xad;
+const I64_ADD: u8 = 0x7c;
+const I64_SUB: u8 = 0x7d;
+const I64_MUL: u8 = 0x7e;
 const I64_OR: u8 = 0x84;
 const I64_SHL: u8 = 0x86;
 const I64_SHR_S: u8 = 0x87;
@@ -1482,6 +1490,84 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 };
                 g.op(shift_op);
                 g.set(L_OPRES);
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(lo));
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHR_U);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(hi));
+            }
+            // 32-bit integer division and remainder, preserving PI32v2's
+            // zero-divisor=0 rule and signed MIN/-1 wrapping_div edge case.
+            // Ordinary WASM div_s would trap on MIN/-1; use a guarded path.
+            Fast::Div { d, a, b, k } => {
+                g.ld_reg(a);
+                g.set(L_A);
+                g.ld_reg(b);
+                g.set(L_B);
+                g.get(L_CPU);
+                g.get(L_B);
+                g.op(IF);
+                g.op(T_I32);
+                g.nest += 1;
+                if k == 0 {
+                    g.get(L_A);
+                    g.i32c(0x8000_0000);
+                    g.op(I32_EQ);
+                    g.get(L_B);
+                    g.i32c(u32::MAX);
+                    g.op(I32_EQ);
+                    g.op(I32_AND);
+                    g.op(IF);
+                    g.op(T_I32);
+                    g.nest += 1;
+                    g.i32c(0x8000_0000);
+                    g.op(ELSE);
+                    g.get(L_A);
+                    g.get(L_B);
+                    g.op(I32_DIV_S);
+                    g.end();
+                } else {
+                    g.get(L_A);
+                    g.get(L_B);
+                    g.op(match k { 1 => I32_DIV_U, 2 => I32_REM_S, _ => I32_REM_U });
+                }
+                g.op(ELSE);
+                g.i32c(0);
+                g.end();
+                g.mem_op(I32_STORE, 2, off_reg(d));
+            }
+            // PI32v2 Raw21 integer wide multiply and accumulate/subtract.
+            // Same 64-bit signed extension and modulo-2^64 operations
+            // as exec_raw; exact result is verified against reference PCM.
+            Fast::Raw { route: 21, raw } if matches!(raw as u8, 0xf8 | 0xfc | 0xfe) => {
+                let lo = ((raw >> 29) & 7) as u8 * 2;
+                let hi = lo + 1;
+                let ext = if (raw >> 28) & 1 != 0 { I64_EXTEND_I32_S } else { I64_EXTEND_I32_U };
+                g.ld_reg(((raw >> 20) & 0xf) as u8);
+                g.op(ext);
+                g.ld_reg(((raw >> 24) & 0xf) as u8);
+                g.op(ext);
+                g.op(I64_MUL);
+                g.set(L_OPRES);
+                if matches!(raw as u8, 0xfc | 0xfe) {
+                    g.ld_reg(hi);
+                    g.op(I64_EXTEND_I32_U);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, 32);
+                    g.op(I64_SHL);
+                    g.ld_reg(lo);
+                    g.op(I64_EXTEND_I32_U);
+                    g.op(I64_OR);
+                    g.get(L_OPRES);
+                    g.op(if raw as u8 == 0xfc { I64_ADD } else { I64_SUB });
+                    g.set(L_OPRES);
+                }
                 g.get(L_CPU);
                 g.get(L_OPRES);
                 g.op(I32_WRAP_I64);
