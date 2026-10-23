@@ -23,6 +23,12 @@
 #define BR3_DONE 0xB330C0DEu
 #define BR3_TIMER_HZ 24000000u /* FM-1 TIMER4 */
 #define BR3_BOOT_TICKS (24u*20000u) /* 20 ms */
+#ifndef BR3_SLICE_FRAMES
+#define BR3_SLICE_FRAMES 32u /* production reference; must match synth build */
+#endif
+#if BR3_SLICE_FRAMES > 32u && !defined(BR3_LARGE_SLICE_LAB)
+#error "Large slice size is a native diagnostics-only experiment"
+#endif
 /* Optional PERFORMANCE LAB knob. Default 1 retains every BLACK BOX event.
  * When >1, counters remain exact and faults are always logged; ordinary
  * per-job tracing is sampled so we can measure instrumentation overhead. */
@@ -154,7 +160,7 @@ int br3_cpu1_start(void){
   return 1;
 }
 static int br3_submit(br3_job fn,void *arg,uint32_t frames){
-  if(!br3_enabled||br3_inflight||!fn || frames==0 || frames>32)return 0;
+  if(!br3_enabled||br3_inflight||!fn || frames==0 || frames>BR3_SLICE_FRAMES)return 0;
   /* The whole job must fit in its actual 44.1-kHz sample-time window;
      85%% guard preserves time for final mix/FX and DMA after CPU1 finishes. */
   br3_job_deadline_ticks=(uint32_t)(((uint64_t)frames*BR3_TIMER_HZ*85u)/(44100u*100u));
