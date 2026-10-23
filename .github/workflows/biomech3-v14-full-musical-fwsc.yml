@@ -141,6 +141,27 @@ jobs:
           BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14-direct-note /tmp/jieli /tmp/br3-v14-direct-note
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14-direct-note -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-direct-note
           sha256sum /tmp/br3-v14-direct-note/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Build queue-injection V14 FWSC to isolate MIDI callback (lab only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a /tmp/fm1-v14 /tmp/fm1-v14-queued-midi
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/fm1-v14-queued-midi/app/biomech/biomech_sdk_port.c')
+          src=p.read_text()
+          old='    (void)fm1_audio_start();'
+          new='\n'.join(['    /* QUEUE-MIDI LAB: real MIDI parser and real DSP, external callback bypassed. */',
+                          '    static const uint8_t probe_midi[3]={0x90,60,110};',
+                          '    biomech_sdk_midi_received(FM1_MIDI_DIN,probe_midi,3);',
+                          '    (void)fm1_audio_start();'])
+          if src.count(old)!=1:raise SystemExit("Ambiguous queue-note patch")
+          p.write_text(src.replace(old,new,1))
+          print('BR3_QUEUE_MIDI_LAB enqueued one real MIDI packet before starting real SDK audio')
+          PY
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14-queued-midi /tmp/jieli /tmp/br3-v14-queued-midi
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14-queued-midi -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-queued-midi
+          sha256sum /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
       - name: Boot actual stock and BIOMECH3 16F FWSC on emulator with BLACK BOX
         shell: bash
         run: |
@@ -161,7 +182,8 @@ jobs:
             /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-full/musical /tmp/br3-v14-full/sdk.nm \
-            /tmp/br3-v14-direct-note/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+            /tmp/br3-v14-direct-note/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -177,6 +199,8 @@ jobs:
             /tmp/br3-v14-full/musical/*.wav
             /tmp/br3-v14-direct-note/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-direct-note/build.log
+            /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+            /tmp/br3-v14-queued-midi/build.log
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-full-8/build.log
             /tmp/br3-v14-full-8/sdk.elf
