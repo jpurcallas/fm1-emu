@@ -49,7 +49,7 @@
       </div>
       <div class="stage">
         <canvas id="panel" aria-label="FM-1 front panel"></canvas>
-        <button id="start">Start</button>
+        <button id="start" disabled title="Preparing WebAssembly emulator">Preparing emulator…</button>
       </div>
       <section aria-label="BIOMECH BLACK BOX" style="padding:12px; margin:8px 0; border:2px solid currentColor; border-radius:8px;">
         <b>BIOMECH 2 — BLACK BOX (web emulator)</b>
@@ -341,6 +341,16 @@
     </div>
   </div>
 </footer>
+<script>
+// Capture firmware selections before the large WebAssembly module has finished initializing.
+// Otherwise selecting a .fwsc during page initialization silently loses the user's file.
+window.__bbPendingFW = null;
+window.__bbPickerBound = false;
+document.getElementById("open").addEventListener("change", (e) => {
+  if (!window.__bbPickerBound && e.target.files?.length)
+    window.__bbPendingFW = e.target.files[0];
+}, true);
+</script>
 <script type="module" src="main.js"></script>
 </body>
 </html>
