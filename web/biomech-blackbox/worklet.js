@@ -63,6 +63,7 @@ class Fm1 extends AudioWorkletProcessor {
         this.port.postMessage({ type: "snapshot", seq: m.seq, request: m.request, unavailable: true });
       } else if (this.x) {
         if (m.type === "blackbox-request") this.captureBlackbox("manual export");
+        else if (m.type === "wav-request") this.captureWav();
         else if (m.type === "snapshot") {
           if (m.seq !== this.seq) return;
           this.snapshots.push({ ...m, started: now() });
@@ -116,6 +117,20 @@ class Fm1 extends AudioWorkletProcessor {
     this.reportCalls = 0;
     this.haltReported = false;
     this.short = 0;
+    // Emulator PCM evidence, separate from host hardware playback / microphone capture.
+    // Keep the last six seconds of both channels and a bounded per-quantum history.
+    this.pcmCapacity = Math.max(128, Math.floor(sampleRate * 6));
+    this.pcmL = new Float32Array(this.pcmCapacity);
+    this.pcmR = new Float32Array(this.pcmCapacity);
+    this.pcmWrite = 0;
+    this.pcmFilled = 0;
+    this.audioStats = {
+      source: "emulator PCM after DMA before browser output",
+      sampleRate, quantumFrames: 128, requestedFrames: 0, deliveredFrames: 0,
+      shortQuanta: 0, missingFrames: 0, quanta: 0,
+      nonzeroStereoFrames: 0, nearClipSamples: 0, peak: 0, sumSquares: 0,
+      sampleCount: 0, quantumTrace: []
+    };
     this.calls = 0;
     this.busy = 0;                      // ms spent emulating since the last frame message
     this.worst = 0;                     // the longest quantum among them
@@ -168,6 +183,31 @@ class Fm1 extends AudioWorkletProcessor {
     }
   }
 
+  captureWav() {
+    const count = this.pcmFilled || 0;
+    if (!count) {
+      this.port.postMessage({type:"wav", seq:this.seq, error:"No emulator PCM captured yet; play the sequence first."});
+      return;
+    }
+    // Little-endian PCM16 stereo WAV. This is exactly the PCM emitted by the
+    // emulator before Chrome's AudioContext mixes / resamples it.
+    const bytes = new ArrayBuffer(44 + count * 4), view = new DataView(bytes);
+    const tag = (off, value) => { for(let k=0;k<4;k++) view.setUint8(off+k, value.charCodeAt(k)); };
+    tag(0,"RIFF"); view.setUint32(4,36+count*4,true); tag(8,"WAVE");
+    tag(12,"fmt "); view.setUint32(16,16,true); view.setUint16(20,1,true);
+    view.setUint16(22,2,true); view.setUint32(24,sampleRate,true);
+    view.setUint32(28,sampleRate*4,true); view.setUint16(32,4,true);
+    view.setUint16(34,16,true); tag(36,"data"); view.setUint32(40,count*4,true);
+    let idx = (this.pcmWrite - count + this.pcmCapacity) % this.pcmCapacity;
+    for(let i=0;i<count;i++) {
+      const clip = v => Math.max(-32768, Math.min(32767, Math.round(v*32768)));
+      view.setInt16(44+i*4,clip(this.pcmL[idx]),true);
+      view.setInt16(46+i*4,clip(this.pcmR[idx]),true);
+      idx = (idx+1)%this.pcmCapacity;
+    }
+    this.port.postMessage({type:"wav",seq:this.seq,buffer:bytes,frames:count,sampleRate},[bytes]);
+  }
+
   // Independent emulator snapshot: runs after CPU halt, not from guest interrupt handlers.
   // Capture the whole guest RAM in addition to the emulator's exact CPU/error state.
   captureBlackbox(note, extraError = "") {
@@ -191,7 +231,14 @@ class Fm1 extends AudioWorkletProcessor {
       const ram = new Uint8Array(x.memory.buffer, at, len).slice().buffer;
       this.port.postMessage({ type: "blackbox", seq: this.seq, note, error: extraError,
         machine: state, ram, capturedAt: new Date().toISOString(),
-        jit: { ...this.jit }, clockHz: this.budget / 0.02 * 1e6 / 1e6 }, [ram]);
+        jit: { ...this.jit },
+        audio_metrics: this.audioStats ? {
+          ...this.audioStats,
+          rms: this.audioStats.sampleCount ? Math.sqrt(this.audioStats.sumSquares / this.audioStats.sampleCount) : 0,
+          availableWavFrames: this.pcmFilled,
+          latest6sSeconds: this.pcmFilled/sampleRate
+        } : null,
+        clockHz: this.budget / 0.02 * 1e6 / 1e6 }, [ram]);
     } catch (e) {
       this.port.postMessage({ type: "blackbox", seq: this.seq, note,
         error: "capture failed: " + String(e) + "; original: " + extraError });
@@ -229,6 +276,31 @@ class Fm1 extends AudioWorkletProcessor {
     out[0].set(l);
     if (out[1]) out[1].set(r);
     this.short = (this.short || 0) + (have < n ? 1 : 0);
+    // Never infer distortion solely from nonzero/near-clipping values; report
+    // underruns separately from signal saturation and browser worklet workload.
+    let peak = 0, nearClip = 0, nonzero = 0;
+    for(let i=0;i<n;i++) {
+      const a=l[i], b=r[i], pa=Math.abs(a), pb=Math.abs(b);
+      peak=Math.max(peak,pa,pb);
+      nearClip+=(pa>=0.98?1:0)+(pb>=0.98?1:0);
+      if(pa>1/32768 || pb>1/32768) nonzero++;
+      this.audioStats.sumSquares+=a*a+b*b;
+      const k=this.pcmWrite;
+      this.pcmL[k]=a; this.pcmR[k]=b;
+      this.pcmWrite=(k+1)%this.pcmCapacity;
+    }
+    this.pcmFilled=Math.min(this.pcmCapacity,this.pcmFilled+n);
+    const metrics=this.audioStats;
+    metrics.quanta++; metrics.requestedFrames+=n;
+    metrics.deliveredFrames+=have;
+    metrics.shortQuanta+=(have<n?1:0);
+    metrics.missingFrames+=n-have;
+    metrics.sampleCount+=2*n; metrics.nonzeroStereoFrames+=nonzero;
+    metrics.nearClipSamples+=nearClip; metrics.peak=Math.max(peak,metrics.peak);
+    const tookAudio=now()-t0;
+    const trace=metrics.quantumTrace;
+    if(trace.length===2048) trace.shift();
+    trace.push([x.fm1_ms(),have,n,+peak.toFixed(4),nearClip,nonzero,+tookAudio.toFixed(3)]);
     this.reportFrames += n;
     this.reportCalls++;
     if (this.reportFrames >= sampleRate / 30) {
