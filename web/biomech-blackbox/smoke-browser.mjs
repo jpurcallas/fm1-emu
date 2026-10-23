@@ -47,4 +47,20 @@ try {
      wav.readUInt16LE(34)!==16 || wav.readUInt32LE(40)!==wav.length-44)
     throw new Error("WAV export invalid or empty");
   console.log("WAV_EXPORT",{bytes:wav.length,frames:(wav.length-44)/4,rate:wav.readUInt32LE(24)});
+  // The user-approved eight-second recording MUST remain available, independent
+  // of the rolling six-second diagnostic export.
+  const [recording]=await Promise.all([
+    page.waitForEvent("download",{timeout:55000}),
+    page.locator("#record8").click()
+  ]);
+  const rec=readFileSync(await recording.path());
+  const frames=(rec.length-44)/4;
+  const sampleHz=rec.readUInt32LE(24);
+  console.log("RECORD8_WAV",{bytes:rec.length,frames,sampleHz,seconds:frames/sampleHz});
+  if(rec.toString("ascii",0,4)!=="RIFF" ||
+     rec.toString("ascii",8,12)!=="WAVE" ||
+     rec.readUInt32LE(40)!==rec.length-44 ||
+     frames!==Math.round(sampleHz*8) ||
+     (await page.locator("#record8").isDisabled()))
+    throw new Error("Eight-second recording failed or was not re-enabled");
 } finally {await browser.close();}
