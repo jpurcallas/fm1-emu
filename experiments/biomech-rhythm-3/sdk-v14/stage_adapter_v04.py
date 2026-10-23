@@ -51,6 +51,22 @@ if os.getenv("BR3_DISPLAY_CACHE_SHADOW")=="1":
  code=code[:init_at]+code[init_at:].replace(old2,new2,1)
  ui.write_text(code)
  print("BR3_DISPLAY_CACHE_SHADOW 21376 byte visual mirror now in .cache_ram_bss; DSP untouched")
+# Emulator-only AUDIO BOOT gate. In the integrated V14 guest, the BIOMECH
+# UI init ran, but fm1_audio_start's own initialized flag remained 0 even
+# after >8 simulated seconds; no DAC data was emitted. Call the protected
+# idempotent SDK audio starter explicitly from the end of the UI init,
+# after all engine/panel state is ready. No DSP/ALNK IRQ rewrite.
+if os.getenv("BR3_AUDIO_START_PROBE")=="1":
+ ui=ROOT/"app/biomech/biomech_sdk_port.c"
+ code=ui.read_text()
+ needle="    BR_STORE(&initialized,1U,__ATOMIC_RELEASE);\n}"
+ insert="    BR_STORE(&initialized,1U,__ATOMIC_RELEASE);\n    /* Emulator LAB: explicitly start V14 audio. The SDK audio_start\n       routine is idempotent and installs the original ALNK/DMA IRQ. */\n    (void)fm1_audio_start();\n}"
+ if code.count(needle)!=1:raise SystemExit("Missing exact BIOMECH init tail for audio start")
+ code=code.replace(needle,insert)
+ if '#include "fm1_audio.h"' not in code:
+  code=code.replace('#include "biomech_sdk_port.h"', '#include "biomech_sdk_port.h"\n#include "fm1_audio.h"')
+ ui.write_text(code)
+ print("BR3_AUDIO_START_PROBE enabled at complete UI init; original fm1_audio_start/IRQ, no DSP changes")
 # Reuse the exact, versioned six-track CPU0/CPU1 music and blackbox files in
 # this same repository. No placeholder DSP, fake panel, or substituted FX.
 engine=REPO/"experiments/biomech-rhythm-3/musical-3plus3"
