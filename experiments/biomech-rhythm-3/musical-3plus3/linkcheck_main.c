@@ -14,6 +14,11 @@
 BREngine br3_synth;
 BRCompactFXBuffers br3_effects;
 float br3_samples[256];
+/* Laboratory-only raw PCM export for literal byte comparisons on guest PI32.
+ * Not a new synth output path. Exact 32 blocks * 128 stereo samples. */
+#ifdef BR3_PCM_DUMP_LAB
+uint32_t br3_pcm_dump[32u*128u*2u] __attribute__((aligned(64)));
+#endif
 volatile uint32_t br3_test_status,br3_test_peakbits,br3_test_checksum,br3_test_rendered;
 void __attribute__((noreturn)) br3_cpu0_main(void){
   br3_test_status=0xB3300001u;
@@ -66,6 +71,9 @@ void __attribute__((noreturn)) br3_cpu0_main(void){
       if(-x>peak)peak=-x;
       union {float f;uint32_t u;}bits;
       bits.f=x;
+#ifdef BR3_PCM_DUMP_LAB
+      br3_pcm_dump[b*256u+i]=bits.u;
+#endif
       hash=(hash^bits.u)*16777619u;
     }
     br3_test_rendered=b+1u;
