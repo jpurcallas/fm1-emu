@@ -181,7 +181,12 @@ class Fm1 extends AudioWorkletProcessor {
       const memory = new Uint8Array(x.memory.buffer);
       let end = p;
       while (end < memory.length && end - p < 100000 && memory[end] !== 0) end++;
-      const state = JSON.parse(new TextDecoder().decode(memory.subarray(p, end)));
+      // TextDecoder is not exposed on all AudioWorkletGlobalScope implementations.
+      // The snapshot is ASCII JSON, so convert directly without relying on worker APIs.
+      let json = "";
+      for (let i = p; i < end; i += 8192)
+        json += String.fromCharCode(...memory.subarray(i, Math.min(i + 8192, end)));
+      const state = JSON.parse(json);
       const at = x.fm1_blackbox_ram_ptr(), len = x.fm1_blackbox_ram_len();
       const ram = new Uint8Array(x.memory.buffer, at, len).slice().buffer;
       this.port.postMessage({ type: "blackbox", seq: this.seq, note, error: extraError,
