@@ -64,6 +64,7 @@ class Fm1 extends AudioWorkletProcessor {
       } else if (this.x) {
         if (m.type === "blackbox-request") this.captureBlackbox("manual export");
         else if (m.type === "wav-request") this.captureWav();
+        else if (m.type === "record8-request") this.startRecord8();
         else if (m.type === "snapshot") {
           if (m.seq !== this.seq) return;
           this.snapshots.push({ ...m, started: now() });
@@ -124,6 +125,7 @@ class Fm1 extends AudioWorkletProcessor {
     this.pcmR = new Float32Array(this.pcmCapacity);
     this.pcmWrite = 0;
     this.pcmFilled = 0;
+    this.record8 = null;                 // from-button eight-second recording (separate from rolling WAV)
     this.audioStats = {
       source: "emulator PCM after DMA before browser output",
       sampleRate, quantumFrames: 128, requestedFrames: 0, deliveredFrames: 0,
@@ -208,6 +210,40 @@ class Fm1 extends AudioWorkletProcessor {
     this.port.postMessage({type:"wav",seq:this.seq,buffer:bytes,frames:count,sampleRate},[bytes]);
   }
 
+  startRecord8() {
+    if (this.record8) {
+      this.port.postMessage({type:"record8-status", seq:this.seq, status:"already-recording"});
+      return;
+    }
+    const target=Math.round(sampleRate*8);
+    this.record8={
+      left:new Float32Array(target),
+      right:new Float32Array(target),
+      frames:0, target
+    };
+    this.port.postMessage({type:"record8-status",seq:this.seq,status:"recording",seconds:8});
+  }
+
+  finishRecord8() {
+    const rec=this.record8;
+    if (!rec || rec.frames!==rec.target) return;
+    this.record8=null;
+    const count=rec.target;
+    const bytes=new ArrayBuffer(44+count*4), view=new DataView(bytes);
+    const tag=(off,value)=>{for(let k=0;k<4;k++)view.setUint8(off+k,value.charCodeAt(k));};
+    tag(0,"RIFF");view.setUint32(4,36+count*4,true);tag(8,"WAVE");
+    tag(12,"fmt ");view.setUint32(16,16,true);view.setUint16(20,1,true);
+    view.setUint16(22,2,true);view.setUint32(24,sampleRate,true);
+    view.setUint32(28,sampleRate*4,true);view.setUint16(32,4,true);
+    view.setUint16(34,16,true);tag(36,"data");view.setUint32(40,count*4,true);
+    for(let i=0;i<count;i++) {
+      const clip=v=>Math.max(-32768,Math.min(32767,Math.round(v*32768)));
+      view.setInt16(44+4*i,clip(rec.left[i]),true);
+      view.setInt16(46+4*i,clip(rec.right[i]),true);
+    }
+    this.port.postMessage({type:"record8-wav",seq:this.seq,buffer:bytes,frames:count,sampleRate},[bytes]);
+  }
+
   // Independent emulator snapshot: runs after CPU halt, not from guest interrupt handlers.
   // Capture the whole guest RAM in addition to the emulator's exact CPU/error state.
   captureBlackbox(note, extraError = "") {
@@ -275,6 +311,16 @@ class Fm1 extends AudioWorkletProcessor {
     const { l, r } = this.views;
     out[0].set(l);
     if (out[1]) out[1].set(r);
+    // Exact eight seconds starting at the user's RECORD press; do not
+    // replace or shorten the existing independently exported rolling six seconds.
+    if (this.record8) {
+      const rec=this.record8;
+      const take=Math.min(n,rec.target-rec.frames);
+      rec.left.set(l.subarray(0,take),rec.frames);
+      rec.right.set(r.subarray(0,take),rec.frames);
+      rec.frames+=take;
+      if (rec.frames===rec.target) this.finishRecord8();
+    }
     this.short = (this.short || 0) + (have < n ? 1 : 0);
     // Never infer distortion solely from nonzero/near-clipping values; report
     // underruns separately from signal saturation and browser worklet workload.
