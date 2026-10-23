@@ -88,6 +88,12 @@ identitycode+='const unsigned char fm1_update_identity[27]="'+product.group(1)+'
 (GEN/"build_identity.c").write_text(identitycode)
 run([BIN/"clang",*flags,"-c",GEN/"build_identity.c","-o",OBJ/"build_identity.o"])
 objs.append(OBJ/"build_identity.o")
+if BR3_FULL:
+ diag=pathlib.Path(__file__).resolve().parent/"br3_cpu1_no_owner.c"
+ out=OBJ/"br3_cpu1_no_owner.o"
+ run([BIN/"clang",*flags,"-c",diag,"-o",out])
+ objs.append(out)
+ note("BR3_DIAG_CPU1_LEASE absent by design: verified safe serial probe only")
 if BR3_LINK:
  note("LINK EXPERIMENT: COMPILE REAL BR3 SIX-TRACK DSP + PRIVATE CPU1, NO UI OR DMA YET")
  for name in ("biomech.c","br3_blackbox.c","br3_cpu1_runtime.c","br3_cpu1_entry.S"):
