@@ -2,7 +2,7 @@
 // JIT OFF, direct TRS MIDI UART bytes into the real emulated firmware.
 // Do not claim CPU1 ownership, real-time DMA success or physical hardware.
 import {readFileSync,writeFileSync} from "node:fs";
-const [wasmPath,stockPath,br3Path,outDir,nmPath,bootNotePath]=process.argv.slice(2);
+const [wasmPath,stockPath,br3Path,outDir,nmPath,bootNotePath,queuedMidiPath]=process.argv.slice(2);
 if(!outDir)throw Error("usage: node smoke_fwsc_musical.mjs emulator.wasm stock.fwsc br3.fwsc outDir");
 const wasm=readFileSync(wasmPath);
 const framesPerBlock=128;
@@ -116,5 +116,6 @@ const stock=await run("stock-midi",stockPath);
 const br3=await run("biomech3-midi",br3Path);
 const keys=await run("biomech3-keys",br3Path,"keys");
 const tone=bootNotePath?await run("biomech3-direct-note",bootNotePath,"none"):null;
-console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_keyboard_pcm:keys.nonzero_stereo_frames,br3_keyboard_peak:keys.peak,direct_note_pcm:tone?.nonzero_stereo_frames??null,direct_note_peak:tone?.peak??null,br3_fwsc_boot:true}));
+const queued=queuedMidiPath?await run("biomech3-queued-midi",queuedMidiPath,"none"):null;
+console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_keyboard_pcm:keys.nonzero_stereo_frames,br3_keyboard_peak:keys.peak,direct_note_pcm:tone?.nonzero_stereo_frames??null,direct_note_peak:tone?.peak??null,queued_midi_pcm:queued?.nonzero_stereo_frames??null,queued_midi_peak:queued?.peak??null,br3_fwsc_boot:true}));
 console.log("STAGE: real firmware booted; MIDI was injected. Nonzero PCM and musical behavior remain separately evidenced.");
