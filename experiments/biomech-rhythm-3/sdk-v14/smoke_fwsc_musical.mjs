@@ -25,7 +25,7 @@ function guestDiagnostic(x,symbolMap=nmPath){
   if(symbolMap){
     for(const line of readFileSync(symbolMap,"utf8").split("\n")){
       const match=line.trim().match(/^([0-9a-fA-F]+)\s+[a-zA-Z]\s+([^\s]+)$/);
-      if(match && /^(runtime|initialized|midi_head|midi_tail|midi_dropped|br3_blackbox|br3_completed_jobs|br3_cpu1_stage|br3_cpu0_stage|biomech_sdk_audio|fm1_audio_start|br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source|br3_midi_last_length)/.test(match[2])){
+      if(match && /^(runtime|initialized|midi_head|midi_tail|midi_dropped|br3_blackbox|br3_completed_jobs|br3_cpu1_stage|br3_cpu0_stage|biomech_sdk_audio|fm1_audio_start|br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source|br3_midi_last_length|br3_factory_reads)/.test(match[2])){
         const addr=parseInt(match[1],16),offs=addr-0x01c00000;
         if(offs>=0&&offs+16<=len){
           symbols[match[2]]={address:"0x"+addr.toString(16),u32:[0,4,8,12].map(j=>dv.getUint32(offs+j,true))};
