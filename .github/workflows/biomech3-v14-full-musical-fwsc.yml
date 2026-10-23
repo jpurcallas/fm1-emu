@@ -1,7 +1,7 @@
-name: BIOMECH3 V14 full UI MIDI DMA musical FWSC candidate
+name: BIOMECH3 V14 MIDI blackbox stimulus (NO INSTALL)
 on:
   push:
-    branches: [experiment/biomech-rhythm-3-dualcore-3plus3-20261023]
+    branches: [experiment/biomech3-v14-musical-blackbox-20261023]
     paths:
       - 'experiments/biomech-rhythm-3/sdk-v14/**'
       - '.github/workflows/biomech3-v14-full-musical-fwsc.yml'
@@ -36,6 +36,21 @@ jobs:
         run: |
           set -euo pipefail
           BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Print musical control mapping from pinned original adapter
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('/tmp/fm1-v14/app/biomech/biomech_sdk_port.c')
+          rows=p.read_text().splitlines()
+          sel=[]
+          for i,line in enumerate(rows):
+              if re.search(r'PLAY|STOP|TRANSPORT|MIDI|KEY_|key_id|case 3[0-9]|case 4[0-9]|br_start\(|br_stop\(|br_midi_byte|biomech_sdk_key|biomech_sdk_midi',line,re.I):
+                  sel.extend(range(max(0,i-1),min(len(rows),i+2)))
+          for i in sorted(set(sel))[:190]:
+              print('BR3_ADAPTER_CONTROL',i+1,rows[i][:190])
+          PY
       - name: Compile and link ALL BIOMECH musical, UI and DMA sources
         shell: bash
         run: |
@@ -107,6 +122,16 @@ jobs:
             /tmp/biomech3-fm1-web.wasm \
             /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
+      - name: Stimulate real V14 FWSC with MIDI and inspect PCM WAV BLACK BOX
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/br3-v14-full/musical
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
+            /tmp/biomech3-fm1-web.wasm \
+            /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-full/musical
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -118,6 +143,8 @@ jobs:
             /tmp/br3-v14-full/sdk.elf
             /tmp/br3-v14-full/sdk.map
             /tmp/br3-v14-full/sdk.nm
+            /tmp/br3-v14-full/musical/*.json
+            /tmp/br3-v14-full/musical/*.wav
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-full-8/build.log
             /tmp/br3-v14-full-8/sdk.elf
