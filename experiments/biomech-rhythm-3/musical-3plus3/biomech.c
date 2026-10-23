@@ -597,6 +597,11 @@ void br3_set_executor(const BR3Executor *ops){
 typedef struct {
   BREngine *engine;
   BRPlayingVoice cpu1_shadow[BR_POLYPHONY];
+#ifdef BR3_ACTIVE_SLOTS_LAB
+  /* Canonical ascending slot order, fully compatible with 64-voice stealing. */
+  uint8_t live_slots[BR_POLYPHONY];
+  uint32_t live_count;
+#endif
   uint8_t ready[BR3_SLICE_FRAMES][BR_POLYPHONY];
   float env[BR3_SLICE_FRAMES][BR_POLYPHONY];
   float noise[BR3_SLICE_FRAMES][BR_POLYPHONY];
@@ -604,6 +609,13 @@ typedef struct {
   uint32_t frames;
 } BR3Segment;
 static BR3Segment br3_seg;
+#ifdef BR3_ACTIVE_SLOTS_LAB
+#define BR3_LIVE_BOUND(s) ((s)->live_count)
+#define BR3_LIVE_IDX(s,j) ((s)->live_slots[(j)])
+#else
+#define BR3_LIVE_BOUND(s) BR_POLYPHONY
+#define BR3_LIVE_IDX(s,j) (j)
+#endif
 /* Experimental guest hardware timer profiling, off in ordinary builds.
  * Separate per-core slots; no mixed writes or owner overlap.
  * Totals are intervals in TIMER4 ticks, not independent CPU instructions.
@@ -625,7 +637,8 @@ static void BR_RAMCODE br3_upper_segment(void *data){
   BR3Segment *s=(BR3Segment*)data;
   BREngine *e=s->engine;
   for(uint32_t n=0;n<s->frames;n++){
-    for(int i=0;i<BR_POLYPHONY;i++){
+    for(uint32_t slot_j=0;slot_j<BR3_LIVE_BOUND(s);slot_j++){
+      int i=BR3_LIVE_IDX(s,slot_j);
       BRPlayingVoice *q=&s->cpu1_shadow[i];
       if(s->ready[n][i] && BR3_ON_CPU1(q->track))
         s->sample[n][i]=br_voice_post(NULL,q,&e->project.track[q->track],s->env[n][i],s->noise[n][i]);
@@ -701,8 +714,17 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     BR3_PROF_START(preflight_t0);
     BRPlayingVoice simulated[BR_POLYPHONY];
     memcpy(simulated,e->active,sizeof(simulated));
+#ifdef BR3_ACTIVE_SLOTS_LAB
+    /* No new note can be inserted mid-slice: event/roll/step boundaries
+       were already used to limit span. Include only active slots, in their
+       exact original order, even if the envelope dies within the slice. */
+    s->live_count=0;
+    for(int i=0;i<BR_POLYPHONY;i++)
+      if(simulated[i].active)s->live_slots[s->live_count++]=(uint8_t)i;
+#endif
     for(uint32_t n=0;n<span;n++){
-      for(int i=0;i<BR_POLYPHONY;i++){
+      for(uint32_t slot_j=0;slot_j<BR3_LIVE_BOUND(s);slot_j++){
+      int i=BR3_LIVE_IDX(s,slot_j);
         BRPlayingVoice *q=&simulated[i];
         s->ready[n][i]=0;s->sample[n][i]=0;
         if(!q->active)continue;
@@ -728,7 +750,8 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     if(!started)br3_upper_segment(s);
     BR3_PROF_START(lower_t0);
     for(uint32_t n=0;n<span;n++){
-      for(int i=0;i<BR_POLYPHONY;i++){
+      for(uint32_t slot_j=0;slot_j<BR3_LIVE_BOUND(s);slot_j++){
+      int i=BR3_LIVE_IDX(s,slot_j);
         BRPlayingVoice *q=&e->active[i];
         if(s->ready[n][i] && !BR3_ON_CPU1(q->track))
           s->sample[n][i]=br_voice_post(NULL,q,&e->project.track[q->track],s->env[n][i],s->noise[n][i]);
@@ -759,7 +782,8 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     }
     for(uint32_t n=0;n<span;n++){
       float dry=0,ds=0,rv=0,rs=0;
-      for(int i=0;i<BR_POLYPHONY;i++){
+      for(uint32_t slot_j=0;slot_j<BR3_LIVE_BOUND(s);slot_j++){
+      int i=BR3_LIVE_IDX(s,slot_j);
         if(!s->ready[n][i])continue;
         const BRTrack *v=&e->project.track[simulated[i].track];
         float value=s->sample[n][i];
