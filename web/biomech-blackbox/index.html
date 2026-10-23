@@ -54,8 +54,10 @@
       <section aria-label="BIOMECH BLACK BOX" style="padding:12px; margin:8px 0; border:2px solid currentColor; border-radius:8px;">
         <b>BIOMECH 2 — BLACK BOX (web emulator)</b>
         <button type="button" id="bbexport" style="margin:4px 8px; padding:8px;">Export BLACK BOX (.json)</button>
+        <button type="button" id="wavexport" style="margin:4px 8px; padding:8px;">Export last 6s WAV (.wav)</button>
+        <span id="wavstate" role="status">Play a sequence; WAV captures last 6 seconds of emulator audio.</span>
         <span id="bbstate" role="status">Press Start to arm CPU0/CPU1 and RAM capture.</span>
-        <p style="font-size:12px;margin-top:6px">If CPU halted appears, click Export BLACK BOX and attach the JSON. It includes CPU0/CPU1 PC, registers, halt reason and 1 MiB guest RAM.</p>
+        <p style="font-size:12px;margin-top:6px">If CPU halted appears, click Export BLACK BOX and attach the JSON. It includes CPU0/CPU1 PC, registers, halt reason, PCM underruns/peaks and 1 MiB guest RAM. Export WAV separately to compare the audible waveform at 100 vs 200 MHz.</p>
       </section>
       <p class="rotate">Turn the phone sideways for a bigger synth.</p>
       <p class="hint">
