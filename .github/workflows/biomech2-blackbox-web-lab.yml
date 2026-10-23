@@ -1,0 +1,67 @@
+name: BIOMECH2 BLACK BOX web lab (no master changes)
+on:
+  push:
+    branches:
+      - experiment/biomech2-blackbox-export-20261023
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: biomech2-blackbox-web-lab
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: lab
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          path: public
+          fetch-depth: 1
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Javascript regression tests
+        working-directory: lab
+        run: node --test web/main.test.mjs web/worklet.test.mjs web/fwsc.test.mjs
+      - name: Compile lab emulator and verify BLACK BOX exports
+        working-directory: lab
+        run: |
+          tools/build_site.sh "$GITHUB_WORKSPACE/_site/biomech-blackbox"
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const x=WebAssembly.Module.exports(new WebAssembly.Module(readFileSync(process.env.GITHUB_WORKSPACE+"/_site/biomech-blackbox/fm1_web.wasm"))).map(v=>v.name); for (const k of ["fm1_blackbox_cpu_json","fm1_halt_reason","fm1_guest_ram_ptr","fm1_guest_ram_len"]) if (!x.includes(k)) throw Error("missing "+k);'
+      - name: Keep the existing public emulator unchanged at site root
+        working-directory: public
+        run: tools/build_site.sh "$GITHUB_WORKSPACE/_site_public"
+      - name: Merge public root with separate diagnostic subdirectory
+        run: |
+          cp -a _site_public/. _site/
+          touch _site/.nojekyll
+          test -s _site/index.html
+          test -s _site/biomech-blackbox/index.html
+          test -s _site/biomech-blackbox/fm1_web.wasm
+      - name: Upload testable web emulator as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIOMECH2-BLACKBOX-web-emulator
+          path: _site/biomech-blackbox
+          retention-days: 30
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy lab under /biomech-blackbox without rewriting master
+        id: deploy
+        uses: actions/deploy-pages@v4
