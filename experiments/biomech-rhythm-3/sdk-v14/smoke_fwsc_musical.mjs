@@ -44,10 +44,10 @@ function guestDiagnostic(x){
     events_cpu1:dv.getUint32(found+20,true),
     jobs_sent:dv.getUint32(found+32,true),jobs_done:dv.getUint32(found+36,true),
     fallback:dv.getUint32(found+48,true),dma_ok:dv.getUint32(found+52,true),
-    dma_missed:dv.getUint32(found+56,true),last_error:dv.getUint32(found+108,true)}:null;
+    dma_missed:dv.getUint32(found+56,true),last_error:dv.getUint32(found+92,true)}:null;
   return {memory_bytes:len,br3_marker:marker,symbols};
 }
-async function run(label,path){
+async function run(label,path,mode='midi'){
  const {instance}=await WebAssembly.instantiate(wasm,{env:{fm1_jit_compile:()=>0}});
  const x=instance.exports;x.fm1_jit(0,0);
  const file=readFileSync(path), p=x.fm1_alloc(file.length);
@@ -62,11 +62,21 @@ async function run(label,path){
  const keys=[36,38,42,46,49,51];
  let k=0;
  for(;k<800;k++){
-   if(k>=120&&k<120+6*92&&(k-120)%92===0){
+   if(mode==='keys'){
+     // Two physical controls, no synthetic DSP notes: real keyboard matrix id0
+     // (key F3) and transport PLAY (FM1 button id 39, verified from UI map).
+     if(k===120){x.fm1_key(39,1);events.push({block:k,key:39,down:1})}
+     if(k===125){x.fm1_key(39,0);events.push({block:k,key:39,down:0})}
+     if(k===200){x.fm1_key(0,1);events.push({block:k,key:0,down:1})}
+     if(k===310){x.fm1_key(0,0);events.push({block:k,key:0,down:0})}
+     if(k===390){x.fm1_key(3,1);events.push({block:k,key:3,down:1})}
+     if(k===500){x.fm1_key(3,0);events.push({block:k,key:3,down:0})}
+   }
+   if(mode==='midi'&&k>=120&&k<120+6*92&&(k-120)%92===0){
      const note=keys[Math.floor((k-120)/92)];
      midi(0x90,note,110);midi(0x99,note,110);
    }
-   if(k>=176&&k<176+6*92&&(k-176)%92===0){
+   if(mode==='midi'&&k>=176&&k<176+6*92&&(k-176)%92===0){
      const note=keys[Math.floor((k-176)/92)];
      midi(0x80,note,0);midi(0x89,note,0);
    }
@@ -94,7 +104,7 @@ async function run(label,path){
    nonzero_stereo_frames:nonzero,peak:maxAbs,halted,reason:bb.reason,
    emulated_ms:bb.ms,cpu0_insn:bb.cpu0?.insn_count,cpu1_insn:bb.cpu1?.insn_count,
    lcd_revision:x.fm1_lcd_revision(),control_events:bb.control_events?.length??0,
-   midi_events_sent:events.length,midi_events:events,phase_samples:phases,
+   stimulus_mode:mode,events_sent:events.length,input_events:events,phase_samples:phases,
    guest_state:label==="biomech3-midi"?guestDiagnostic(x):undefined};
  writeFileSync(outDir+"/"+label+".json",JSON.stringify(result,null,2));
  writeFileSync(outDir+"/"+label+".wav",encodeWav(L,R));
@@ -104,5 +114,6 @@ async function run(label,path){
 }
 const stock=await run("stock-midi",stockPath);
 const br3=await run("biomech3-midi",br3Path);
-console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_fwsc_boot:true}));
+const keys=await run("biomech3-keys",br3Path,"keys");
+console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_keyboard_pcm:keys.nonzero_stereo_frames,br3_keyboard_peak:keys.peak,br3_fwsc_boot:true}));
 console.log("STAGE: real firmware booted; MIDI was injected. Nonzero PCM and musical behavior remain separately evidenced.");
