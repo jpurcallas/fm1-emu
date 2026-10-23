@@ -39,6 +39,8 @@ const ctx = canvas.getContext("2d");
 const status = document.getElementById("status");
 const bbexport = document.getElementById("bbexport");
 const wavexport = document.getElementById("wavexport");
+const record8 = document.getElementById("record8");
+const record8state = document.getElementById("record8state");
 const wavstate = document.getElementById("wavstate");
 const bbstate = document.getElementById("bbstate");
 let lastBlackbox = null, blackboxRequested = false;
@@ -83,6 +85,15 @@ bbexport.addEventListener("click", () => {
   bbstate.textContent = "Capturing CPU0, CPU1, RAM and PCM statistics...";
   if (node) node.port.postMessage({ type: "blackbox-request", seq: bootSeq });
   else bbstate.textContent = "Press Start first, then export.";
+});
+record8.addEventListener("click", () => {
+  if (!node || !running) {
+    record8state.textContent = "Press Start and play the pattern first.";
+    return;
+  }
+  record8.disabled = true;
+  record8state.textContent = "Recording the next eight seconds of emulator audio...";
+  node.port.postMessage({type:"record8-request",seq:bootSeq});
 });
 wavexport.addEventListener("click", () => {
   if (node) {
@@ -921,6 +932,25 @@ async function startAudio() {
 // what the audio thread sends: the screen and LEDs with its timing, boot and error news
 function onWorklet(e) {
   const m = e.data;
+  if (m.type === "record8-status") {
+    if (m.seq !== bootSeq) return;
+    record8state.textContent = m.status === "recording"
+      ? "Recording eight seconds... Keep the pattern playing."
+      : "Already recording; wait for WAV download.";
+    return;
+  }
+  if (m.type === "record8-wav") {
+    if (m.seq !== bootSeq) return;
+    const blob = new Blob([m.buffer],{type:"audio/wav"});
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;
+    a.download="BIOMECH2_RECORD8_"+mhz+"MHz_"+new Date().toISOString().replace(/[:.]/g,"-")+".wav";
+    document.body.append(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    record8.disabled=false;
+    record8state.textContent="Recorded "+(m.frames/m.sampleRate).toFixed(2)+" s. WAV downloaded.";
+    return;
+  }
   if (m.type === "wav") {
     if (m.error) {wavstate.textContent=m.error;return;}
     const blob=new Blob([m.buffer],{type:"audio/wav"});
@@ -977,6 +1007,8 @@ function onWorklet(e) {
     if (!session || !waiter) return;
     running = session;
     lastBlackbox = null; blackboxRequested = false;
+    record8.disabled=false;
+    record8state.textContent="Click Record 8 seconds WAV to capture the NEXT eight seconds.";
     wavstate.textContent = "Play a sequence; WAV captures last 6 seconds of emulator audio.";
     bbstate.textContent = "Capture armed from boot. Click Export BLACK BOX at any time.";
     for (const key of sessions.keys()) if (key !== m.seq) sessions.delete(key);
