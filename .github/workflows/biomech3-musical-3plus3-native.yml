@@ -103,6 +103,9 @@ jobs:
           curl -fLsS --retry 2 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o "$O/fm1_web.wasm"
           node experiments/biomech-rhythm-3/musical-3plus3/smoke_native.mjs "$O/br3_music.bin" "$O/br3_music.nm" "$O/fm1_web.wasm"
           node experiments/biomech-rhythm-3/musical-3plus3/compare_native.mjs "$O/serial_music.bin" "$O/serial_music.nm" "$O/br3_music.bin" "$O/br3_music.nm" "$O/fm1_web.wasm"
+      - name: Verify alternate guest PI32 16/8 frame slices against serial PCM
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_batch_pi32.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
