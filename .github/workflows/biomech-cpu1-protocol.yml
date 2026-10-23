@@ -1,9 +1,8 @@
 name: BIOMECH CPU1 read-only gate (NO MERGE)
 on:
   pull_request:
-    paths:
-      - 'crates/fm1-web/src/lib.rs'
-      - '.github/workflows/biomech-cpu1-protocol.yml'
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
