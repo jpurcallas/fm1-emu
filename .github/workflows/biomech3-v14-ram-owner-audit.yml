@@ -143,7 +143,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/br3-fx-owner
-          /tmp/jieli/pi32v2/bin/nm -A --print-size /tmp/br3-v14-$BR3_ROUTE/obj/*.o > /tmp/br3-fx-owner/app_objects.nm
+          /tmp/jieli/pi32v2/bin/nm -A --print-size /tmp/br3-v14-$BR3_ROUTE/obj/*.o > /tmp/br3-fx-owner/app_objects.nm 2>/tmp/br3-fx-owner/lto-nm-errors.txt || true
           /tmp/jieli/pi32v2/bin/nm -A --print-size /tmp/fm1-v14/sdk/lib/libfm1_engine.a > /tmp/br3-fx-owner/sdk_archive.nm
           /tmp/jieli/pi32v2/bin/ar x /tmp/fm1-v14/sdk/lib/libfm1_engine.a --output /tmp/br3-fx-owner || true
           if [ ! -f /tmp/br3-fx-owner/engine_startup.S.o ]; then
@@ -162,11 +162,18 @@ jobs:
               hits=[l for l in lines+sdk if l.split()[-1:]==[sym]]
               for line in hits[:16]:print('BR3_EXACT_OWNER',sym,line[:430])
               if not hits:print('BR3_EXACT_OWNER_MISSING',sym)
+          mapping=Path('/tmp/br3-v14-'+__import__('os').environ['BR3_ROUTE']+'/sdk.map').read_text(errors='replace').splitlines()
+          for sym in ('effects','fm1_fx_states','runtime','br3_seg','factory_raw'):
+              for i,line in enumerate(mapping):
+                  if line.strip().endswith(' '+sym):
+                      print('BR3_MAP_OWNER_CONTEXT',sym,' '.join(mapping[max(0,i-4):min(len(mapping),i+3)])[:950])
+                      break
           rel=(root/'sdk_fx_relocs.txt').read_text(errors='replace').splitlines()
           for i,line in enumerate(rel):
               if 'fm1_fx_states' in line:
                   print('BR3_SDK_FX_RELOC',i+1,' '.join(rel[max(0,i-2):min(len(rel),i+3)])[:700])
           print('BR3_SDK_FX_RELOC_MATCHES',sum('fm1_fx_states' in x for x in rel))
+          print('BR3_LTO_NM_ERRORS',len((root/'lto-nm-errors.txt').read_text().splitlines()))
           print('BR3_SDK_DISASM_ERRORS',(root/'disasm_errors.txt').read_text()[:550])
           PY
       - uses: actions/upload-artifact@v4
@@ -179,6 +186,7 @@ jobs:
             /tmp/br3-v14-${{ matrix.route }}/sdk.map
             /tmp/br3-fx-owner/*.nm
             /tmp/br3-fx-owner/*.txt
+            /tmp/br3-fx-owner/*.o
             /tmp/br3-v14-${{ matrix.route }}/nm-size-errors.txt
             /tmp/br3-v14-${{ matrix.route }}/sdk.nm
             /tmp/br3-v14-${{ matrix.route }}/build.log
