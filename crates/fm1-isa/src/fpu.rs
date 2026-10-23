@@ -43,6 +43,14 @@ pub static FPU: &[IsaEntry] = &[
     e!("fpu_ftou", "R = ftou(R) (trunc)", 0x00ff_ffff, 0x005f_e53f),
     e!("fpu_itof", "R = itof(R)", 0x00ff_ffff, 0x008f_e53f),
     e!("fpu_utof", "R = utof(R)", 0x00ff_ffff, 0x009f_e53f),
+    // JieLi PI32v2 clang 4.0.1 -mcpu=r3 emits:
+    //   __builtin_truncf(x) -> 3f e5 df 00
+    //   __builtin_ceilf(x)  -> 3f e5 ef 00
+    //   __builtin_floorf(x) -> 3f e5 ff 00
+    // In BIOMECH v0.2, 3f e5 ff 01 = r0 = ftof(r1) (floor).
+    e!("fpu_ftof_trunc", "R = ftof(R) (trunc)", 0x00ff_ffff, 0x00df_e53f),
+    e!("fpu_ftof_ceil",  "R = ftof(R) (ceil)",  0x00ff_ffff, 0x00ef_e53f),
+    e!("fpu_ftof_floor", "R = ftof(R) (floor)", 0x00ff_ffff, 0x00ff_e53f),
     e!("iff_r_eq_r_goto_i", "iff (R == R) goto #i", 0x0800_ff70, 0x0800_e800),
     e!("iff_r_uge_r_goto_i", "iff (R u>= R) goto #i", 0x0800_ff70, 0x0800_e900),
     e!("iff_r_ugt_r_goto_i", "iff (R u> R) goto #i", 0x0800_ff70, 0x0800_ec00),
@@ -63,6 +71,9 @@ pub static FPU: &[IsaEntry] = &[
     e!("fpu_ftou_p", "R = ftou(R) (trunc) #", 0x00ff_ffff, 0x005f_f53f),
     e!("fpu_itof_p", "R = itof(R) #", 0x00ff_ffff, 0x008f_f53f),
     e!("fpu_utof_p", "R = utof(R) #", 0x00ff_ffff, 0x009f_f53f),
+    e!("fpu_ftof_trunc_p", "R = ftof(R) (trunc) #", 0x00ff_ffff, 0x00df_f53f),
+    e!("fpu_ftof_ceil_p",  "R = ftof(R) (ceil) #",  0x00ff_ffff, 0x00ef_f53f),
+    e!("fpu_ftof_floor_p", "R = ftof(R) (floor) #", 0x00ff_ffff, 0x00ff_f53f),
     e!("iff_r_eq_r_goto_i_l6", "iff (R == R) goto #i", 0x0080_fffe, 0x0080_ff40, 6),
     e!("iff_r_uge_r_goto_i_l6", "iff (R u>= R) goto #i", 0x0080_fffe, 0x0080_ff42, 6),
     e!("iff_r_ugt_r_goto_i_l6", "iff (R u> R) goto #i", 0x0080_fffe, 0x0080_ff48, 6),
