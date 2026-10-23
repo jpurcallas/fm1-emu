@@ -1,0 +1,54 @@
+name: BIOMECH3 native V14 SDK baseline linkage (NO FWSC)
+on:
+  push:
+    branches: [experiment/biomech-rhythm-3-dualcore-3plus3-20261023]
+    paths:
+      - 'experiments/biomech-rhythm-3/sdk-v14/**'
+      - '.github/workflows/biomech3-v14-sdk-base-link.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v14-base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin author-identical V14 and JieLi compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+          /tmp/jieli/pi32v2/bin/clang --version | head -n 1
+      - name: Verify exact original SDK 65-file manifest and native PI32v2 link
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14
+          file /tmp/br3-v14/sdk.elf
+          sha256sum /tmp/br3-v14/sdk.elf
+      - name: Inspect ELF RAM budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14/sdk.elf > /tmp/br3-v14/sdk.nm
+          grep -E '_MALLOC_SIZE|_HEAP|_data|_bss|cpu1' /tmp/br3-v14/sdk.nm | tail -n 35 || true
+          echo 'BASELINE ONLY, NO BIOMECH 3 DSP, NO FWSC, DO NOT INSTALL.'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_V14_ORIGINAL_SDK_LINK_ONLY_NO_INSTALL
+          path: |
+            /tmp/br3-v14/build.log
+            /tmp/br3-v14/sdk.elf
+            /tmp/br3-v14/sdk.map
+            /tmp/br3-v14/sdk.nm
+          if-no-files-found: warn
+          retention-days: 7
