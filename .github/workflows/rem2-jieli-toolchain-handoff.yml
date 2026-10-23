@@ -1,0 +1,33 @@
+name: REM2 isolated verified JieLi toolchain handoff (NO MERGE)
+on:
+  push:
+    branches: [experiment/reminiscent2-cpu1-ownership-gate-20261023]
+    paths:
+      - '.github/workflows/rem2-jieli-toolchain-handoff.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover author-verified PI32v2 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 180 https://pkgman.jieliapp.com/s/linux-toolchain -o /tmp/jieli.tar.xz
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+          /tmp/jieli/pi32v2/bin/clang --version
+          printf '#include <stdint.h>\nuint32_t rem2_native_toolchain_probe(uint32_t x){return x*3u+7u;}\n' >/tmp/rem2_toolchain_probe.c
+          /tmp/jieli/pi32v2/bin/clang -target pi32v2 -I/tmp/jieli/pi32v2/include -mcpu=r3 -O2 -c /tmp/rem2_toolchain_probe.c -o /tmp/rem2_toolchain_probe.o
+          /tmp/jieli/pi32v2/bin/llvm-readelf -h /tmp/rem2_toolchain_probe.o || file /tmp/rem2_toolchain_probe.o
+      - name: Upload checked compiler for isolated native build
+        uses: actions/upload-artifact@v4
+        with:
+          name: REM2-JIELI-PI32V2-VERIFIED-COMPILER-LOCAL-BUILD
+          path: /tmp/jieli.tar.xz
+          retention-days: 1
