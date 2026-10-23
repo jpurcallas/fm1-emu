@@ -21,6 +21,12 @@ pub struct Core1Bus<'a> {
 }
 
 impl Bus for Core1Bus<'_> {
+    fn trace_instruction_pc(&mut self, pc: u32) {
+        self.soc.biomech_coord_pc[1] = pc;
+    }
+    fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.soc.record_biomech_coord(1, pc, addr, width, value);
+    }
     fn read8(&mut self, a: u32) -> u8 {
         self.soc.core1_read8(a)
     }
@@ -34,13 +40,19 @@ impl Bus for Core1Bus<'_> {
         self.soc.read32(a)
     }
     fn write8(&mut self, a: u32, v: u8) {
-        self.soc.write8(a, v)
+        self.soc.biomech_coord_core = 1;
+        self.soc.write8(a, v);
+        self.soc.biomech_coord_core = 0;
     }
     fn write16(&mut self, a: u32, v: u16) {
-        self.soc.write16(a, v)
+        self.soc.biomech_coord_core = 1;
+        self.soc.write16(a, v);
+        self.soc.biomech_coord_core = 0;
     }
     fn write32(&mut self, a: u32, v: u32) {
-        self.soc.write32(a, v)
+        self.soc.biomech_coord_core = 1;
+        self.soc.write32(a, v);
+        self.soc.biomech_coord_core = 0;
     }
     fn tick(&mut self) -> bool {
         self.budget = self.budget.saturating_sub(1);

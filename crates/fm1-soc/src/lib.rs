@@ -161,6 +161,10 @@ impl BiomechCpu0Profile {
     }
 }
 
+pub struct CoordStoreEvent {
+    pub cycle: u64, pub core: u8, pub pc: u32, pub addr: u32,
+    pub width: u8, pub value: u32,
+}
 pub struct Soc {
     pub board: Board,
     /// The BT baseband's window base (0x2FC44), as the firmware set it.
@@ -181,6 +185,10 @@ pub struct Soc {
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
+    pub biomech_coord_watch: bool,
+    pub biomech_coord_events: Vec<CoordStoreEvent>,
+    pub biomech_coord_pc: [u32; 2],
+    pub biomech_coord_core: u8,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -223,6 +231,18 @@ fn dbg_line(addr: u32) -> &'static str {
 }
 
 impl Soc {
+    pub fn record_biomech_coord(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32) {
+        const WORDS: [u32; 6] = [0x01c574c0, 0x01c574e0, 0x01c57500,
+            0x01c5b290, 0x01c5b2a8, 0x01c5b2ac];
+        if !self.biomech_coord_watch || self.biomech_coord_events.len() >= 1024 {
+            return;
+        }
+        if WORDS.iter().any(|a| addr <= *a + 3 && addr.saturating_add(width as u32) > *a) {
+            self.biomech_coord_events.push(CoordStoreEvent {
+                cycle: self.periph.cycles, core, pc, addr, width, value
+            });
+        }
+    }
     /// After an erase or page program: the XIP window shows the flash chip, also where the
     /// window's contents come from the package (`xip`, the app area as installed). A booted
     /// package's window reaches flash 0x93000, and April OS writes its samples from 0x74000
@@ -255,6 +275,10 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             biomech_cpu0_profile: None,
+            biomech_coord_watch: false,
+            biomech_coord_events: Vec::new(),
+            biomech_coord_pc: [0; 2],
+            biomech_coord_core: 0,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
@@ -519,6 +543,12 @@ impl Soc {
 }
 
 impl Bus for Soc {
+    fn trace_instruction_pc(&mut self, pc: u32) {
+        self.biomech_coord_pc[0] = pc;
+    }
+    fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.record_biomech_coord(0, pc, addr, width, value);
+    }
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
             self.periph.next_due = 0;
@@ -619,6 +649,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write8(&mut self, addr: u32, value: u8) {
+        self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 1, value as u32);
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
             return self.ram.write8(o, value);
@@ -628,6 +659,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write16(&mut self, addr: u32, value: u16) {
+        self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 2, value as u32);
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
         if o + 2 <= self.ram.len() && addr & 1 == 0 {
@@ -638,6 +670,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write32(&mut self, addr: u32, value: u32) {
+        self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, value);
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
             return self.ram.write32(o as u32, value);
