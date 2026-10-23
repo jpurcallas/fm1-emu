@@ -107,21 +107,35 @@ impl Machine {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| {
+        // Counterfactual: after original CPU1 boot, temporarily omit CPU1
+        // slices. No changes to guest firmware or memory; no production use.
+        let freeze = unsafe { CPU1_FREEZE_AFTER_MS != 0 }
+            && soc.periph.ms() >= unsafe { CPU1_FREEZE_AFTER_MS };
+        let mut cpu0_slice = |soc: &mut Soc, k: u32| {
             let result = machine::run_blocks(cpu, soc, k, pending_tick);
-            if result.is_ok() {
-                soc.observe_writer(0, cpu.pc, cpu.irq_levels.len() as u32);
-            }
+            if result.is_ok() { soc.observe_writer(0, cpu.pc, cpu.irq_levels.len() as u32); }
             result
-        }).is_err() {
-            self.halted = true;
-        }
+        };
+        let outcome = if freeze && cpu1.is_some() {
+            cpu0_slice(soc, n)
+        } else {
+            machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, cpu0_slice)
+        };
+        if outcome.is_err() { self.halted = true; }
     }
 }
 
 static mut M: Option<Machine> = None;
 static mut JIT: bool = false;
 static mut JIT_PER_RENDER: u32 = 0;
+static mut CPU1_FREEZE_AFTER_MS: u32 = 0;
+#[no_mangle]
+pub extern "C" fn fm1_diag_freeze_cpu1_after(ms: u32) { unsafe { CPU1_FREEZE_AFTER_MS = ms; } }
+#[no_mangle]
+pub extern "C" fn fm1_diag_cpu1_insns() -> u64 {
+    machine().and_then(|m| m.cpu1.as_ref().map(|c|c.insn_count)).unwrap_or(0)
+}
+
 static mut OUT_L: [f32; 1024] = [0.0; 1024];
 static mut OUT_R: [f32; 1024] = [0.0; 1024];
 static mut LEDS: [f32; 41] = [0.0; 41];
