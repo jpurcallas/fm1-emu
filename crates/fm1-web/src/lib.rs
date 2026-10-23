@@ -36,6 +36,8 @@ struct Machine {
     halt_reason: Option<String>,
     // Last CPU0 scheduling slices and CPU1 observations; never written by the guest.
     trace: VecDeque<(u32,u32,u64,u64,u64)>,
+    // Emulator-owned input breadcrumbs: (kind, knob/key, delta/down, ms, CPU0 PC).
+    control_events: VecDeque<(u32,u32,i32,u32,u32)>,
     flash0: Vec<u8>,
     usr: Option<usize>,
     started: bool,
@@ -59,6 +61,7 @@ impl Machine {
         }
         let flash0 = soc.flash.mem.clone();
         Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None, trace: VecDeque::with_capacity(256),
+            control_events: VecDeque::with_capacity(64),
             flash0, usr: None, started: false }
     }
 
@@ -107,7 +110,8 @@ impl Machine {
 
     /// fm1-live's loop: cpu0's blocks (interrupts exact at block granularity), cpu1 beside.
     fn run(&mut self, n: u32) {
-        let jit = self.cpu.jit_on;
+        // Do not disable CPU1's JIT when tracing CPU0 after a preset encoder event.
+        let jit = unsafe { JIT };
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, trace, .. } = self;
         let result = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| {
@@ -382,6 +386,8 @@ pub extern "C" fn fm1_pads() -> *const u32 {
 #[no_mangle]
 pub extern "C" fn fm1_key(id: u32, down: u32) {
     if let Some(m) = machine() {
+        if m.control_events.len() == 64 { m.control_events.pop_front(); }
+        m.control_events.push_back((2, id, down as i32, m.soc.periph.ms() as u32, m.cpu.pc));
         m.soc.periph.apply(&Action::Key { id: id as u8, down: down != 0 });
     }
 }
@@ -390,6 +396,13 @@ pub extern "C" fn fm1_key(id: u32, down: u32) {
 #[no_mangle]
 pub extern "C" fn fm1_enc(enc: u32, clicks: i32) {
     if let Some(m) = machine() {
+        if m.control_events.len() == 64 { m.control_events.pop_front(); }
+        m.control_events.push_back((1, enc, clicks, m.soc.periph.ms() as u32, m.cpu.pc));
+        // Capture real CPU0 branches after the user's control action. CPU1 stays unchanged.
+        if clicks != 0 {
+            m.cpu.br2_trace_on = true;
+            m.cpu.jit_on = false;
+        }
         m.soc.periph.apply(&Action::Enc { enc: enc as u8, clicks });
     }
 }
@@ -443,11 +456,13 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
         let reason = m.halt_reason.as_deref().unwrap_or("");
         let trace = m.trace.iter().map(|(from,to,first,last,cycles)| format!(
             "[{from},{to},{first},{last},{cycles}]")).collect::<Vec<_>>().join(",");
+        let branches = m.cpu.br2_branches.iter().map(|(from,to,insn)| format!("[{from},{to},{insn}]")).collect::<Vec<_>>().join(",");
+        let inputs = m.control_events.iter().map(|(kind,id,amount,ms,pc)| format!("[{kind},{id},{amount},{ms},{pc}]")).collect::<Vec<_>>().join(",");
         let cpu1_counters = m.cpu1.as_ref().map_or("null".to_owned(),
             |c| format!("{{\"pc\":{},\"insn_count\":{}}}", c.pc, c.insn_count));
         // Reason is an emulator-generated diagnostic string, not untrusted guest text.
-        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{}}}",
-            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters)
+        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{},\"cpu0_branches\":[{}],\"control_events\":[{}],\"branch_trace_armed\":{}}}",
+            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters,branches,inputs,m.cpu.br2_trace_on)
     }).unwrap_or_else(|| "{\"schema\":\"BR2-WEB-BB1\",\"error\":\"no machine\"}".to_owned());
     unsafe {
         BLACKBOX_JSON = value.into_bytes();
