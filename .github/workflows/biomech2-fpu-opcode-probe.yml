@@ -44,4 +44,33 @@ jobs:
           /tmp/pi32-tools/pi32v2/bin/clang -c -target pi32v2 -mcpu=r3 /tmp/opcode.S -o /tmp/opcode.o
           echo '=== OFFICIAL JIELI OBJDUMP DECODE ==='
           /tmp/pi32-tools/pi32v2/bin/objdump -d /tmp/opcode.o
+
+          cat >/tmp/fpu.c <<'C'
+          float fneg(float x) { return -x; }
+          float fabs_b(float x) { return __builtin_fabsf(x); }
+          float fadd(float a,float b) { return a+b; }
+          float fsub(float a,float b) { return a-b; }
+          float fmul(float a,float b) { return a*b; }
+          float fdiv(float a,float b) { return a/b; }
+          float fsqrt(float x) { return __builtin_sqrtf(x); }
+          float fceil(float x) { return __builtin_ceilf(x); }
+          float ffloor(float x) { return __builtin_floorf(x); }
+          float ftrunc(float x) { return __builtin_truncf(x); }
+          float fround(float x) { return __builtin_roundf(x); }
+          float fmin2(float a,float b) { return __builtin_fminf(a,b); }
+          float fmax2(float a,float b) { return __builtin_fmaxf(a,b); }
+          int ftoi(float a) {return (int)a;}
+          unsigned ftou(float a) {return (unsigned)a;}
+          float itof(int a) {return (float)a;}
+          float utof(unsigned a) {return (float)a;}
+          float fnmadd(float a,float b,float c){return -(a*b+c);}
+          C
+          for o in 0 1 2 3; do
+            /tmp/pi32-tools/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -O$o -S /tmp/fpu.c -o /tmp/fpu-O$o.s
+            /tmp/pi32-tools/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -O$o -c /tmp/fpu.c -o /tmp/fpu-O$o.o
+            echo "=== COMPILER PI32 ASM OPT O$o ==="
+            cat /tmp/fpu-O$o.s
+            echo "=== COMPILER BINARY O$o DISASM (FPU shown unknown) ==="
+            /tmp/pi32-tools/pi32v2/bin/objdump -d /tmp/fpu-O$o.o | grep -A8 -B2 -i -E '3f e5|3f f5|ff 01' || true
+          done
           echo '=== END PROBE ==='
