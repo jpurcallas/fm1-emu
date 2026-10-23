@@ -23,6 +23,16 @@
 #define BR3_DONE 0xB330C0DEu
 #define BR3_TIMER_HZ 24000000u /* FM-1 TIMER4 */
 #define BR3_BOOT_TICKS (24u*20000u) /* 20 ms */
+/* Optional PERFORMANCE LAB knob. Default 1 retains every BLACK BOX event.
+ * When >1, counters remain exact and faults are always logged; ordinary
+ * per-job tracing is sampled so we can measure instrumentation overhead. */
+#ifndef BR3_BB_SAMPLE_RATE
+#define BR3_BB_SAMPLE_RATE 1u
+#endif
+#if BR3_BB_SAMPLE_RATE < 1 || BR3_BB_SAMPLE_RATE > 256
+#error "BR3_BB_SAMPLE_RATE must be 1..256"
+#endif
+#define BR3_TRACE_JOB(seq) (((seq) % BR3_BB_SAMPLE_RATE)==0u)
 typedef void (*br3_job)(void*);
 typedef struct __attribute__((aligned(64))) {
   volatile uint32_t sequence;
@@ -92,12 +102,12 @@ void __attribute__((noreturn,section(".br3_cpu1_text"))) br3_cpu1_main(void){
       last=seq;
       continue;
     }
-    br3_bb_event(1,BR3_BB_JOB_ACCEPT,R32(TMR4),seq,(uint32_t)fn,(uint32_t)arg);
+    if(BR3_TRACE_JOB(seq)) br3_bb_event(1,BR3_BB_JOB_ACCEPT,R32(TMR4),seq,(uint32_t)fn,(uint32_t)arg);
     ((br3_job)fn)((void*)arg);
     BUS_SYNC();
     br3_mailbox.reply.done=seq;
     br3_cpu1_stage=BR3_DONE;
-    br3_bb_event(1,BR3_BB_JOB_DONE,R32(TMR4),seq,(uint32_t)fn,0);
+    if(BR3_TRACE_JOB(seq)) br3_bb_event(1,BR3_BB_JOB_DONE,R32(TMR4),seq,(uint32_t)fn,0);
     BUS_SYNC();
     last=seq;
   }
@@ -159,7 +169,7 @@ static int br3_submit(br3_job fn,void *arg,uint32_t frames){
   BUS_SYNC();
   br3_inflight=seq;
   br3_blackbox.jobs_sent++;
-  br3_bb_event(0,BR3_BB_JOB_SEND,R32(TMR4),seq,(uint32_t)(uintptr_t)fn,(uint32_t)(uintptr_t)arg);
+  if(BR3_TRACE_JOB(seq)) br3_bb_event(0,BR3_BB_JOB_SEND,R32(TMR4),seq,(uint32_t)(uintptr_t)fn,(uint32_t)(uintptr_t)arg);
   return 1;
 }
 /* Returns only AFTER CPU1 is known to be done OR is forcibly held.
@@ -186,7 +196,7 @@ static int br3_wait(void){
   }else{
     br3_completed_jobs++;
     br3_blackbox.jobs_done++;
-    br3_bb_event(0,BR3_BB_WAIT_OK,R32(TMR4),seq,took,0);
+    if(BR3_TRACE_JOB(seq)) br3_bb_event(0,BR3_BB_WAIT_OK,R32(TMR4),seq,took,0);
     BUS_SYNC();
   }
   br3_inflight=0;
