@@ -62,7 +62,9 @@ class Fm1 extends AudioWorkletProcessor {
       } else if (m.type === "snapshot" && !this.x) {
         this.port.postMessage({ type: "snapshot", seq: m.seq, request: m.request, unavailable: true });
       } else if (this.x) {
-        if (m.type === "snapshot") {
+        if (m.type === "blackbox-capture") {
+          if (m.seq === this.seq) this.captureBlackbox("manual");
+        } else if (m.type === "snapshot") {
           if (m.seq !== this.seq) return;
           this.snapshots.push({ ...m, started: now() });
           this.flushSnapshots();
@@ -119,6 +121,10 @@ class Fm1 extends AudioWorkletProcessor {
     this.worst = 0;                     // the longest quantum among them
     this.board = x.fm1_board();         // 0 the FM-1, 1 the SMK-37 (the package says which)
     this.seq = m.seq;
+    this.bbTrace = [];
+    this.bbCaptured = false;
+    this.bbLastTick = 0;
+    this.bbRecord("boot");
     this.paused = false;
     this.snapshots = [];
     this.flashRevision = x.fm1_flash_revision();
@@ -166,6 +172,62 @@ class Fm1 extends AudioWorkletProcessor {
     }
   }
 
+  // Emulator-owned BLACK BOX: remains accessible when the guest CPU is halted.
+  // Native firmware breadcrumbs are retained in a complete guest-RAM snapshot.
+  bbCString(exportName) {
+    const x = this.x;
+    if (!x || typeof x[exportName] !== "function") return null;
+    try {
+      const start = x[exportName]();
+      const bytes = new Uint8Array(x.memory.buffer);
+      if (start <= 0 || start >= bytes.length) return null;
+      let end = start;
+      while (end < bytes.length && end - start < 16384 && bytes[end] !== 0) end++;
+      return new TextDecoder().decode(bytes.subarray(start, end));
+    } catch { return null; }
+  }
+
+  bbCpu() {
+    try { return JSON.parse(this.bbCString("fm1_blackbox_cpu_json") || "null"); }
+    catch { return null; }
+  }
+
+  bbRecord(event) {
+    if (!this.x) return;
+    try {
+      this.bbTrace ||= [];
+      const t = { event, ms: this.x.fm1_ms(), cpu: this.bbCpu() };
+      this.bbTrace.push(t);
+      if (this.bbTrace.length > 120) this.bbTrace.shift();
+    } catch { /* tracing must never fail the audio thread */ }
+  }
+
+  captureBlackbox(trigger, error = null) {
+    const x = this.x;
+    if (!x || (this.bbCaptured && trigger !== "manual")) return;
+    if (trigger !== "manual") this.bbCaptured = true;
+    this.bbRecord(trigger);
+    let ram = null, ramError = null;
+    try {
+      if (typeof x.fm1_guest_ram_ptr !== "function" || typeof x.fm1_guest_ram_len !== "function")
+        throw new Error("this WASM build has no guest RAM export");
+      const ptr = x.fm1_guest_ram_ptr(), len = x.fm1_guest_ram_len();
+      if (!Number.isInteger(ptr) || !Number.isInteger(len) || len <= 0 || len > 4 * 1024 * 1024)
+        throw new Error("invalid guest RAM range");
+      ram = new Uint8Array(x.memory.buffer, ptr, len).slice();
+    } catch (e) { ramError = String(e); }
+    const report = {
+      type: "blackbox", seq: this.seq, trigger,
+      error: error ? String(error) : null,
+      haltReason: this.bbCString("fm1_halt_reason"),
+      cpu: this.bbCpu(),
+      trace: (this.bbTrace || []).slice(),
+      guestRamBase: "0x01c00000", ram, ramError,
+      emulatedMs: (() => { try { return x.fm1_ms(); } catch { return null; } })()
+    };
+    this.port.postMessage(report, ram ? [ram.buffer] : []);
+  }
+
   process(_inputs, outputs) {
     const out = outputs[0];
     const x = this.x;
@@ -176,6 +238,7 @@ class Fm1 extends AudioWorkletProcessor {
     try {
       have = x.fm1_render(n, this.budget);
     } catch (err) {                       // a trap in the emulator: stop and say so
+      this.captureBlackbox("wasm-trap", err);
       this.x = null;
       for (const request of this.snapshots.splice(0)) {
         this.port.postMessage({ type: "snapshot", seq: this.seq, request: request.request, unavailable: true });
@@ -183,6 +246,7 @@ class Fm1 extends AudioWorkletProcessor {
       this.port.postMessage({ type: "error", seq: this.seq, fatal: true, message: `render: ${err}` });
       return true;
     }
+    if (x.fm1_halted()) this.captureBlackbox("cpu-halted");
     const buffer = x.memory.buffer, lp = x.fm1_out_l(), rp = x.fm1_out_r();
     if (!this.views || this.views.l.buffer !== buffer || this.views.l.length !== n ||
         this.views.l.byteOffset !== lp || this.views.r.byteOffset !== rp) {
@@ -195,6 +259,8 @@ class Fm1 extends AudioWorkletProcessor {
     this.reportFrames += n;
     this.reportCalls++;
     if (this.reportFrames >= sampleRate / 30) {
+      const guestMs = x.fm1_ms();
+      if (guestMs - this.bbLastTick >= 1000) { this.bbRecord("heartbeat"); this.bbLastTick = guestMs; }
       const flashRevision = this.observeFlash();
       if (flashRevision !== this.flashRevision && now() - this.lastSnapshot >= 1000 &&
           now() - this.flashChangedAt >= 250 && !this.snapshots.length) {
