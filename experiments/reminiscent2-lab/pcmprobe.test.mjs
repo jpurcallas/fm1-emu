@@ -15,7 +15,7 @@ function harness(have=128, enabled=true) {
     AudioWorkletProcessor:class {constructor(){this.port={postMessage:m=>received.push(m)};}},
     registerProcessor(_name,p){Processor=p;},
   });
-  vm.runInContext(fs.readFileSync(new URL('../web/worklet.js', import.meta.url),'utf8'),context);
+  vm.runInContext(fs.readFileSync(new URL('../../web/worklet.js', import.meta.url),'utf8'),context);
   const p=new Processor();
   p.x={
     memory, fm1_render:()=>have, fm1_out_l:()=>0, fm1_out_r:()=>4096,
