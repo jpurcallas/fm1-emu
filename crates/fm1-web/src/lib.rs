@@ -381,6 +381,33 @@ pub extern "C" fn fm1_biomech_cpu1_status() -> *const u8 {
     }
 }
 
+static mut BIOMECH_COORD_JSON: Vec<u8> = Vec::new();
+/// Enable exact writer trace. Off by default; zero clears collected events.
+#[no_mangle]
+pub extern "C" fn fm1_biomech_coord_watch(on: u32) {
+    if let Some(m) = machine() {
+        m.soc.biomech_coord_watch = on != 0;
+        if on == 0 { m.soc.biomech_coord_events.clear(); }
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_biomech_coord_report() -> *const u8 {
+    let report = machine().map(|m| {
+        let events: Vec<String> = m.soc.biomech_coord_events.iter().map(|e| format!(
+            r#"{{"cycle":{},"core":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"value":"0x{:08x}"}}"#,
+            e.cycle, e.core, e.pc, e.addr, e.width, e.value
+        )).collect();
+        format!(r#"{{"enabled":{},"count":{},"events":[{}]}}"#,
+            m.soc.biomech_coord_watch, events.len(), events.join(","))
+    }).unwrap_or_else(|| r#"{"available":false}"#.to_string());
+    unsafe {
+        BIOMECH_COORD_JSON = report.into_bytes();
+        BIOMECH_COORD_JSON.push(0);
+        BIOMECH_COORD_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
