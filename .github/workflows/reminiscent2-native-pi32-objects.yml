@@ -39,13 +39,35 @@ jobs:
           "$TC_CLANG" --version | head -3
           SRC=experiments/reminiscent2-lab/native
           TRACE=experiments/reminiscent2-lab/trace
-          "$TC_CLANG" -target pi32v2 -mcpu=r3 -Os -std=c99 -ffreestanding -fno-builtin -I"$TRACE" -c "$SRC/rem2_cpu1_native.c" -o out/rem2_native/rem2_cpu1_native.o
+          "$TC_CLANG" -target pi32v2 -mcpu=r3 -D__GCC_PI32V2__ -Os -std=c99 -ffreestanding -fno-builtin -I"$TRACE" -c "$SRC/rem2_cpu1_native.c" -o out/rem2_native/rem2_cpu1_native.o
           "$TC_CLANG" -target pi32v2 -mcpu=r3 -c "$SRC/rem2_cpu1_entry.S" -o out/rem2_native/rem2_cpu1_entry.o
           file out/rem2_native/*.o
           for f in out/rem2_native/*.o; do
             readelf -h "$f" | sed -n '1,20p'
             readelf -S "$f" | grep -E 'rem2_c1_ram|text.r2_cpu1|bss.r2_c1_stack|\.text'
           done
+          # Check that the CPU1 RAM section does not branch to flash .text.
+          python3 - <<'PY'
+          import subprocess,re
+          elf='out/rem2_native/rem2_cpu1_native.o'
+          sym=subprocess.check_output(['readelf','-sW',elf],text=True)
+          rel=subprocess.check_output(['readelf','-rW',elf],text=True)
+          sections={}
+          for line in sym.splitlines():
+              m=re.match(r'\s*\d+:\s+[0-9a-f]+\s+\d+\s+(?:\S+\s+){3}(\S+)\s+(.+)',line)
+              if m: sections[m.group(2).strip()]=m.group(1)
+          ram=rel.split("Relocation section '.rela.rem2_c1_ram'",1)[1].split("Relocation section",1)[0]
+          forbidden=[]
+          for line in ram.splitlines():
+              parts=line.split()
+              if len(parts)<5 or not re.match('[0-9a-fA-F]{8}',parts[0]):continue
+              target=parts[4]
+              if target in ['__sync_synchronize','memcpy','memset','rem2_barrier'] or (target in sections and sections[target]=='2'):
+                  forbidden.append(target)
+          if forbidden:raise SystemExit('CPU1 RAM path references flash/libc: '+str(forbidden))
+          print('PASS: RAM section has no forbidden flash/libc targets in relocation list.')
+          print('Remaining externs:', [l.strip() for l in sym.splitlines() if ' UND ' in l])
+          PY
           cat > out/rem2_native/STATUS.txt <<EOF
           Compiled two PI32v2 objects from REminiSCENT 2 LAB at $GITHUB_SHA.
           NOT LINKED. NOT A .fwsc. NOT EXECUTED ON CPU1.
