@@ -1,0 +1,47 @@
+name: BIOMECH2 BLACK BOX web experimental
+on:
+  push:
+    branches:
+      - experiment/biomech2-blackbox-web-20261023
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: biomech2-web-blackbox
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust wasm target
+        run: rustup target add wasm32-unknown-unknown
+      - name: Build instrumented web emulator
+        run: tools/build_site.sh _site
+      - name: Verify mandatory BLACK BOX exports and UI
+        run: |
+          test -s _site/biomech-blackbox/fm1_web.wasm
+          grep -q 'Export BLACK BOX' _site/biomech-blackbox/index.html
+          grep -q 'captureBlackbox' _site/biomech-blackbox/worklet.js
+          grep -q 'saveBlackbox' _site/biomech-blackbox/main.js
+      - name: Upload offline diagnostic emulator ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIOMECH2_BLACKBOX_WEB_EMULATOR
+          path: _site/biomech-blackbox/
+          retention-days: 14
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
