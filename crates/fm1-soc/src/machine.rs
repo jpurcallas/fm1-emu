@@ -21,6 +21,12 @@ pub struct Core1Bus<'a> {
 }
 
 impl Bus for Core1Bus<'_> {
+    fn trace_instruction_pc(&mut self, pc: u32) {
+        self.soc.trace_core_instruction(1,pc);
+    }
+    fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.soc.trace_core_store(1,pc,addr,width,value);
+    }
     fn read8(&mut self, a: u32) -> u8 {
         self.soc.core1_read8(a)
     }
@@ -229,6 +235,7 @@ pub fn run_cpu1(c1: &mut Cpu, soc: &mut Soc, cycles: u64) -> Result<(), String> 
         let mut bus = Core1Bus { soc: &mut *soc, budget: chunk.max(64) + 1 };
         let k = match c1.run_fast(&mut bus, chunk as u32) {
             Ok((0, _)) => {
+                bus.trace_instruction_pc(c1.pc);
                 if let Err(e) = c1.step(&mut bus) {
                     return Err(format!("cpu1: {e:?} at pc {:#010x}", c1.pc));
                 }
