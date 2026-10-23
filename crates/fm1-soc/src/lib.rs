@@ -563,6 +563,7 @@ impl Soc {
 }
 
 impl Bus for Soc {
+    fn guest_trace_enabled(&self) -> bool { self.biomech_coord_watch }
     fn trace_instruction_pc(&mut self, pc: u32) {
         self.biomech_coord_pc[0] = pc;
     }
