@@ -38,23 +38,35 @@ static rem2_blackbox r2_blackbox __attribute__((aligned(64)));
 extern void r2_cpu1_entry(void);
 
 /* No LIBC, no RTOS: fixed mixing iterations and permitted task IDs only. */
-static uint32_t r2_hash(uint32_t x) {
+static uint32_t __attribute__((section(".rem2_c1_ram"),noinline,used)) r2_hash(uint32_t x) {
  x^=x>>16; x*=0x7feb352du; x^=x>>15; x*=0x846ca68bu;
  return x^(x>>16);
 }
-static uint32_t r2_check(uint32_t seq,uint32_t kind,uint32_t a,uint32_t b) {
+static uint32_t __attribute__((section(".rem2_c1_ram"),noinline,used)) r2_check(uint32_t seq,uint32_t kind,uint32_t a,uint32_t b) {
  return r2_hash(0x52324c42u ^ (seq*0x9e3779b9u) ^ (kind<<17) ^ (a*0x85ebca6bu) ^ b);
 }
-static uint32_t r2_work(uint32_t a,uint32_t b) {
+static uint32_t __attribute__((section(".rem2_c1_ram"),noinline,used)) r2_work(uint32_t a,uint32_t b) {
  uint32_t v=a^(b*33u);
  for(uint32_t i=0;i<64u;i++) v=r2_hash(v+0x1234abcdu+i);
  return v;
 }
+/* Fixed record written directly; no C aggregate init that lowers to memset.
+ * The other core uses its own 64B-ring; interrupted records stay odd.
+ */
 static void __attribute__((section(".rem2_c1_ram"),noinline,used))
  r2_trace_event(uint32_t core,uint32_t event,uint32_t job,uint32_t reason) {
- rem2_fields f={0};
- f.cycle=R2_TIMER4; f.job=job; f.event=event; f.extra=reason;
- rem2_emit(&r2_blackbox,core,f);
+ rem2_ring *ring=&r2_blackbox.cpu[core];
+ uint32_t pos=ring->head, token=(pos+1u)*2u;
+ rem2_record *r=&ring->events[pos%REM2_TRACE_SLOTS];
+ r->commit=token-1u;rem2_barrier();
+ r->cycle=R2_TIMER4;r->block=0;r->job=job;r->event=event;
+ r->pc=0;r->sp=0;r->wait_ticks=0;
+ r->dma_half=0;r->dma_deadline=0;r->dma_copy_tick=0;
+ r->audio_late=0;r->last_valid_block=0;r->fault_reason=0;r->extra=reason;
+ r->payload_crc=rem2_crc(r);
+ rem2_barrier();r->commit=token;rem2_barrier();
+ ring->head=pos+1u;
+ if(pos>=REM2_TRACE_SLOTS)ring->overflow=pos+1u-REM2_TRACE_SLOTS;
 }
 void __attribute__((section(".rem2_c1_ram"),noreturn,used))
  r2_cpu1_main(void) {
