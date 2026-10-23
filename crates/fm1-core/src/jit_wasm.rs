@@ -228,6 +228,13 @@ extern "C" fn h_read<B: Bus>(ctx: *mut Ctx, addr: u32, idx: u32, w: u32) -> u32 
     v
 }
 
+/// Passive JIT guest-read callback, including inline RAM loads.
+extern "C" fn h_guest_read<B: Bus>(ctx: *mut Ctx, addr: u32, value: u32, pc: u32, width: u32) {
+    let ctx = unsafe { &mut *ctx };
+    let bus = unsafe { &mut *(ctx.bus as *mut B) };
+    bus.trace_guest_read(pc, addr, width as u8, value);
+}
+
 /// A passive guest-store callback, including inline RAM stores.
 extern "C" fn h_guest_store<B: Bus>(ctx: *mut Ctx, addr: u32, value: u32, pc: u32, width: u32) {
     let ctx = unsafe { &mut *ctx };
@@ -405,6 +412,7 @@ struct Gen<'a> {
     h_read: u32,
     h_write: u32,
     h_guest_store: u32,
+    h_guest_read: u32,
     h_op: u32,
     /// the region's blocks by start pc -> index
     index: std::collections::HashMap<u32, u32>,
@@ -673,7 +681,7 @@ impl Gen<'_> {
 
     /// local val = load(w, signed) at guest address local addr: inline RAM / XIP (the Soc's fast
     /// paths: the word or halfword must lie inside), else the bus.
-    fn load(&mut self, w: u8, signed: bool, idx: u32) {
+    fn load(&mut self, w: u8, signed: bool, idx: u32, pc: u32) {
         let mem = *self.mem;
         let ld = match (w, signed) {
             (4, _) => I32_LOAD,
@@ -713,6 +721,12 @@ impl Gen<'_> {
         self.set(L_VAL);
         self.end();
         self.end();
+        self.get(L_CTX);
+        self.get(L_ADDR);
+        self.get(L_VAL);
+        self.i32c(pc);
+        self.i32c(w as u32);
+        self.call_ind(TY_WRITE, self.h_guest_read);
     }
 
     /// store(w) of local val at guest address local addr: inline RAM, else the bus (and so is a
@@ -795,6 +809,7 @@ fn compile<B: Bus>(blocks: &[(usize, u32, Vec<crate::BOp>)], mem: &JitMem, profi
         h_read: h_read::<B> as usize as u32,
         h_write: h_write::<B> as usize as u32,
         h_guest_store: h_guest_store::<B> as usize as u32,
+        h_guest_read: h_guest_read::<B> as usize as u32,
         h_op: if profile { h_op::<B, true> as usize as u32 } else { h_op::<B, false> as usize as u32 },
         index: blocks.iter().enumerate().map(|(k, b)| (b.1, k as u32)).collect(),
         table: jump_table(blocks),
@@ -924,7 +939,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 // [R + off] = [R + off] op rhs: one read and one write, as the interpreter
                 g.rhs(rk, rv);
                 g.addr(Base::Reg(b), off as u32);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.get(L_VAL);
                 g.set(L_A);
                 g.alu(op);
@@ -1050,25 +1065,25 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
             }
             Fast::Ld { d, b, off, w, signed } => {
                 g.addr(b, off);
-                g.load(w, signed, idx);
+                g.load(w, signed, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 bus_used = true;
             }
             Fast::LdW { d, b, off } => {
                 g.addr(Base::Reg(b), off);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 bus_used = true;
             }
             Fast::LdWSp { d, off } => {
                 g.addr(Base::Sp, off);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 bus_used = true;
             }
             Fast::LdBu { d, b, off } => {
                 g.addr(Base::Reg(b), off);
-                g.load(1, false, idx);
+                g.load(1, false, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 bus_used = true;
             }
@@ -1102,7 +1117,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 }
                 g.op(I32_ADD);
                 g.set(L_ADDR);
-                g.load(w, signed, idx);
+                g.load(w, signed, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 bus_used = true;
             }
@@ -1124,7 +1139,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 // d = [b]; then b = b + inc (b read after the load, as exec_fast)
                 g.ld_reg(b);
                 g.set(L_ADDR);
-                g.load(w, signed, idx);
+                g.load(w, signed, idx, pc);
                 g.st_reg_from(d, L_VAL);
                 g.get(L_CPU);
                 g.ld_reg(b);
@@ -1149,7 +1164,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
             Fast::Rmw { b, w, op: rop, off, v } => {
                 g.addr(Base::Reg(b), off);
                 if !matches!(rop, RmwOp::Mov) {
-                    g.load(w, false, idx);
+                    g.load(w, false, idx, pc);
                     g.get(L_VAL);
                     g.i32c(v);
                     g.op(match rop {
@@ -1183,7 +1198,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 // pc = [sp]; sp += 4
                 g.ld_field(off_sp());
                 g.set(L_ADDR);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.get(L_CPU);
                 g.get(L_ADDR);
                 g.i32c(4);
@@ -1220,7 +1235,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 for r in bot..=top {
                     g.ld_field(off_sp());
                     g.set(L_ADDR);
-                    g.load(4, false, idx);
+                    g.load(4, false, idx, pc);
                     g.st_reg_from(r as u8, L_VAL);
                     g.get(L_CPU);
                     g.get(L_ADDR);
@@ -1230,7 +1245,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 }
                 g.ld_field(off_sp());
                 g.set(L_ADDR);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.get(L_CPU);
                 g.get(L_ADDR);
                 g.i32c(4);
@@ -1370,7 +1385,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
             }
             Fast::PopRets => {
                 g.ld_field(off_sp()); g.set(L_ADDR);
-                g.load(4, false, idx);
+                g.load(4, false, idx, pc);
                 g.get(L_CPU); g.get(L_VAL); g.mem_op(I32_STORE, 2, off_rets());
                 g.get(L_CPU); g.get(L_ADDR); g.i32c(4); g.op(I32_ADD);
                 g.mem_op(I32_STORE, 2, off_sp());
@@ -1378,7 +1393,7 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
             }
             Fast::Tb { r, half } => {
                 g.ld_reg(r); g.i32c(next_pc); g.op(I32_ADD); g.set(L_ADDR);
-                g.load(if half { 2 } else { 1 }, false, idx);
+                g.load(if half { 2 } else { 1 }, false, idx, pc);
                 g.get(L_VAL); g.i32c(1); g.op(I32_SHL); g.i32c(next_pc); g.op(I32_ADD);
                 g.set(L_VAL); g.jump_local(L_VAL, count);
                 ended = true;
