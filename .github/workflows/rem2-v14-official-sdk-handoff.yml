@@ -1,0 +1,29 @@
+name: REM2 official V14 SDK recovery (NO MERGE)
+on:
+  push:
+    branches: [experiment/reminiscent2-cpu1-ownership-gate-20261023]
+    paths: ['.github/workflows/rem2-v14-official-sdk-handoff.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recover-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download official V14 development kit and inspect
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://open.m-vave.com/releases/V14/6324230590b8e332bc544128abd7b919a2efd5982db60ea9a11663d4ea820344/FM1-Open-V14-Development-Kit-copy-update.zip'
+          curl -fLsS --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 300 "$url" -o /tmp/fm1_v14_original.zip
+          echo "downloaded_bytes=$(stat -c%s /tmp/fm1_v14_original.zip)"
+          sha256sum /tmp/fm1_v14_original.zip
+          unzip -tq /tmp/fm1_v14_original.zip | tail -2
+          unzip -Z1 /tmp/fm1_v14_original.zip | grep -E 'sdk/(lib/libfm1_engine.a|include/fm1.h|Package.cs)|sdk/manifest.json|THIRD_PARTY.md' | head -30
+      - name: Preserve exact official SDK archive for controlled offline build
+        uses: actions/upload-artifact@v4
+        with:
+          name: REM2-OFFICIAL-FM1-OPEN-V14-SDK-READONLY
+          path: /tmp/fm1_v14_original.zip
+          retention-days: 1
