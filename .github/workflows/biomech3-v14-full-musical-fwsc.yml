@@ -162,6 +162,41 @@ jobs:
           BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14-queued-midi /tmp/jieli /tmp/br3-v14-queued-midi
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14-queued-midi -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-queued-midi
           sha256sum /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Build V14 external callback counters in disposable overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a /tmp/fm1-v14 /tmp/fm1-v14-input-route
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/fm1-v14-input-route/app')
+          a=root/'screen.c'
+          src=a.read_text()
+          old='#include "biomech/biomech_sdk_port.h"'
+          new=old+'\nvolatile unsigned br3_screen_call_count;'
+          if src.count(old)!=1:raise SystemExit('screen header missing')
+          src=src.replace(old,new,1)
+          old='    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */'
+          new='    ++br3_screen_call_count;\n'+old
+          if src.count(old)!=1:raise SystemExit('screen control hook missing')
+          a.write_text(src.replace(old,new,1))
+          a=root/'midi_router.c'
+          src=a.read_text()
+          old='#include "biomech/biomech_sdk_port.h"'
+          new=old+'\nvolatile unsigned br3_midi_callback_count,br3_midi_last_source,br3_midi_last_length;'
+          if src.count(old)!=1:raise SystemExit('midi header missing')
+          src=src.replace(old,new,1)
+          old='    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */'
+          new='    ++br3_midi_callback_count;\n    br3_midi_last_source=source;\n    br3_midi_last_length=(unsigned)n;\n'+old
+          if src.count(old)!=1:raise SystemExit('midi hook missing')
+          a.write_text(src.replace(old,new,1))
+          print('BR3_V14_ROUTE_COUNTERS: external callbacks count only, no DSP or routing change')
+          PY
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14-input-route /tmp/jieli /tmp/br3-v14-input-route
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-input-route/sdk.elf > /tmp/br3-v14-input-route/sdk.nm
+          grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source|br3_midi_last_length' /tmp/br3-v14-input-route/sdk.nm
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14-input-route -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-input-route
+          sha256sum /tmp/br3-v14-input-route/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
       - name: Boot actual stock and BIOMECH3 16F FWSC on emulator with BLACK BOX
         shell: bash
         run: |
@@ -177,13 +212,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/br3-v14-full/musical
-          node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
+          BR3_ROUTE_ONLY=1 node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
             /tmp/biomech3-fm1-web.wasm \
             /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-full/musical /tmp/br3-v14-full/sdk.nm \
             /tmp/br3-v14-direct-note/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
-            /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+            /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-input-route/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-input-route/sdk.nm
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -201,6 +238,9 @@ jobs:
             /tmp/br3-v14-direct-note/build.log
             /tmp/br3-v14-queued-midi/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-queued-midi/build.log
+            /tmp/br3-v14-input-route/sdk.nm
+            /tmp/br3-v14-input-route/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+            /tmp/br3-v14-input-route/build.log
             /tmp/br3-v14-full/BIOMECH3_v0.4_CACHE_SHADOW_16F_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-full-8/build.log
             /tmp/br3-v14-full-8/sdk.elf
