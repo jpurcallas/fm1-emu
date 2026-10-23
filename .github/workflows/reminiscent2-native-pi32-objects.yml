@@ -1,0 +1,58 @@
+name: REminiSCENT 2 LAB - PI32v2 CPU1 object compilation
+on:
+  push:
+    branches:
+      - experiment/reminiscent-2-lab-cpu1-libre-20261022
+    paths:
+      - 'experiments/reminiscent2-lab/native/**'
+      - 'experiments/reminiscent2-lab/trace/rem2_trace.h'
+      - '.github/workflows/reminiscent2-native-pi32-objects.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-cpu1-objects:
+    name: Assemble/compile CPU1 (not firmware)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch official JieLi Linux PI32v2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/jieli"
+          curl -fL --retry 3 --connect-timeout 20 --max-time 240 https://pkgman.jieliapp.com/s/linux-toolchain | tar -xJ -C "$RUNNER_TEMP/jieli"
+          TC="$(find "$RUNNER_TEMP/jieli" -maxdepth 1 -type d -name 'jieli-linux-toolchains-*' | sort | tail -1)"
+          test -n "$TC"
+          echo "TC=$TC" >> "$GITHUB_ENV"
+          find "$TC" -type f -name clang -print
+      - name: Compile native LAB units to PI32v2 ELF objects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/rem2_native
+          TC_CLANG="$(find "$TC" -type f -name clang -print -quit)"
+          test -x "$TC_CLANG"
+          "$TC_CLANG" --version | head -3
+          SRC=experiments/reminiscent2-lab/native
+          TRACE=experiments/reminiscent2-lab/trace
+          "$TC_CLANG" -target pi32v2 -mcpu=r3 -Os -std=c99 -ffreestanding -fno-builtin -I"$TRACE" -c "$SRC/rem2_cpu1_native.c" -o out/rem2_native/rem2_cpu1_native.o
+          "$TC_CLANG" -target pi32v2 -mcpu=r3 -c "$SRC/rem2_cpu1_entry.S" -o out/rem2_native/rem2_cpu1_entry.o
+          file out/rem2_native/*.o
+          for f in out/rem2_native/*.o; do
+            readelf -h "$f" | sed -n '1,20p'
+            readelf -S "$f" | grep -E 'rem2_c1_ram|text.r2_cpu1|bss.r2_c1_stack|\.text'
+          done
+          cat > out/rem2_native/STATUS.txt <<EOF
+          Compiled two PI32v2 objects from REminiSCENT 2 LAB at $GITHUB_SHA.
+          NOT LINKED. NOT A .fwsc. NOT EXECUTED ON CPU1.
+          Requires SDK V14 build, PC guard, RAM copy table and emulator.
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem2-native-pi32v2-objects-only-NO-INSTALL
+          path: out/rem2_native/
+          if-no-files-found: error
