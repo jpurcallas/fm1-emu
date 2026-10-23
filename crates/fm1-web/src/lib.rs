@@ -34,6 +34,8 @@ struct Machine {
     audio: VecDeque<i16>,
     halted: bool,
     halt_reason: Option<String>,
+    // Last CPU0 scheduling slices and CPU1 observations; never written by the guest.
+    trace: VecDeque<(u32,u32,u64,u64,u64)>,
     flash0: Vec<u8>,
     usr: Option<usize>,
     started: bool,
@@ -56,7 +58,7 @@ impl Machine {
             cpu.regs[0] = fm1_soc::stock_boot(&mut soc, f, params, board);
         }
         let flash0 = soc.flash.mem.clone();
-        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None,
+        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None, trace: VecDeque::with_capacity(256),
             flash0, usr: None, started: false }
     }
 
@@ -107,8 +109,17 @@ impl Machine {
     fn run(&mut self, n: u32) {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
-        let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if let Err(e) = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)) {
+        let Machine { cpu, cpu1, soc, pending_tick, trace, .. } = self;
+        let result = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| {
+            let pc_before = cpu.pc;
+            let insns_before = cpu.insn_count;
+            let cycles_before = soc.periph.cycles;
+            let outcome = machine::run_blocks(cpu, soc, k, pending_tick);
+            if trace.len() == 256 { trace.pop_front(); }
+            trace.push_back((pc_before, cpu.pc, insns_before, cpu.insn_count, cycles_before));
+            outcome
+        });
+        if let Err(e) = result {
             self.halted = true;
             self.halt_reason = Some(e);
         }
@@ -430,9 +441,13 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
         }
         let cpu1 = m.cpu1.as_ref().map_or("null".to_owned(), core);
         let reason = m.halt_reason.as_deref().unwrap_or("");
+        let trace = m.trace.iter().map(|(from,to,first,last,cycles)| format!(
+            "[{from},{to},{first},{last},{cycles}]")).collect::<Vec<_>>().join(",");
+        let cpu1_counters = m.cpu1.as_ref().map_or("null".to_owned(),
+            |c| format!("{{\"pc\":{},\"insn_count\":{}}}", c.pc, c.insn_count));
         // Reason is an emulator-generated diagnostic string, not untrusted guest text.
-        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{}}}",
-            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len())
+        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{}}}",
+            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters)
     }).unwrap_or_else(|| "{\"schema\":\"BR2-WEB-BB1\",\"error\":\"no machine\"}".to_owned());
     unsafe {
         BLACKBOX_JSON = value.into_bytes();
