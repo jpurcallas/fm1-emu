@@ -27,6 +27,6 @@ try {
   const path=await download.path();
   const {readFileSync}=await import("node:fs");
   const obj=JSON.parse(readFileSync(path,"utf8"));
-  console.log("BLACKBOX_EXPORT",{format:obj.format,ram_bytes:obj.ram_bytes,emulator:obj.emulator?.schema,firmware:obj.candidate});
+  console.log("BLACKBOX_EXPORT",{format:obj.format,ram_bytes:obj.ram_bytes,emulator:obj.emulator?.schema,firmware:obj.candidate,error:obj.error,note:obj.note});
   if(obj.ram_bytes!==1048576 || !obj.emulator?.cpu0 || !obj.ram_base64)throw new Error("BLACK BOX missing CPU0/RAM");
 } finally {await browser.close();}
