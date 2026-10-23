@@ -1,0 +1,23 @@
+name: REminiSCENT CPU1 isolated scheduling test (NO MERGE)
+on:
+  pull_request:
+    paths:
+      - "crates/fm1-web/src/lib.rs"
+      - ".github/workflows/reminiscent-cpu1-isolation.yml"
+permissions:
+  contents: read
+jobs:
+  instrumented-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add wasm32-unknown-unknown
+      - run: tools/build_site.sh _site
+      - name: Check diagnostic export
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const m=new WebAssembly.Module(readFileSync("_site/fm1_web.wasm"));const a=WebAssembly.Module.exports(m).map(x=>x.name);for(const key of ["fm1_render","fm1_diag_freeze_cpu1_after","fm1_diag_cpu1_insns"])if(!a.includes(key))throw Error("Missing export "+key);'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-cpu1-scheduling-wasm
+          path: _site/fm1_web.wasm
+          retention-days: 3
