@@ -1,0 +1,130 @@
+name: BIOMECH3 V14 isolate BR3 initialization side effects (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-control-scheduler-a-b-20261023]
+    paths:
+      - '.github/workflows/biomech3-v14-init-side-effects.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deferred:
+    strategy:
+      fail-fast: false
+      matrix:
+        route: [skip-br3-init, run-br3-init]
+    env:
+      BR3_ROUTE: ${{ matrix.route }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned source and verified PI32 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage original unchanged musical DSP and signed V14 adapter
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Isolate whether BIOMECH initialization prevents stock V14 scheduler boot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          variant=os.environ['BR3_ROUTE']
+          root=Path('/tmp/fm1-v14/app')
+          p=root/'biomech/biomech_sdk_port.c'
+          src=p.read_text()
+          old='    (void)fm1_audio_start();'
+          if src.count(old)!=1:raise SystemExit('BIOMECH original audio start hook absent')
+          src=src.replace(old,'    /* LAB: defer audio start until AFTER original V14 screen startup. */',1)
+          if variant not in ('skip-br3-init','run-br3-init'):
+              raise SystemExit('Unexpected mode '+variant)
+          old='    br_fm1_render_q23(&runtime,out,frames);'
+          if src.count(old)!=1:raise SystemExit('Expected BR3 render call missing')
+          hdr='#include "biomech_sdk_port.h"'
+          if src.count(hdr)!=1:raise SystemExit('Missing SDK bridge header')
+          src=src.replace(hdr,hdr+'\n#include "fm1_engine_control.h"',1)
+          src=src.replace(old,'    (void)fm1_engine_render(out,frames); /* LAB: original SDK renderer in both conditions */',1)
+          p.write_text(src)
+          p=root/'screen.c';src=p.read_text()
+          incl='#include "biomech/biomech_sdk_port.h"'
+          if src.count(incl)!=1:raise SystemExit('Missing control header')
+          src=src.replace(incl,incl+'\nvolatile unsigned br3_screen_call_count;',1)
+          ctl='    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */'
+          if src.count(ctl)!=1:raise SystemExit('Missing control wrapper')
+          src=src.replace(ctl,'    ++br3_screen_call_count;\n'+ctl,1)
+          init='    biomech_sdk_init(); return; /* BIOMECH experimental control front-end */'
+          if src.count(init)!=1:raise SystemExit('Missing old SDK screen entry')
+          if variant=='skip-br3-init':
+              src=src.replace(init,'    /* LAB: intentionally skip BIOMECH initialization and keep stock V14 startup */',1)
+          else:
+              src=src.replace(init,'    biomech_sdk_init(); /* LAB: run BR3 init then complete V14 startup */',1)
+          target='    frame_ms = fm1_millis();'
+          if src.count(target)!=1:raise SystemExit('Unexpected final V14 stock screen initialization tail')
+          src=src.replace(target,target+'\n    (void)fm1_audio_start(); /* LAB: start after V14 UI init */',1)
+          src=src.replace(incl,incl+'\n#include "fm1_audio.h"',1)
+          p.write_text(src)
+          p=root/'midi_router.c';src=p.read_text()
+          if src.count(incl)!=1:raise SystemExit('Missing MIDI header')
+          src=src.replace(incl,incl+'\nvolatile unsigned br3_midi_callback_count,br3_midi_last_source,br3_midi_last_length;',1)
+          mid='    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */'
+          if src.count(mid)!=1:raise SystemExit('Missing MIDI hook')
+          src=src.replace(mid,'    ++br3_midi_callback_count;\n    br3_midi_last_source=source;\n    br3_midi_last_length=(unsigned)n;\n'+mid,1)
+          p.write_text(src)
+          print('BR3_SDK_ENGINE_PUMP_LAB',variant,'ONLY disposable emulator copy; never install bypass variant')
+          PY
+      - name: Compile, link, measure 48KiB heap, pack no-install FWSC
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-${BR3_ROUTE}
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-${BR3_ROUTE}/sdk.elf > /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
+          grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source' /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          for line in Path('/tmp/br3-v14-'+os.environ['BR3_ROUTE']+'/sdk.nm').read_text().splitlines():
+              if line.endswith(' _MALLOC_SIZE'):
+                  size=int(line.split()[0],16)
+                  print('BR3_INIT_SIDE_EFFECT_HEAP',size,'48KiB_GATE',size>=49152)
+                  if size<49152:raise SystemExit('Heap below SDK floor')
+          PY
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-${BR3_ROUTE}
+          sha256sum /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Measure V14 callbacks with vs without BIOMECH initial state mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          mkdir -p /tmp/br3-v14-${BR3_ROUTE}/probe
+          BR3_ROUTE_ONLY=1 node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
+            /tmp/fm1_web.wasm \
+            /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-${BR3_ROUTE}/probe \
+            /tmp/br3-v14-${BR3_ROUTE}/sdk.nm \
+            "" "" \
+            /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_INIT_SIDE_EFFECT_${{ matrix.route }}_NO_INSTALL
+          path: |
+            /tmp/br3-v14-${{ matrix.route }}/probe/*.json
+            /tmp/br3-v14-${{ matrix.route }}/probe/*.wav
+            /tmp/br3-v14-${{ matrix.route }}/sdk.nm
+            /tmp/br3-v14-${{ matrix.route }}/build.log
+            /tmp/br3-v14-${{ matrix.route }}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+          retention-days: 14
+          if-no-files-found: warn
