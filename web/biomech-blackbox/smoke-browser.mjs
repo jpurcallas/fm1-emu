@@ -1,7 +1,7 @@
 
 import { chromium } from "playwright";
 const base=process.env.BB_SMOKE_URL||"http://127.0.0.1:8642";
-const firmware=process.env.BB_SMOKE_FW||"fm1-sid/sidplayer.fwsc";
+const firmware=process.env.BB_SMOKE_FW||"fm1-sid/web/sidplayer.fwsc";
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_BIN||"/usr/bin/google-chrome",args:["--no-sandbox","--autoplay-policy=no-user-gesture-required","--disable-dev-shm-usage"]});
 try {
   const page=await browser.newPage({acceptDownloads:true});
