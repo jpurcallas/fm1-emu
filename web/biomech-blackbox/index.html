@@ -54,6 +54,8 @@
       <section aria-label="BIOMECH BLACK BOX" style="padding:12px; margin:8px 0; border:2px solid currentColor; border-radius:8px;">
         <b>BIOMECH 2 — BLACK BOX (web emulator)</b>
         <button type="button" id="bbexport" style="margin:4px 8px; padding:8px;">Export BLACK BOX (.json)</button>
+        <button type="button" id="record8" style="margin:4px 8px; padding:8px;">Record 8 seconds WAV</button>
+        <span id="record8state" role="status">Records the NEXT eight seconds after pressing.</span>
         <button type="button" id="wavexport" style="margin:4px 8px; padding:8px;">Export last 6s WAV (.wav)</button>
         <span id="wavstate" role="status">Play a sequence; WAV captures last 6 seconds of emulator audio.</span>
         <span id="bbstate" role="status">Press Start to arm CPU0/CPU1 and RAM capture.</span>
