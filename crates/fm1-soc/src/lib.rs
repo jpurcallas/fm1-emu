@@ -187,6 +187,8 @@ pub struct Soc {
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
     pub biomech_coord_watch: bool,
     pub biomech_coord_events: Vec<CoordStoreEvent>,
+    pub biomech_coord_reads: Vec<CoordStoreEvent>,
+    pub biomech_coord_read_count: [u64; 12],
     pub biomech_coord_pc: [u32; 2],
     pub biomech_coord_core: u8,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
@@ -231,6 +233,22 @@ fn dbg_line(addr: u32) -> &'static str {
 }
 
 impl Soc {
+    pub fn record_biomech_coord_read(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32) {
+        const WORDS: [u32; 6] = [0x01c574c0, 0x01c574e0, 0x01c57500,
+            0x01c5b290, 0x01c5b2a8, 0x01c5b2ac];
+        if !self.biomech_coord_watch { return; }
+        for (i,a) in WORDS.iter().enumerate() {
+            if addr <= *a + 3 && addr.saturating_add(width as u32) > *a {
+                self.biomech_coord_read_count[i + 6 * core as usize] += 1;
+                if self.biomech_coord_reads.len() < 256 {
+                    self.biomech_coord_reads.push(CoordStoreEvent {
+                        cycle: self.periph.cycles, core, pc, addr, width, value
+                    });
+                }
+                break;
+            }
+        }
+    }
     pub fn record_biomech_coord(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32) {
         const WORDS: [u32; 6] = [0x01c574c0, 0x01c574e0, 0x01c57500,
             0x01c5b290, 0x01c5b2a8, 0x01c5b2ac];
@@ -277,6 +295,8 @@ impl Soc {
             biomech_cpu0_profile: None,
             biomech_coord_watch: false,
             biomech_coord_events: Vec::new(),
+            biomech_coord_reads: Vec::new(),
+            biomech_coord_read_count: [0; 12],
             biomech_coord_pc: [0; 2],
             biomech_coord_core: 0,
             sfr: Default::default(),
@@ -638,7 +658,9 @@ impl Bus for Soc {
     fn read32(&mut self, addr: u32) -> u32 {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
-            return self.ram.read32(o as u32);
+            let value = self.ram.read32(o as u32);
+            self.record_biomech_coord_read(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, value);
+            return value;
         }
         let x = addr.wrapping_sub(XIP_BASE) as usize;
         if x + 4 <= self.xip.len() {
