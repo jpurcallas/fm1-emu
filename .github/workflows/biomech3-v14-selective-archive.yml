@@ -76,7 +76,7 @@ jobs:
               src=src.replace(original,'"--start-group",',1)
               src=src.replace(later,'SDK/"lib/libfm1_engine.a",',1)
               p.write_text(src)
-                    print('BR3_CPU0_LAB',variant,'ONLY disposable emulator copy; never install bypass variant')
+          print('BR3_SELECTIVE_ARCHIVE_LAB',variant,'DP unchanged; SDK selection only, NO INSTALL')
           PY
       - name: Compile, link, measure 48KiB heap, pack no-install FWSC
         shell: bash
