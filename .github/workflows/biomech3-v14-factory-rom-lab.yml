@@ -210,12 +210,22 @@ jobs:
             "" "" \
             /tmp/br3-v14-whole-current/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
             /tmp/br3-v14-whole-current/sdk.nm
+      - name: Monitor live SDK FX state writes from exact V14 linker map
+        shell: bash
+        run: |
+          set -euo pipefail
+          node experiments/biomech-rhythm-3/sdk-v14/trace_v14_fx_ram.mjs \
+            /tmp/fm1_web.wasm \
+            /tmp/br3-v14-whole-current/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-whole-current/sdk.nm \
+            /tmp/br3-v14-whole-current/trace_fx_ram.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: BIOMECH3_FACTORY_ROM_LAB_${{ matrix.route }}_NO_INSTALL
           path: |
             /tmp/br3-v14-${{ matrix.route }}/probe/*.json
+            /tmp/br3-v14-${{ matrix.route }}/trace_fx_ram.json
             /tmp/br3-v14-${{ matrix.route }}/probe/*.wav
             /tmp/br3-v14-${{ matrix.route }}/sdk.map
             /tmp/br3-v14-${{ matrix.route }}/nm-size-errors.txt
