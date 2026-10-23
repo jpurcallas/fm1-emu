@@ -110,7 +110,7 @@ impl Machine {
         // Counterfactual: after original CPU1 boot, temporarily omit CPU1
         // slices. No changes to guest firmware or memory; no production use.
         let freeze = unsafe { CPU1_FREEZE_AFTER_MS != 0 }
-            && soc.periph.ms() >= unsafe { CPU1_FREEZE_AFTER_MS };
+            && soc.periph.ms() >= u64::from(unsafe { CPU1_FREEZE_AFTER_MS });
         let mut cpu0_slice = |soc: &mut Soc, k: u32| {
             let result = machine::run_blocks(cpu, soc, k, pending_tick);
             if result.is_ok() { soc.observe_writer(0, cpu.pc, cpu.irq_levels.len() as u32); }
