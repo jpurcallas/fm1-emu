@@ -1471,6 +1471,9 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 } else {
                     g.i32c(((raw >> 16) & 0xf) | (((raw >> 24) & 3) << 4));
                 }
+                // WebAssembly i64 shifts and rotates require an i64 count,
+                // even though the JieLi source count register is 32-bit.
+                g.op(I64_EXTEND_I32_U);
                 let shift_op = if matches!(raw as u8, 0xd4 | 0xdc) {
                     I64_ROTR
                 } else {
