@@ -1,0 +1,78 @@
+name: BIOMECH3 native musical CPU0-CPU1 3+3
+on:
+  push:
+    branches: [experiment/biomech-rhythm-3-dualcore-3plus3-20261023]
+    paths:
+      - 'experiments/biomech-rhythm-3/musical-3plus3/**'
+      - '.github/workflows/biomech3-musical-3plus3-native.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install verified vendor PI32v2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 180 https://pkgman.jieliapp.com/s/linux-toolchain -o /tmp/jieli.tar.xz
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Compile native six-track musical engine and custom CPU1 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          S=experiments/biomech-rhythm-3/musical-3plus3
+          T=/tmp/jieli/pi32v2/bin
+          L=/tmp/jieli/pi32v2/lib/r3
+          O=/tmp/biomech3-music
+          mkdir -p "$O"
+          CFLAGS='-target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DBR3_DUAL_CORE -DBR3_PI32V2'
+          "$T/clang" -target pi32v2 -mcpu=r3 -c "$S/linkcheck_entry.S" -o "$O/cpu0_entry.o"
+          "$T/clang" -target pi32v2 -mcpu=r3 -c "$S/br3_cpu1_entry.S" -o "$O/cpu1_entry.o"
+          for file in biomech br3_cpu1_runtime br3_blackbox linkcheck_main; do
+            "$T/clang" $CFLAGS -I"$S" -c "$S/$file.c" -o "$O/$file.o"
+          done
+          "$T/ld" --gc-sections -T "$S/linkcheck.ld" -e _start             "$O/cpu0_entry.o" "$O/cpu1_entry.o" "$O/biomech.o" "$O/br3_cpu1_runtime.o"             "$O/br3_blackbox.o" "$O/linkcheck_main.o"             --start-group "$L/libm.a" "$L/libc.a" "$L/libcompiler_rt.a" --end-group             -o "$O/br3_music.elf"
+          /tmp/jieli/common/bin/objcopy -O binary -j .text "$O/br3_music.elf" "$O/text.bin"
+          /tmp/jieli/common/bin/objcopy -O binary -j .data "$O/br3_music.elf" "$O/data.bin"
+          "$T/nm" "$O/br3_music.elf" > "$O/br3_music.nm"
+          "$T/size" "$O/br3_music.elf" || true
+          python3 - "$O" <<'PY'
+          import pathlib,sys,re,struct
+          root=pathlib.Path(sys.argv[1])
+          syms=root.joinpath('br3_music.nm').read_text()
+          def symbol(name):
+              hit=re.search(r'^([0-9a-fA-F]+)\s+\w\s+'+name+r'$',syms,re.M)
+              if not hit: raise SystemExit('Missing symbol '+name)
+              return int(hit[1],16)
+          text=root.joinpath('text.bin').read_bytes()
+          data=root.joinpath('data.bin').read_bytes()
+          offset=symbol('_data_load')-0x02000120
+          if offset<len(text):raise SystemExit('ROM section overlap')
+          image=text+b'\xff'*(offset-len(text))+data
+          if len(image)>0x8DFBC:raise SystemExit('XIP app overflow')
+          if symbol('_bss_end')>0x01C74000:raise SystemExit('SRAM overflow / stacks')
+          assert image[:4]==bytes.fromhex('04818000'),image[:8].hex()
+          root.joinpath('br3_music.bin').write_bytes(image)
+          print('BR3_MUSIC_IMAGE',len(image),'BSS_END',hex(symbol('_bss_end')),'DSP_ENGINE',hex(symbol('br_render')))
+          PY
+          sha256sum "$O/br3_music.bin"
+      - name: Execute native musical 3+3 on actual emulated CPU0 and CPU1
+        shell: bash
+        run: |
+          set -euo pipefail
+          O=/tmp/biomech3-music
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o "$O/fm1_web.wasm"
+          node experiments/biomech-rhythm-3/musical-3plus3/smoke_native.mjs "$O/br3_music.bin" "$O/br3_music.nm" "$O/fm1_web.wasm"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
+          path: |
+            /tmp/biomech3-music/br3_music.bin
+            /tmp/biomech3-music/br3_music.elf
+            /tmp/biomech3-music/br3_music.nm
+          retention-days: 14
