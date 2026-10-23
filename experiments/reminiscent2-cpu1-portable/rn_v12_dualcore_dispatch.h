@@ -12,6 +12,9 @@ typedef struct {
  void *context;
  int (*submit)(void *context, void (*fn)(void *), void *arg, unsigned frames);
  int (*wait_done)(void *context);
+ /* Optional preflight BEFORE DSP event/decoder state is changed.
+  * Mandatory for adapters that may quarantine timed-out CPU1 memory. */
+ int (*ready)(void *context);
 } rn_dc_executor;
 /* Return 0 on successful audio, 0 for flash guard silence, <0 on error.
  * -3 = CPU1 submit failure, -4 = wait failure; no DMA commit after failure.
