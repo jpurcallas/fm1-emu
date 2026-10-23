@@ -575,11 +575,15 @@ void br3_set_executor(const BR3Executor *ops){
 #ifdef BR3_DUAL_CORE
 /* Batch a bounded number of samples per request. Scheduler runs only at exact
    boundaries, so no note/step/event is incorrectly moved in time. */
-#define BR3_SLICE_FRAMES 32u
+#ifndef BR3_SLICE_FRAMES
+#define BR3_SLICE_FRAMES 32u /* baseline; alternative slice budgets require testing */
+#endif
+#if BR3_SLICE_FRAMES < 1u || BR3_SLICE_FRAMES > 32u
+#error "BR3_SLICE_FRAMES must be 1..32"
+#endif
 typedef struct {
   BREngine *engine;
   BRPlayingVoice cpu1_shadow[BR_POLYPHONY];
-  BRPlayingVoice cpu1_before[BR_POLYPHONY]; /* rollback if CPU1 was forcibly held */
   uint8_t ready[BR3_SLICE_FRAMES][BR_POLYPHONY];
   float env[BR3_SLICE_FRAMES][BR_POLYPHONY];
   float noise[BR3_SLICE_FRAMES][BR_POLYPHONY];
@@ -685,7 +689,6 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     /* Refresh all slot identities: a globally shared polyphony slot can be
        stolen and reassigned from CPU1's lane to CPU0's lane between batches. */
     for(int i=0;i<BR_POLYPHONY;i++)s->cpu1_shadow[i]=e->active[i];
-    memcpy(s->cpu1_before,s->cpu1_shadow,sizeof(s->cpu1_shadow));
     int started=br3_executor.submit ? br3_executor.submit(br3_upper_segment,s,s->frames):0;
     if(!started)br3_upper_segment(s);
     for(uint32_t n=0;n<span;n++){
@@ -698,7 +701,10 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     }
     if(started && br3_executor.wait && !br3_executor.wait()){
       /* The wait callback MUST have halted CPU1 before returning failure. */
-      memcpy(s->cpu1_shadow,s->cpu1_before,sizeof(s->cpu1_shadow));
+      /* CPU1 has already been stopped by wait(). Upper tracks are still
+         unchanged in e->active while CPU0 worked on lower tracks.
+         Restore from that canonical state before recomputing on CPU0. */
+      memcpy(s->cpu1_shadow,e->active,sizeof(s->cpu1_shadow));
       br3_upper_segment(s);
     }
     for(int i=0;i<BR_POLYPHONY;i++){
