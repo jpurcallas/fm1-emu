@@ -3,6 +3,7 @@
  * No DSP replacement; both versions use their real compiled C99 engines.
  */
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 const [serialBin, serialSymbols, parallelBin, parallelSymbols, wasmPath] = process.argv.slice(2);
 if (!wasmPath) throw Error("usage: compare_native.mjs serial.bin serial.nm parallel.bin parallel.nm fm1_web.wasm");
 const wasm = readFileSync(wasmPath);
@@ -46,6 +47,20 @@ async function run(binPath, symbolPath, label) {
     cpu1Pc:bb.cpu1?.pc||0
   };
   for(const k of keys) data[k]=read(k);
+  const pcmSym=lines.find(l=>l.trim().endsWith(" br3_pcm_dump"));
+  if(pcmSym){
+    const addr=parseInt(pcmSym.trim().split(/\\s+/)[0],16);
+    const start=addr-0x01C00000;
+    const count=32*128*2*4;
+    if(start<0 || start+count>x.fm1_blackbox_ram_len())
+      throw Error(label+" PCM dump outside guest SRAM");
+    const pcm=Buffer.from(new Uint8Array(x.memory.buffer,x.fm1_blackbox_ram_ptr()+start,count));
+    Object.defineProperty(data,"rawPcm",{value:pcm,enumerable:false});
+    data.pcmBytes=count;
+    data.pcmSha256=createHash("sha256").update(pcm).digest("hex");
+  }
+  if(process.env.BR3_REQUIRE_PCM_DUMP==="1" && !data.rawPcm)
+    throw Error(label+" missing full guest PCM dump");
   const phasesLine=lines.find(l=>l.trim().endsWith(" br3_phase_ticks"));
   if(phasesLine){
     const offset=parseInt(phasesLine.trim().split(/\s+/)[0],16)-0x01C00000;
@@ -63,6 +78,14 @@ async function run(binPath, symbolPath, label) {
 }
 const a=await run(serialBin,serialSymbols,"serial");
 const b=await run(parallelBin,parallelSymbols,"3plus3");
+if(a.rawPcm && b.rawPcm && !a.rawPcm.equals(b.rawPcm)){
+  let pos=0;while(pos<a.rawPcm.length && a.rawPcm[pos]===b.rawPcm[pos])pos++;
+  throw Error("Native PI32 guest PCM differs byte-for-byte at offset "+pos);
+}
+if(a.rawPcm && b.rawPcm) console.log("BR3_GUEST_PCM_BYTE_EXACT",JSON.stringify({
+ bytes:a.pcmBytes,serialSha256:a.pcmSha256,dualSha256:b.pcmSha256,
+ identical:true
+}));
 if(a.br3_test_checksum!==b.br3_test_checksum ||
    a.br3_test_peakbits!==b.br3_test_peakbits)
   throw Error("Native PI32v2 musical PCM DIFFERENCE: serial/CPU1 3+3 checksum or peak changed. Do not call it sonically identical.");
