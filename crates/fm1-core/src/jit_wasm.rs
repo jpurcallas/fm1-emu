@@ -361,6 +361,11 @@ const I64_SHR_U: u8 = 0x88;
 const I64_CONST: u8 = 0x42;
 const I64_EQZ: u8 = 0x50;
 const F32_REINTERPRET_I32: u8 = 0xbe;
+const I32_REINTERPRET_F32: u8 = 0xbc;
+const F32_ADD: u8 = 0x92;
+const F32_SUB: u8 = 0x93;
+const F32_MUL: u8 = 0x94;
+const F32_DIV: u8 = 0x95;
 const I32_EXTEND8_S: u8 = 0xc0;
 const I32_EXTEND16_S: u8 = 0xc1;
 const VOID: u8 = 0x40;
@@ -1403,6 +1408,28 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 g.set(L_VAL);
                 g.jump_local(L_VAL, count);
                 ended = true;
+            }
+            // PI32v2 binary32 arithmetic: in the previous JIT these four hot
+            // operations invoked the interpreter once per individual float op.
+            // The underlying PI32v2 interpreter uses x+y, x-y, x*y, x/y as
+            // Rust f32, so use native WebAssembly f32 (not f64 or fused FMA).
+            // All other FPU cases, including accumulate, min/max and converts,
+            // retain their original interpreter behavior.
+            Fast::FOp { d, a, b, op: fop @ (0..=3) } => {
+                g.get(L_CPU);                 // destination for i32.store
+                g.ld_reg(a);
+                g.op(F32_REINTERPRET_I32);
+                g.ld_reg(b);
+                g.op(F32_REINTERPRET_I32);
+                g.op(match fop {
+                    0 => F32_ADD,
+                    1 => F32_SUB,
+                    2 => F32_MUL,
+                    3 => F32_DIV,
+                    _ => unreachable!(),
+                });
+                g.op(I32_REINTERPRET_F32);
+                g.mem_op(I32_STORE, 2, off_reg(d));
             }
             // ---- everything else: the interpreter's executor for this one op
             other => {
