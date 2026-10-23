@@ -1,0 +1,87 @@
+name: REM2 PCM probe experimental Pages
+on:
+  push:
+    branches: [experiment/reminiscent2-worklet-pcm-probe-20261023]
+    paths:
+      - 'web/main.js'
+      - 'web/worklet.js'
+      - 'experiments/reminiscent2-lab/pcmprobe.test.mjs'
+      - '.github/workflows/rem2-pcm-web-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: rem2-pcm-lab-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: instrumented
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/biomech2-blackbox-export-20261023
+          path: biomech
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          path: public
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: JS tests with rendered and silent PCM
+        working-directory: instrumented
+        run: |
+          node --check web/worklet.js
+          node --check web/main.js
+          node --test experiments/reminiscent2-lab/pcmprobe.test.mjs web/main.test.mjs web/worklet.test.mjs web/fwsc.test.mjs
+      - name: Build PCM probe on separate path
+        working-directory: instrumented
+        run: |
+          tools/build_site.sh "$GITHUB_WORKSPACE/_site/reminiscent-pcm"
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const x=WebAssembly.Module.exports(new WebAssembly.Module(readFileSync(process.env.GITHUB_WORKSPACE+"/_site/reminiscent-pcm/fm1_web.wasm"))).map(v=>v.name); for (const k of ["fm1_blackbox_cpu_json","fm1_guest_ram_ptr","fm1_guest_ram_len"]) if (!x.includes(k)) throw Error("missing "+k);'
+          grep -q 'audioOutput: this.pcmStats' "$GITHUB_WORKSPACE/_site/reminiscent-pcm/worklet.js"
+      - name: Preserve existing BIOMECH blackbox
+        run: |
+          mkdir -p _site/biomech-blackbox
+          cp -a _site/reminiscent-pcm/. _site/biomech-blackbox/
+          cp biomech/web/worklet.js biomech/web/main.js _site/biomech-blackbox/
+          cmp biomech/web/worklet.js _site/biomech-blackbox/worklet.js
+      - name: Build root site from unmodified master
+        working-directory: public
+        run: tools/build_site.sh "$GITHUB_WORKSPACE/_site_public"
+      - name: Check public layout
+        run: |
+          cp -a _site_public/. _site/
+          touch _site/.nojekyll
+          test -s _site/index.html
+          test -s _site/biomech-blackbox/index.html
+          test -s _site/biomech-blackbox/fm1_web.wasm
+          test -s _site/reminiscent-pcm/index.html
+          test -s _site/reminiscent-pcm/fm1_web.wasm
+          cmp public/web/main.js _site/main.js
+          cmp biomech/web/main.js _site/biomech-blackbox/main.js
+          cmp instrumented/web/main.js _site/reminiscent-pcm/main.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: REM2-PCM-Worklet-Experimental
+          path: _site/reminiscent-pcm
+          retention-days: 30
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
