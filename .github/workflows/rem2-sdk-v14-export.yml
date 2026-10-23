@@ -1,0 +1,32 @@
+name: REM2 LAB export pinned V14 SDK (temporary)
+on:
+  push:
+    branches:
+      - experiment/reminiscent-2-lab-cpu1-libre-20261022
+    paths:
+      - .github/workflows/rem2-sdk-v14-export.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sdk:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 12
+    steps:
+      - name: Download official V14 SDK, verify structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --connect-timeout 20 --max-time 120 -o /tmp/v14.zip 'https://github.com/m-vave/fm1_open/releases/download/V14/FM1-Open-V14-Development-Kit.zip'
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          echo "V14 tree:"; find /tmp/v14 -maxdepth 4 -type f | head -60
+          tar -cJf /tmp/rem2-v14-sdk.tar.xz -C /tmp/v14 .
+          ls -l /tmp/rem2-v14-sdk.tar.xz
+          cp /tmp/rem2-v14-sdk.tar.xz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem2-pinned-v14-sdk-temporary
+          path: rem2-v14-sdk.tar.xz
+          if-no-files-found: error
+          retention-days: 1
