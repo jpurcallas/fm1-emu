@@ -106,6 +106,9 @@ jobs:
       - name: Verify alternate guest PI32 16/8 frame slices against serial PCM
         shell: bash
         run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_batch_pi32.sh
+      - name: Compare true PI32 CPU1 full BLACK BOX vs sampled trace overhead
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_trace_sampling_pi32.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
