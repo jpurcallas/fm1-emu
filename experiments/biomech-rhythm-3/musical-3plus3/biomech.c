@@ -604,7 +604,24 @@ typedef struct {
   uint32_t frames;
 } BR3Segment;
 static BR3Segment br3_seg;
+/* Experimental guest hardware timer profiling, off in ordinary builds.
+ * Separate per-core slots; no mixed writes or owner overlap.
+ * Totals are intervals in TIMER4 ticks, not independent CPU instructions.
+ * CPU1 overlaps CPU0 by design: DO NOT add phase totals across cores. */
+#ifdef BR3_PROFILE_PHASES
+volatile uint32_t br3_phase_ticks[6];
+volatile uint32_t br3_phase_segments;
+#define BR3_PROF_START(name) uint32_t name=(*(volatile uint32_t*)(uintptr_t)0x00010804u)
+#define BR3_PROF_END(idx,name) do { \
+  uint32_t br3_end=(*(volatile uint32_t*)(uintptr_t)0x00010804u); \
+  br3_phase_ticks[idx] += (uint32_t)(br3_end-(name)); \
+} while (0)
+#else
+#define BR3_PROF_START(name)
+#define BR3_PROF_END(idx,name)
+#endif
 static void BR_RAMCODE br3_upper_segment(void *data){
+  BR3_PROF_START(cpu1_t0);
   BR3Segment *s=(BR3Segment*)data;
   BREngine *e=s->engine;
   for(uint32_t n=0;n<s->frames;n++){
@@ -614,6 +631,7 @@ static void BR_RAMCODE br3_upper_segment(void *data){
         s->sample[n][i]=br_voice_post(NULL,q,&e->project.track[q->track],s->env[n][i],s->noise[n][i]);
     }
   }
+  BR3_PROF_END(5,cpu1_t0);
 }
 static void BR_RAMCODE br3_fx(BREngine *e,float dry,float ds,float rv,float rs,float *interleaved_stereo){
 #ifndef BR_FM1_COMPACT_FX
@@ -680,6 +698,7 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     }
     if(!span)span=1;
     s->frames=(uint32_t)span;
+    BR3_PROF_START(preflight_t0);
     BRPlayingVoice simulated[BR_POLYPHONY];
     memcpy(simulated,e->active,sizeof(simulated));
     for(uint32_t n=0;n<span;n++){
@@ -699,11 +718,15 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
         q->elapsed+=1/BR_SR;
       }
     }
+    BR3_PROF_END(0,preflight_t0);
+    BR3_PROF_START(submit_t0);
     /* Refresh all slot identities: a globally shared polyphony slot can be
        stolen and reassigned from CPU1's lane to CPU0's lane between batches. */
     for(int i=0;i<BR_POLYPHONY;i++)s->cpu1_shadow[i]=e->active[i];
     int started=br3_executor.submit ? br3_executor.submit(br3_upper_segment,s,s->frames):0;
+    BR3_PROF_END(1,submit_t0);
     if(!started)br3_upper_segment(s);
+    BR3_PROF_START(lower_t0);
     for(uint32_t n=0;n<span;n++){
       for(int i=0;i<BR_POLYPHONY;i++){
         BRPlayingVoice *q=&e->active[i];
@@ -712,6 +735,8 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
 
       }
     }
+    BR3_PROF_END(2,lower_t0);
+    BR3_PROF_START(wait_t0);
     if(started && br3_executor.wait && !br3_executor.wait()){
       /* The wait callback MUST have halted CPU1 before returning failure. */
       /* CPU1 has already been stopped by wait(). Upper tracks are still
@@ -720,6 +745,8 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
       memcpy(s->cpu1_shadow,e->active,sizeof(s->cpu1_shadow));
       br3_upper_segment(s);
     }
+    BR3_PROF_END(3,wait_t0);
+    BR3_PROF_START(mix_t0);
     for(int i=0;i<BR_POLYPHONY;i++){
       if(BR3_ON_CPU1(simulated[i].track))e->active[i]=s->cpu1_shadow[i];
       /* Envelope state was advanced in serial-order by CPU0's preflight.
@@ -744,6 +771,10 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
       }
       br3_fx(e,dry,ds,rv,rs,out+(offset+n)*2);
     }
+    BR3_PROF_END(4,mix_t0);
+#ifdef BR3_PROFILE_PHASES
+    br3_phase_segments++;
+#endif
     offset+=span;
   }
 }
