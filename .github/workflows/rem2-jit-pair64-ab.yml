@@ -49,10 +49,11 @@ jobs:
           a=open(os.environ['GITHUB_WORKSPACE']+'/base.raw','rb').read()
           b=open(os.environ['GITHUB_WORKSPACE']+'/opt.raw','rb').read()
           assert a and b
+          j=[json.load(open(os.environ['GITHUB_WORKSPACE']+'/'+x)) for x in ('base.json','opt.json')]
+          assert all(z['jit']['failed']==0 for z in j), f"JIT compilation errors: {[z['jit']['failed'] for z in j]}"
           n=min(len(a),len(b))
           assert a[:n]==b[:n],f"PCM sample discrepancy: first mismatch at byte {next(i for i in range(n) if a[i]!=b[i])}"
           assert abs(len(a)-len(b))<=512, f"Different audio frame counts {len(a)} vs {len(b)}"
-          j=[json.load(open(os.environ['GITHUB_WORKSPACE']+'/'+x)) for x in ('base.json','opt.json')]
           summary={'reference':'baseline PCM exact common prefix','compared_bytes':n,'base_bytes':len(a),'opt_bytes':len(b),
                    'base_p50_ms':j[0]['steadyRenderMs']['p50'],'opt_p50_ms':j[1]['steadyRenderMs']['p50'],
                    'base_p95_ms':j[0]['steadyRenderMs']['p95'],'opt_p95_ms':j[1]['steadyRenderMs']['p95'],
