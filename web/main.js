@@ -37,6 +37,11 @@ let latency = params.get("latency") || stored("fm1.latency") || "interactive";
 const canvas = document.getElementById("panel");
 const ctx = canvas.getContext("2d");
 const status = document.getElementById("status");
+const blackboxStatus = document.getElementById("blackbox-status");
+const blackboxExportBtn = document.getElementById("blackbox-export");
+const blackboxCaptureBtn = document.getElementById("blackbox-capture");
+let blackboxLast = null;
+
 const startBtn = document.getElementById("start");
 const fwSel = document.getElementById("fw");
 const mhzSel = document.getElementById("mhz");
@@ -845,9 +850,81 @@ async function startAudio() {
   await ac.resume();
 }
 
+// Parse BIOMECH's BB2 v2 native firmware rings from a frozen, passive RAM copy.
+// If a firmware uses another layout, the complete raw RAM is still exported.
+function blackboxNativeDecode(ram) {
+  if (!ram || ram.byteLength < 5248) return null;
+  const dv = new DataView(ram.buffer, ram.byteOffset, ram.byteLength);
+  const names = ["BOOT0","BOOT1","JOB_SENT","JOB_ACCEPTED","JOB_DONE","WAIT_BEGIN",
+    "WAIT_END","TIMEOUT","BAD_CHECK","IRQ","DMA_SUBMIT","DMA_MISS",
+    "RENDER_BEGIN","RENDER_END","EXCEPTION","DMA_DEADLINE","LAST_VALID"];
+  const metadata = ["schema","firmwareTag","buildSha32","bootId","block","job","validStage",
+    "exceptionCode","exceptionPc","exceptionSp","exceptionAddr","waitTicks",
+    "deadlineTicks","dmaCopyTicks","dmaLate","snapshotReady"];
+  for (let off = 0; off <= ram.byteLength - 5248; off += 4) {
+    if (dv.getUint32(off, true) !== 0x42423202 || dv.getUint32(off + 4, true) !== 0x42493232) continue;
+    const meta = Object.fromEntries(metadata.map((key, idx) => [key, dv.getUint32(off + idx * 4, true)]));
+    const rings = [0, 1].map(core => {
+      const start = off + 64 + core * (4 + 128 * 20);
+      const next = dv.getUint32(start, true), n = Math.min(next, 128);
+      const events = [];
+      for (let id = next - n; id < next; id++) {
+        const p = start + 4 + (id % 128) * 20;
+        const event = dv.getUint16(p + 16, true);
+        events.push({tick: dv.getUint32(p, true), pc: "0x"+dv.getUint32(p+4,true).toString(16).padStart(8,"0"),
+          sequence: dv.getUint32(p+8,true), detail: dv.getUint32(p+12,true),
+          event, label: names[event - 1] || "UNKNOWN", core: dv.getUint16(p+18,true)});
+      }
+      return {core, next, events};
+    });
+    return {ramOffset:off, guestAddress:"0x"+(0x01c00000+off).toString(16), meta, rings};
+  }
+  return null;
+}
+
+function bytesBase64(bytes) {
+  if (!bytes) return null;
+  // Divisible by three: concatenating each chunk's encoding is safe.
+  const size = 24576; let out = "";
+  for (let at = 0; at < bytes.length; at += size)
+    out += btoa(String.fromCharCode(...bytes.subarray(at, at + size)));
+  return out;
+}
+
+blackboxCaptureBtn.addEventListener("click", () => {
+  if (!running) { blackboxStatus.textContent = "Start a firmware before capturing."; return; }
+  blackboxStatus.textContent = "Capturing CPU registers and RAM…";
+  send({ type: "blackbox-capture", seq: running.seq });
+});
+blackboxExportBtn.addEventListener("click", () => {
+  if (!blackboxLast) return;
+  const ram = blackboxLast.ram;
+  const report = {
+    format: "BIOMECH-EMULATOR-BLACKBOX-v1", timestampUtc: new Date().toISOString(),
+    firmware: blackboxLast.firmware, ...blackboxLast,
+    ram: undefined, nativeBB2: blackboxNativeDecode(ram),
+    guestRamEncoding: ram ? "base64" : null, guestRamBase64: bytesBase64(ram)
+  };
+  const blob = new Blob([JSON.stringify(report, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = `BIOMECH_BLACKBOX_${Date.now()}.json`;
+  a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
 // what the audio thread sends: the screen and LEDs with its timing, boot and error news
 function onWorklet(e) {
   const m = e.data;
+  if (m.type === "blackbox") {
+    // Keep it available after a CPU halt, a WASM trap or the next reboot.
+    blackboxLast = { ...m, firmware: {id:fw.id, name:fw.name, mhz, jit:params.get("jit") !== "0"} };
+    blackboxExportBtn.disabled = false;
+    const complete = !!m.ram && !!m.cpu;
+    blackboxStatus.textContent = complete
+      ? `BLACK BOX captured (${m.trigger}; ${m.ram.length} RAM bytes). Export the JSON now.`
+      : `Partial BLACK BOX captured (${m.trigger}; ${m.ramError || "CPU register snapshot unavailable"}). Export diagnostics.`;
+    if (m.trigger !== "manual") status.textContent = `${fw.name}: CPU stopped — BLACK BOX captured, click Export.`;
+    return;
+  }
   if (m.type === "error") {
     if (m.fatal && running?.seq === m.seq) {
       running = null;
@@ -904,7 +981,7 @@ function onWorklet(e) {
   if (!last || now - last.t > 1000) {
     const mips = last ? (m.minsns - last.minsns) / ((now - last.t) / 1000) : 0;
     perf.second(mips, m);
-    status.textContent = m.halted ? `${fw.name}: the emulated CPU halted` :
+    status.textContent = m.halted ? `${fw.name}: emulated CPU halted — ${blackboxLast ? "BLACK BOX ready to export" : "no diagnostic captured"}` :
       `${fw.name} · ${mhz} MHz · ${mips.toFixed(0)} M instructions/s · load ${perf.loadText()} · ` +
       `${(m.ms / 1000).toFixed(1)} s`;
     // (hover: the JIT's work in the audio thread, and the audio's health)
