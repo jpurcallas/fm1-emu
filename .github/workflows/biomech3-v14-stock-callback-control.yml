@@ -1,0 +1,89 @@
+name: FM1 V14 STOCK callback control vs BIOMECH3 (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-control-scheduler-a-b-20261023]
+    paths: ['.github/workflows/biomech3-v14-stock-callback-control.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact protected V14 + JieLi compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Instrument STOCK V14 callbacks and local diagnostic-only copy of build gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/fm1-v14/app')
+          p=root/'screen.c'
+          s=p.read_text()
+          old='void groove_screen_control(void)\n{'
+          if s.count(old)!=1:raise SystemExit('Stock screen control changed unexpectedly')
+          s='volatile unsigned br3_screen_call_count;\n'+s
+          s=s.replace(old,old+'\n    ++br3_screen_call_count;',1)
+          p.write_text(s)
+          p=root/'midi_router.c';s=p.read_text()
+          old='void fm1_app_midi_received(unsigned source, const uint8_t *m, size_t n)\n{'
+          if s.count(old)!=1:raise SystemExit('Stock MIDI hook changed unexpectedly')
+          s='volatile unsigned br3_midi_callback_count, br3_midi_last_source, br3_midi_last_length;\n'+s
+          s=s.replace(old,old+'\n    ++br3_midi_callback_count;\n    br3_midi_last_source=source;\n    br3_midi_last_length=(unsigned)n;',1)
+          p.write_text(s)
+          # The stock-manifest gate is preserved for all other V14 files; only these
+          # TWO instrumented temporary copies receive an explicit exemption.
+          p=Path('experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py')
+          s=p.read_text()
+          old='changed_stock={"app/screen.c","app/audio_output.c","app/board/audio.c","app/board/fm1_audio.h","app/midi_router.c"} if BR3_FULL else set()'
+          if s.count(old)!=1:raise SystemExit('Stock manifest gate changed')
+          s=s.replace(old,old+'\nif os.getenv("BR3_STOCK_CALLBACK_DIAGNOSTIC")=="1":changed_stock|={"app/screen.c","app/midi_router.c"}',1)
+          p.write_text(s)
+          print('BR3_STOCK_PASSIVE_CALLBACKS only two stock files instrumented in temp SDK; all other upstream 63/65 manifest checked')
+          PY
+      - name: Compile and package V14 STOCK with passive counters
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_STOCK_CALLBACK_DIAGNOSTIC=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-stock-callback
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-stock-callback/sdk.elf > /tmp/br3-v14-stock-callback/sdk.nm
+          grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source' /tmp/br3-v14-stock-callback/sdk.nm
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-stock-callback
+          sha256sum /tmp/br3-v14-stock-callback/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Inject same external MIDI, panel PLAY and key into STOCK V14
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          mkdir -p /tmp/br3-v14-stock-callback/probe
+          BR3_ROUTE_ONLY=1 node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs \
+            /tmp/fm1_web.wasm \
+            /tmp/br3-v14-stock-callback/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-callback/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-callback/probe \
+            /tmp/br3-v14-stock-callback/sdk.nm \
+            "" "" \
+            /tmp/br3-v14-stock-callback/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc \
+            /tmp/br3-v14-stock-callback/sdk.nm
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V14_STOCK_CALLBACKS_REFERENCE_SOLO_EMULADOR
+          path: |
+            /tmp/br3-v14-stock-callback/probe/*.json
+            /tmp/br3-v14-stock-callback/probe/*.wav
+            /tmp/br3-v14-stock-callback/sdk.nm
+            /tmp/br3-v14-stock-callback/build.log
+            /tmp/br3-v14-stock-callback/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+          retention-days: 14
+          if-no-files-found: warn
