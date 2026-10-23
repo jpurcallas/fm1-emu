@@ -33,6 +33,7 @@ struct Machine {
     /// interleaved L/R i16 not yet handed out
     audio: VecDeque<i16>,
     halted: bool,
+    halt_reason: Option<String>,
     flash0: Vec<u8>,
     usr: Option<usize>,
     started: bool,
@@ -55,7 +56,7 @@ impl Machine {
             cpu.regs[0] = fm1_soc::stock_boot(&mut soc, f, params, board);
         }
         let flash0 = soc.flash.mem.clone();
-        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false,
+        Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None,
             flash0, usr: None, started: false }
     }
 
@@ -107,8 +108,9 @@ impl Machine {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)).is_err() {
+        if let Err(e) = machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)) {
             self.halted = true;
+            self.halt_reason = Some(e);
         }
     }
 }
@@ -412,6 +414,38 @@ pub extern "C" fn fm1_minsns() -> u32 {
 #[no_mangle]
 pub extern "C" fn fm1_halted() -> u32 {
     machine().map_or(1, |m| m.halted as u32)
+}
+
+// BLACK BOX: emulator-owned snapshot, available even when the guest firmware halts.
+// This is independent of whether guest firmware instrumentation initialized.
+static mut BLACKBOX_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_blackbox_json() -> *const u8 {
+    let value = machine().map(|m| {
+        fn core(c: &Cpu) -> String {
+            format!("{{\"pc\":{},\"sp\":{},\"ssp\":{},\"usp\":{},\"core_id\":{},\"user\":{},\"insn_count\":{},\"stuck_on\":{:?},\"regs\":{:?}}}",
+                c.pc,c.sp,c.ssp,c.usp,c.core_id,c.user,c.insn_count,c.stuck_on,c.regs)
+        }
+        let cpu1 = m.cpu1.as_ref().map_or("null".to_owned(), core);
+        let reason = m.halt_reason.as_deref().unwrap_or("");
+        // Reason is an emulator-generated diagnostic string, not untrusted guest text.
+        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{}}}",
+            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len())
+    }).unwrap_or_else(|| "{\"schema\":\"BR2-WEB-BB1\",\"error\":\"no machine\"}".to_owned());
+    unsafe {
+        BLACKBOX_JSON = value.into_bytes();
+        BLACKBOX_JSON.push(0);
+        BLACKBOX_JSON.as_ptr()
+    }
+}
+#[no_mangle]
+pub extern "C" fn fm1_blackbox_ram_ptr() -> *mut u8 {
+    machine().map_or(std::ptr::null_mut(), |m| m.soc.ram.as_mut_ptr())
+}
+#[no_mangle]
+pub extern "C" fn fm1_blackbox_ram_len() -> u32 {
+    machine().map_or(0, |m| m.soc.ram.len() as u32)
 }
 
 // ---------------------------------------------------------------- the front panel (page side)
