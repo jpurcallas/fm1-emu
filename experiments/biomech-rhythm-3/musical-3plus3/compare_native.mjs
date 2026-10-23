@@ -46,6 +46,16 @@ async function run(binPath, symbolPath, label) {
     cpu1Pc:bb.cpu1?.pc||0
   };
   for(const k of keys) data[k]=read(k);
+  const phasesLine=lines.find(l=>l.trim().endsWith(" br3_phase_ticks"));
+  if(phasesLine){
+    const offset=parseInt(phasesLine.trim().split(/\s+/)[0],16)-0x01C00000;
+    const v=new DataView(x.memory.buffer,x.fm1_blackbox_ram_ptr());
+    data.phaseTicks=Array.from({length:6},(_,i)=>v.getUint32(offset+4*i,true));
+    const segLine=lines.find(l=>l.trim().endsWith(" br3_phase_segments"));
+    if(segLine)data.phaseSegments=v.getUint32(parseInt(segLine.trim().split(/\s+/)[0],16)-0x01C00000,true);
+    console.log("BR3_PHASE_TICKS",JSON.stringify({label,phaseTicks:data.phaseTicks,phaseSegments:data.phaseSegments,
+       labels:["preflight","snapshot_submit","cpu0_voice","wait_fallback","merge_global_fx","cpu1_voice"]}));
+  }
   console.log("BR3_PI32_COMPARISON",JSON.stringify(data));
   if(data.halted || status!==0xB330A11F || data.br3_test_rendered!==32)
     throw Error(label+" native musical test did not complete");
