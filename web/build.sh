@@ -32,4 +32,10 @@ cp web/index.html web/style.css web/main.js web/persistence.js web/worklet.js we
 mkdir -p "$OUT/smk37"
 cp web/smk37/index.html web/smk37/firmwares.json web/smk37/og.png "$OUT/smk37/"
 cp web/style.css web/main.js web/persistence.js web/worklet.js web/jit.js web/fwsc.js "$OUT/fm1_web.wasm" "$OUT/smk37/"
+# Separate diagnostic page: original emulator root is left untouched.
+mkdir -p "$OUT/biomech-blackbox"
+cp web/biomech-blackbox/index.html web/biomech-blackbox/main.js web/biomech-blackbox/worklet.js "$OUT/biomech-blackbox/"
+for f in fm1_web.wasm style.css fwsc.js jit.js persistence.js firmwares.json og.png fm1-emu-report.pdf; do
+  cp "$OUT/$f" "$OUT/biomech-blackbox/$f"
+done
 ls -la "$OUT" | grep -v "^total"
