@@ -36,4 +36,15 @@ try {
   if(!obj.emulator?.control_events?.some(e=>e[0]===1 && e[2]!==0) ||
      !obj.emulator?.branch_trace_armed || !obj.emulator?.cpu0_branches?.length)
     throw new Error("BLACK BOX missing actual knob action / CPU0 branch trace");
+  const audio=obj.audio_metrics;
+  console.log("PCM_DIAGNOSTICS",{quanta:audio?.quanta,shortQuanta:audio?.shortQuanta,missingFrames:audio?.missingFrames,peak:audio?.peak,trace:audio?.quantumTrace?.length});
+  if(!audio || audio.quanta<=0 || !audio.quantumTrace?.length || audio.availableWavFrames<=0)
+    throw new Error("BLACK BOX missing audio underrun/PCM diagnostics");
+  const [wavDownload]=await Promise.all([page.waitForEvent("download",{timeout:15000}),page.locator("#wavexport").click()]);
+  const wav=readFileSync(await wavDownload.path());
+  if(wav.length<=44 || wav.toString("ascii",0,4)!=="RIFF" ||
+     wav.toString("ascii",8,12)!=="WAVE" || wav.readUInt16LE(22)!==2 ||
+     wav.readUInt16LE(34)!==16 || wav.readUInt32LE(40)!==wav.length-44)
+    throw new Error("WAV export invalid or empty");
+  console.log("WAV_EXPORT",{bytes:wav.length,frames:(wav.length-44)/4,rate:wav.readUInt32LE(24)});
 } finally {await browser.close();}
