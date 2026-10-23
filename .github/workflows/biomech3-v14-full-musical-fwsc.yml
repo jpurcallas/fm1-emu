@@ -44,6 +44,12 @@ jobs:
           /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-full/sdk.elf > /tmp/br3-v14-full/sdk.nm
           grep -E 'biomech_sdk_init$|biomech_sdk_audio$|br_render$|br3_cpu1_main$|fm1_audio_irq$' /tmp/br3-v14-full/sdk.nm
           echo 'BIOMECH3 V14 FULL LINKED; NO CPU1 LEASE PROVEN; NOT INSTALLABLE'
+      - name: Try smaller 8-frame scratch after 16-frame full link
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 BR3_FULL_SLICE_FRAMES=8 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-full-8
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-full-8/sdk.elf > /tmp/br3-v14-full-8/sdk.nm
       - name: Linker budget and symbol differential
         shell: bash
         run: |
@@ -61,10 +67,14 @@ jobs:
             return out
           stock=symbols('/tmp/br3-v14-stock/sdk.nm')
           full=symbols('/tmp/br3-v14-full/sdk.nm')
+          eight=symbols('/tmp/br3-v14-full-8/sdk.nm')
           for name in ('_MALLOC_SIZE','_HEAP_BEGIN','_HEAP_END','br3_seg','br3_mailbox','br3_blackbox'):
             print('BR3_FULL_V14_LINK_BUDGET',name,'stock',hex(stock[name]) if name in stock else None,'full',hex(full[name]) if name in full else None)
           if '_MALLOC_SIZE' in full:
             print('BR3_FULL_V14_48KiB_MIN',full['_MALLOC_SIZE']>=49152)
+          if '_MALLOC_SIZE' in eight:
+            print('BR3_FULL_V14_8FRAMES_HEAP',eight['_MALLOC_SIZE'],
+                  'passes_48KiB',eight['_MALLOC_SIZE']>=49152)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -76,5 +86,9 @@ jobs:
             /tmp/br3-v14-full/sdk.elf
             /tmp/br3-v14-full/sdk.map
             /tmp/br3-v14-full/sdk.nm
+            /tmp/br3-v14-full-8/build.log
+            /tmp/br3-v14-full-8/sdk.elf
+            /tmp/br3-v14-full-8/sdk.map
+            /tmp/br3-v14-full-8/sdk.nm
           if-no-files-found: warn
           retention-days: 14
