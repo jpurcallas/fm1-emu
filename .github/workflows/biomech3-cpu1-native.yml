@@ -1,0 +1,73 @@
+name: BIOMECH3 direct CPU1 native probe
+on:
+  push:
+    branches: [experiment/biomech-rhythm-3-dualcore-3plus3-20261023]
+    paths:
+      - 'experiments/biomech-rhythm-3/native-cpu1/**'
+      - '.github/workflows/biomech3-cpu1-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  cpu1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve known JieLi PI32v2 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 180 https://pkgman.jieliapp.com/s/linux-toolchain -o /tmp/jieli.tar.xz
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Compile and link standalone CPU1 probe for real PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          S=experiments/biomech-rhythm-3/native-cpu1
+          mkdir -p /tmp/br3
+          /tmp/jieli/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -c "$S/entry.S" -o /tmp/br3/entry.o
+          /tmp/jieli/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -ffreestanding -fno-builtin -ffunction-sections -fno-stack-protector -c "$S/probe.c" -o /tmp/br3/probe.o
+          /tmp/jieli/pi32v2/bin/ld --gc-sections -T "$S/app.ld" -e _start /tmp/br3/entry.o /tmp/br3/probe.o -o /tmp/br3/br3_probe.elf
+          /tmp/jieli/common/bin/objcopy -O binary -j .text /tmp/br3/br3_probe.elf /tmp/br3/br3_probe.bin
+          /tmp/jieli/common/bin/nm /tmp/br3/br3_probe.elf > /tmp/br3/br3_probe.nm
+          test "$(stat -c %s /tmp/br3/br3_probe.bin)" -gt 100
+          head -c 8 /tmp/br3/br3_probe.bin | od -An -tx1
+          sha256sum /tmp/br3/br3_probe.bin
+          grep -E 'br3_(status|cpu1_main|cpu0_main|mailbox)' /tmp/br3/br3_probe.nm
+      - name: Actual emulated guest CPU1 completes mailbox job
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 2 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/br3/emulator.wasm
+          file /tmp/br3/emulator.wasm
+          node experiments/biomech-rhythm-3/native-cpu1/smoke.mjs /tmp/br3/br3_probe.bin /tmp/br3/br3_probe.nm /tmp/br3/emulator.wasm
+      - name: Publish exact validated probe ONLY to BIOMECH3 experimental branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          D=experiments/biomech-rhythm-3/native-cpu1/artifacts
+          mkdir -p "$D"
+          cp /tmp/br3/br3_probe.bin "$D/"
+          cp /tmp/br3/br3_probe.nm "$D/"
+          sha256sum "$D/br3_probe.bin" > "$D/SHA256SUMS.txt"
+          cat > "$D/STATUS.txt" <<'EOT'
+          Native PI32v2 CPU1 self-test: CI PASS in fm1-emu WASM.
+          This is NOT BIOMECH musical firmware; it does not synthesize voices.
+          Raw .bin is for isolated emulator tests ONLY. DO NOT FLASH HARDWARE.
+          EOT
+          git config user.name "BIOMECH3 CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$D"
+          git commit -m "BIOMECH3 verified independent CPU1 boot and work completion (native probe)" || exit 0
+          git push origin HEAD:experiment/biomech-rhythm-3-dualcore-3plus3-20261023
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BIOMECH3_PI32V2_CPU1_NATIVE_PROBE_NO_INSTALL
+          path: |
+            /tmp/br3/br3_probe.bin
+            /tmp/br3/br3_probe.elf
+            /tmp/br3/br3_probe.nm
+          retention-days: 14
