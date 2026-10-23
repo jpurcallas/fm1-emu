@@ -115,6 +115,9 @@ jobs:
       - name: Diagnostic 64/128 sample work granularity and native memory
         shell: bash
         run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_large_slices_pi32.sh
+      - name: Profile native CPU0 prep/submit/voices/wait/mix versus CPU1 work
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_phase_profile_pi32.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
