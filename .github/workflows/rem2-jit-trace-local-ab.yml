@@ -1,0 +1,86 @@
+name: REM2 LAB sampled trace local A-B (NO MERGE)
+on:
+  push:
+    branches:
+      - experiment/rem2-jit-trace-local-20261023
+    paths:
+      - 'crates/fm1-core/src/jit_wasm.rs'
+      - '.github/workflows/rem2-jit-trace-local-ab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/rem2-jit-trace-fastgate-20261023
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          path: optimized
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: CPU regression tests and AudioWorklet tests
+        working-directory: optimized
+        run: |
+          cargo test --release -p fm1-core --lib
+          node --test web/worklet.test.mjs experiments/reminiscent2-lab/pcmprobe.test.mjs
+      - name: Compile baseline and candidate WASM
+        run: |
+          cd baseline
+          tools/build_site.sh "$GITHUB_WORKSPACE/site_base"
+          cp "$GITHUB_WORKSPACE/site_base/fm1_web.wasm" "$GITHUB_WORKSPACE/baseline.wasm"
+          cd ../optimized
+          tools/build_site.sh "$GITHUB_WORKSPACE/site_opt"
+          cp "$GITHUB_WORKSPACE/site_opt/fm1_web.wasm" "$GITHUB_WORKSPACE/optimized.wasm"
+      - name: A-B non-silent PCM parity and timings (SID reference)
+        working-directory: optimized
+        run: |
+          for trial in 1 2; do
+            if [ "$trial" = 1 ]; then order="baseline optimized"; else order="optimized baseline"; fi
+            for which in $order; do
+              FM1_FWSC=fm1-sid/web/sidplayer.fwsc FM1_WASM="$GITHUB_WORKSPACE/$which.wasm" FM1_BENCH_NOKEYS=1 FM1_WARMUP_MS=500 FM1_BENCH_JSON="$GITHUB_WORKSPACE/${which}_${trial}.json" node web/bench.mjs 200 3 "$GITHUB_WORKSPACE/${which}_${trial}.raw"
+            done
+          done
+          python3 - <<'PY'
+          import json,os,hashlib
+          base=os.environ['GITHUB_WORKSPACE']
+          all_results=[]
+          for trial in (1,2):
+              blobs=[open(f'{base}/{which}_{trial}.raw','rb').read() for which in ('baseline','optimized')]
+              stats=[json.load(open(f'{base}/{which}_{trial}.json')) for which in ('baseline','optimized')]
+              assert stats[0]['jit']['failed']==stats[1]['jit']['failed']==0, 'JIT failed'
+              # Reject digital-silence parity.
+              assert any(blobs[0]) and any(blobs[1]), 'PCM is digitally silent'
+              count=min(map(len,blobs))
+              assert blobs[0][:count] == blobs[1][:count], 'PCM mismatch'
+              assert abs(len(blobs[0])-len(blobs[1]))<=512,'different audio frames'
+              result={'trial':trial,'sha256':hashlib.sha256(blobs[0][:count]).hexdigest(),
+                'compared_bytes':count,'jit_errors':0,
+                'p50_ms_baseline':stats[0]['steadyRenderMs']['p50'],
+                'p50_ms_optimized':stats[1]['steadyRenderMs']['p50'],
+                'p95_ms_baseline':stats[0]['steadyRenderMs']['p95'],
+                'p95_ms_optimized':stats[1]['steadyRenderMs']['p95'],
+                'realtime_baseline':stats[0]['steadyRealtime'],
+                'realtime_optimized':stats[1]['steadyRealtime']}
+              print(json.dumps(result,indent=2))
+              all_results.append(result)
+          with open(f'{base}/AB_RESULT.json','w') as f:json.dump(all_results,f,indent=2)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: REM2-JIT-TRACE-LOCAL-CANDIDATE-WASM-SID-GATE
+          path: |
+            baseline.wasm
+            optimized.wasm
+            baseline_1.json
+            baseline_2.json
+            optimized_1.json
+            optimized_2.json
+            AB_RESULT.json
+          retention-days: 30
