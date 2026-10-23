@@ -15,3 +15,14 @@ THIRD: delegate voices 4–6 with original state and preserve baseline PCM; comp
 FOURTH: compare two, three and six voices on same pattern at 200 MHz, export WAV and blackbox; check worst block and DMA.
 
 Success only if better audible results with full functionality. No BIOMECH 3 firmware yet.
+
+## Primer resultado real de CPU1 (2026-10-23)
+**PASS, emulador PI32v2, prueba aislada SIN síntesis musical.** Fuentes propias en `native-cpu1/` y artefactos de compilación en `native-cpu1/artifacts/`.
+
+- Compilación, enlace y ELF PI32v2 reales con herramienta JieLi y XIP en `0x02000120`; binario 648 bytes.
+- CPU0 ejerció directamente los registros de arranque de CPU1, sin despachador musical del SDK.
+- El CPU1 emulado ejecutó su propio `br3_cpu1_main`, leyó una solicitud firmada de la RAM compartida, ejecutó 64 iteraciones y respondió.
+- Evidencia de ejecución del huésped: `br3_status=0xB3300003`; trazas `CPU0=0xC0000003`, `CPU1=0xC1000002`; resultado esperado=observado=`0x8AA2F20D`; `halted=false`.
+- Evidencia CI: https://github.com/jpurcallas/fm1-emu/actions/runs/39986469523
+- **No es FWSC musical ni prueba 3+3 ni validación de hardware físico.** Tampoco prueba coherencia de caché bajo carga ni disponibilidad de CPU1 dentro del SDK original. Los resultados de CPU1 no autorizan reemplazar el motor de BIOMECH 2.
+- Siguiente implementación: preservar y recuperar el código C99 exacto del DSP de v0.2 y montar la entrada CPU1 propia en un FWSC experimental separado; primero trabajo sin DSP, luego transferencia de voces con igualdad funcional y audio comparado.
