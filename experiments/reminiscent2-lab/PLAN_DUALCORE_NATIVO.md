@@ -15,6 +15,14 @@ Probar deliberadamente una arquitectura propia para los **dos núcleos PI32v2 de
 - El archivo `REminiSCENT_2_LAB_INICIO_20261022_NO_INSTALAR.zip` contiene el **FWSC binario**, WAV y la prueba host, **no el código fuente completo, los objetos PI32v2 ni el enlazador de la compilación nativa**. Primero localizar y verificar el árbol de construcción exacto de v3.0.23 / SDK V14. Si no está, esto es un bloqueo de integración real, no una razón para fabricar un FWSC renombrado.
 - Cerradas las observaciones previas de ACK y JIT; no volver a abrirlas como investigación general. Su utilidad aquí es como controles de arranque, NOTE OFF, audio y DMA. La diferencia entre teclado y MIDI sigue como **regresión funcional a observar**, no como dependencia para intentar CPU1 propio.
 
+## Precedentes obligatorios: X0X y Clipper
+
+**Antes de escribir el controlador CPU1 del LAB**, usar el cruce [X0X_CLIPPER_REFERENCIAS_APLICADAS.md](X0X_CLIPPER_REFERENCIAS_APLICADAS.md) como parte del plan, no como lectura opcional. Está basado en código de arranque, mailbox, fallbacks y pruebas de ambos repositorios con commits fijados.
+
+**Corrección crucial al protocolo inicial de este plan:** el mailbox propio no será solo `job_seq/done_seq`; tendrá versión, tipo de tarea permitido, integridad de datos, alineación de caché, rechazados y una prueba de corrupción intencional. CPU0 no vuelve a tocar un buffer cuando CPU1 tarda sin **confirmar antes el estacionamiento**. El modo de fallo debe producir trazas incluso si el propio firmware deja de responder.
+
+X0X mide audio real en FM-1 y demuestra que la distribución por costo importa. Clipper reparte **voces dentro del instrumento**, prepara modulación en CPU0 y prueba modos inline/2 hilos con demoras y trabajos perdidos. Nuestra adaptación preservará **cuatro PARTS y su motor completo**; ninguno de esos antecedentes demuestra automáticamente la capacidad de nuestro firmware.
+
 ## Arquitectura de la apuesta
 
 ```
