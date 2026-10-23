@@ -588,8 +588,11 @@ void br3_set_executor(const BR3Executor *ops){
 #error "Only validated 3/3 assignments 0x38, 0x2A, 0x15 are allowed in the lab"
 #endif
 #define BR3_ON_CPU1(t) (((BR3_CPU1_TRACK_MASK>>(t))&1u)!=0u)
-#if BR3_SLICE_FRAMES < 1u || BR3_SLICE_FRAMES > 32u
-#error "BR3_SLICE_FRAMES must be 1..32"
+#if BR3_SLICE_FRAMES < 1u || BR3_SLICE_FRAMES > 128u
+#error "BR3_SLICE_FRAMES must be 1..128"
+#endif
+#if BR3_SLICE_FRAMES > 32u && !defined(BR3_LARGE_SLICE_LAB)
+#error "Large 64/128 work slices are diagnostic only, not approved for V14 memory/DMA"
 #endif
 typedef struct {
   BREngine *engine;
