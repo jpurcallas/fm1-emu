@@ -168,6 +168,9 @@ pub struct CoreWriterProbe {
     other_stores: Vec<(u64,u64,u32,u32,u8,u8,u8)>,
     schedule_events: Vec<(u64,u64,u8,u32,u32,u8,u8,u8)>,
     irq127_writes: Vec<(u64,u64,u32,u32,u8,u32,u32,u8,u8)>,
+    // CPU0/CPU1 acknowledgement byte: exact guest store, not a slice-end inference.
+    sync_ack_writes: Vec<(u64,u64,u8,u32,u32,u8,u8,u8,bool)>,
+    sync_ack_dropped: u64,
 }
 impl CoreWriterProbe {
     pub fn report(&self) -> String {
@@ -205,8 +208,15 @@ impl CoreWriterProbe {
             r#"{{"cycle":{},"half":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"value":{},"ilatBefore":{},"panel":{},"producer":{}}}"#,
             cycle,half,pc,addr,width,value,ilat,panel,producer
         )).collect::<Vec<_>>().join(",");
-        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}],"irq127Writes":[{}]}}"#,
-            self.checks,events,counts,recent,at_voice,exact,snapshots,others,schedule,requests)
+        let acknowledgements=self.sync_ack_writes.iter().enumerate().map(
+            |(seq,(cycle,half,core,pc,addr,width,before,after,jit))| format!(
+                r#"{{"seq":{},"cycle":{},"half":{},"core":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{},"jitCallback":{}}}"#,
+                seq,cycle,half,core,pc,addr,width,before,after,jit
+            )
+        ).collect::<Vec<_>>().join(",");
+        format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}],"irq127Writes":[{}],"syncAckWrites":[{}],"syncAckDropped":{}}}"#,
+            self.checks,events,counts,recent,at_voice,exact,snapshots,others,schedule,requests,
+            acknowledgements,self.sync_ack_dropped)
     }
 }
 
@@ -233,6 +243,9 @@ pub struct Soc {
     pub keyvoice_watch: Option<KeyVoiceWatch>,
     pub writer_probe: Option<CoreWriterProbe>,
     current_instruction_pc: u32,
+    current_instruction_core: u8,
+    // Suppress the duplicate bus notification following a JIT guest-store callback.
+    pending_sync_jit_store: Option<(u8,u32,u32,u8,u32)>,
     sfr: std::collections::HashMap<u32, u32, std::hash::BuildHasherDefault<AddrHasher>>,
     /// Core 0 / 1 paused by the other (C0_CON / C1_CON bit 2 pulses, bit 3 resumes).
     paused: [bool; 2],
@@ -309,6 +322,8 @@ impl Soc {
             keyvoice_watch: None,
             writer_probe: None,
             current_instruction_pc: 0,
+            current_instruction_core: 0,
+            pending_sync_jit_store: None,
             sfr: Default::default(),
             paused: [false; 2],
             lock_owner: None,
@@ -394,13 +409,55 @@ impl Soc {
         }
     }
 
-    #[inline]
-    fn observe_target_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
-        const TARGET: u32 = 0x01c1_993f;
-        if self.writer_probe.is_none() || !(1380..=1540).contains(&self.periph.ms()) {
-            return;
+    /// Current guest instruction, not a scheduling-slice end PC.
+    /// CPU1 calls this through Core1Bus, including its interpreted instructions.
+    pub fn trace_core_instruction(&mut self, core: u8, pc: u32) {
+        if self.writer_probe.is_some() {
+            self.current_instruction_core=core;
+            self.current_instruction_pc=pc;
+            self.pending_sync_jit_store=None;
         }
-        if width == 0 { return; }
+    }
+
+    /// JIT emits this callback before its inline RAM store; the reported PC
+    /// is the guest instruction's PC, even when Rust's Bus::write* is bypassed.
+    pub fn trace_core_store(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32) {
+        if self.writer_probe.is_none() { return; }
+        self.current_instruction_core=core;
+        self.current_instruction_pc=pc;
+        self.observe_target_store(core,pc,addr,width,value,true);
+    }
+
+    #[inline]
+    fn observe_target_store(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32, from_jit: bool) {
+        const TARGET: u32 = 0x01c1_993f;
+        const ACK: u32 = 0x01c1_0984;
+        if self.writer_probe.is_none() || width == 0 { return; }
+        // Time is emulated device time. The 1343..1346 ms CPU0 wait is inside
+        // this narrow window; other key-up probes retain their original window.
+        let ack_hit = (1330..=1360).contains(&self.periph.ms())
+            && addr <= ACK && ACK-addr < width as u32;
+        if from_jit && ack_hit {
+            self.pending_sync_jit_store=Some((core,pc,addr,width,value));
+        } else if !from_jit {
+            // h_guest_store is followed by h_write on the JIT slow path.
+            // The helper must not create a second fictitious guest write.
+            let duplicate=self.pending_sync_jit_store.take()==Some((core,pc,addr,width,value));
+            if duplicate && ack_hit { return; }
+        }
+        if ack_hit {
+            let before=self.ram.read8(ACK-RAM_BASE);
+            let after=((value >> (8*(ACK-addr))) & 255) as u8;
+            if let Some(p)=self.writer_probe.as_mut() {
+                if p.sync_ack_writes.len()<8192 {
+                    p.sync_ack_writes.push((self.periph.cycles,self.periph.audio_halves,
+                        core,pc,addr,width,before,after,from_jit));
+                } else {
+                    p.sync_ack_dropped+=1;
+                }
+            }
+        }
+        if !(1380..=1540).contains(&self.periph.ms()) { return; }
         // IRQ 120..127 are software interrupts in the ILAT write register.
         // Capture the request/acknowledgement guest store PC through both the
         // interpreter and inline JIT paths, without reading or writing guest IO.
@@ -691,11 +748,11 @@ impl Soc {
 impl Bus for Soc {
     #[inline(always)]
     fn trace_instruction_pc(&mut self, pc: u32) {
-        if self.writer_probe.is_some() { self.current_instruction_pc=pc; }
+        self.trace_core_instruction(0,pc);
     }
     #[inline(always)]
     fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
-        self.observe_target_store(pc,addr,width,value);
+        self.trace_core_store(0,pc,addr,width,value);
     }
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
@@ -797,7 +854,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write8(&mut self, addr: u32, value: u8) {
-        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,1,value as u32); }
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_core,self.current_instruction_pc,addr,1,value as u32,false); }
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
             return self.ram.write8(o, value);
@@ -807,7 +864,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write16(&mut self, addr: u32, value: u16) {
-        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,2,value as u32); }
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_core,self.current_instruction_pc,addr,2,value as u32,false); }
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
         if o + 2 <= self.ram.len() && addr & 1 == 0 {
@@ -818,7 +875,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write32(&mut self, addr: u32, value: u32) {
-        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_pc,addr,4,value as u32); }
+        if self.writer_probe.is_some() { self.observe_target_store(self.current_instruction_core,self.current_instruction_pc,addr,4,value as u32,false); }
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
             return self.ram.write32(o as u32, value);
@@ -1137,6 +1194,36 @@ pub fn write_boot_info(soc: &mut Soc, at: u32, flash: &[u8]) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sync_ack_catches_cpu0_cpu1_and_jit_without_double_counting() {
+        const ACK: u32 = 0x01c1_0984;
+        let mut soc=Soc::new(1<<20, vec![]);
+        soc.periph.hz=200_000_000;
+        soc.periph.cycles=soc.periph.cycle_of_ms(1343);
+        soc.writer_probe=Some(CoreWriterProbe::default());
+
+        soc.trace_core_instruction(0,0x01c0_b9fa);
+        soc.write8(ACK,0);
+        soc.trace_core_instruction(1,0x01c0_bd26);
+        soc.write8(ACK,1);
+        // Simulate the JIT pre-store callback plus the Rust slow-path write:
+        // one actual guest instruction must yield exactly one event.
+        soc.trace_core_store(1,0x01c0_bd30,ACK,1,0);
+        soc.write8(ACK,0);
+        // Inline JIT's direct RAM write bypasses Soc::write8 altogether.
+        soc.trace_core_store(1,0x01c0_bd32,ACK,1,3);
+        soc.ram.write8(ACK-RAM_BASE,3);
+
+        let p=soc.writer_probe.as_ref().unwrap();
+        assert_eq!(p.sync_ack_writes.len(),4);
+        assert_eq!(p.sync_ack_dropped,0);
+        assert_eq!((p.sync_ack_writes[0].2,p.sync_ack_writes[0].3), (0,0x01c0_b9fa));
+        assert_eq!((p.sync_ack_writes[1].2,p.sync_ack_writes[1].3), (1,0x01c0_bd26));
+        assert_eq!((p.sync_ack_writes[2].6,p.sync_ack_writes[2].7),(1,0));
+        assert_eq!((p.sync_ack_writes[3].6,p.sync_ack_writes[3].7),(0,3));
+        assert!(p.sync_ack_writes[3].8);
+    }
 
     #[test]
     fn flash_writes_show_through_xip() {
