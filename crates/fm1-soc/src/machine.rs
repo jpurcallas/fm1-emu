@@ -28,17 +28,23 @@ impl Bus for Core1Bus<'_> {
         self.soc.record_biomech_coord(1, pc, addr, width, value);
     }
     fn read8(&mut self, a: u32) -> u8 {
+        self.soc.biomech_coord_core = 1;
         let value = self.soc.core1_read8(a);
+        self.soc.biomech_coord_core = 0;
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 1, value as u32);
         value
     }
     fn read16(&mut self, a: u32) -> u16 {
+        self.soc.biomech_coord_core = 1;
         let value = self.soc.core1_read16(a);
+        self.soc.biomech_coord_core = 0;
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 2, value as u32);
         value
     }
     fn read32(&mut self, a: u32) -> u32 {
+        self.soc.biomech_coord_core = 1;
         let value = self.soc.core1_read32(a);
+        self.soc.biomech_coord_core = 0;
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 4, value as u32);
         value
     }
