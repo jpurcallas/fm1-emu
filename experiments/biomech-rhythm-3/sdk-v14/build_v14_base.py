@@ -61,9 +61,12 @@ for d in ["sdk/include","sdk/include/libc","app/synth","sdk/config","app","app/b
 sources=sorted(p for p in APP.rglob("*")
  if p.suffix in (".c",".S") and not p.is_relative_to(APP/"synth"))
 if BR3_FULL:
+ slice_size=int(os.getenv("BR3_FULL_SLICE_FRAMES","16"))
+ if slice_size not in (8,16,32):raise SystemExit("BR3_FULL_SLICE_FRAMES must be 8, 16 or 32")
  flags+=["-DBR3_DUAL_CORE","-DBR3_PI32V2","-DBR3_EMULATOR_LAB",
          "-DBR3_SDK_CPU1_PROBE_SERIAL","-DBR3_ACTIVE_SLOTS_LAB",
-         "-DBR3_SDK_NATIVE_AUDIO"]
+         "-DBR3_SDK_NATIVE_AUDIO","-DBR3_SLICE_FRAMES="+str(slice_size)]
+ note("BR3_FULL_SLICE_FRAMES "+str(slice_size)+"; musical DSP/polyphony unchanged")
 note("APP SOURCES "+str(len(sources)))
 objs=[]
 for i,path in enumerate(sources):
