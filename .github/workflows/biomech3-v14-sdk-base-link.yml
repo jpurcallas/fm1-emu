@@ -42,6 +42,7 @@ jobs:
           /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-music/sdk.elf > /tmp/br3-v14-music/sdk.nm
           grep -E 'br_render$|br3_cpu1_start$|br3_cpu1_main$|br3_blackbox$' /tmp/br3-v14-music/sdk.nm
           sha256sum /tmp/br3-v14-music/sdk.elf
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14/sdk.elf > /tmp/br3-v14/sdk.nm
           python3 - <<'PY'
           import pathlib
           def read(p):
