@@ -152,7 +152,7 @@ const hubCard = (f) => `https://thefirmwarehub.com/#fw-${f.hub}`;
 const twins = new Map();
 if (DEVICE === "fm1") {
   try {
-    for (const s of (await (await fetch("smk37/firmwares.json")).json()).firmwares) if (s.fm1) twins.set(s.fm1, s.id);
+    for (const s of (await (await fetch("../smk37/firmwares.json")).json()).firmwares) if (s.fm1) twins.set(s.fm1, s.id);
   } catch { /* (no SMK-37 catalog next to this page: no links) */ }
 }
 {
@@ -343,7 +343,27 @@ async function openLocal(file) {
   if (node) boot();
   else status.textContent = `${file.name} ready: click Start`;
 }
-openInput.addEventListener("change", () => { openLocal(openInput.files[0]); openInput.value = ""; });
+let pendingFirmwareRead = Promise.resolve();
+function queueFirmware(file) {
+  pendingFirmwareRead = openLocal(file);
+  pendingFirmwareRead.catch(error => {
+    status.textContent = "Cannot read .fwsc: " + String(error);
+    bbstate.textContent = "Firmware upload failed; select the file again.";
+  });
+  return pendingFirmwareRead;
+}
+openInput.addEventListener("change", () => {
+  const file = openInput.files[0];
+  if (file) queueFirmware(file);
+  openInput.value = "";
+});
+window.__bbPickerBound = true;
+if (window.__bbPendingFW) {
+  const file = window.__bbPendingFW;
+  window.__bbPendingFW = null;
+  queueFirmware(file);
+  openInput.value = "";
+}
 bankInput.addEventListener("change", async () => {
   const file = bankInput.files[0];
   bankInput.value = "";
@@ -967,9 +987,12 @@ function onWorklet(e) {
   }
 }
 
+startBtn.disabled = false;
+startBtn.textContent = "Start";
 startBtn.addEventListener("click", async () => {
   startBtn.disabled = true;
   status.textContent = "starting audio…";
+  await pendingFirmwareRead;
   if (!node) await startAudio();
   const started = await boot();
   if (!started) { startBtn.disabled = false; return; }
