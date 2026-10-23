@@ -30,7 +30,7 @@ jobs:
           L=/tmp/jieli/pi32v2/lib/r3
           O=/tmp/biomech3-music
           mkdir -p "$O"
-          CFLAGS='-target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DBR3_DUAL_CORE -DBR3_PI32V2'
+          CFLAGS='-target pi32v2 -I/tmp/jieli/pi32v2/include -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -ffreestanding -fno-builtin -ffunction-sections -fdata-sections -DBR3_DUAL_CORE -DBR3_PI32V2'
           "$T/clang" -target pi32v2 -mcpu=r3 -c "$S/linkcheck_entry.S" -o "$O/cpu0_entry.o"
           "$T/clang" -target pi32v2 -mcpu=r3 -c "$S/br3_cpu1_entry.S" -o "$O/cpu1_entry.o"
           for file in biomech br3_cpu1_runtime br3_blackbox linkcheck_main; do
