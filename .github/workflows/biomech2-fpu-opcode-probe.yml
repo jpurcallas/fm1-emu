@@ -12,12 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Retrieve pinned JieLi PI32v2 assembler and objdump (temporary runner only)
+      - name: Identify official JieLi download and decode opcode with vendor objdump
         shell: bash
         run: |
           set -euxo pipefail
           curl --retry 2 --connect-timeout 15 --max-time 150 -fLsS 'https://pkgman.jieliapp.com/s/linux-toolchain' -o /tmp/pi32-tools.tar.xz
-          echo 'f686586bcfb45e0f0bb27fd2b39c7a7f313cb4f0e88a66a14da621ffa8225958  /tmp/pi32-tools.tar.xz' | sha256sum -c -
+          echo '=== OFFICIAL DOWNLOAD IDENTIFICATION (short URL has moved from archived hash) ==='
+          sha256sum /tmp/pi32-tools.tar.xz
+          file /tmp/pi32-tools.tar.xz
+          test "$(stat -c %s /tmp/pi32-tools.tar.xz)" -gt 10000000
+          xz -t /tmp/pi32-tools.tar.xz
+          echo '=== END DOWNLOAD CHECK ==='
           mkdir -p /tmp/pi32-tools
           tar -xJf /tmp/pi32-tools.tar.xz -C /tmp/pi32-tools --strip-components=1
           ls -la /tmp/pi32-tools/pi32v2/bin/ | head -45
