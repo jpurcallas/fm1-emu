@@ -1,0 +1,99 @@
+--- v11/src/rn_sends.c
++++ v12/src/rn_sends.c
+@@ -61,12 +61,12 @@
+  /* Different prime-ish allpass lengths widen the stereo image without allocating buffers. */
+  const unsigned len=stage?(ch?191u:173u):(ch?149u:127u);
+  unsigned head=s->allpass_head[ch][stage];
+- unsigned idx=head%len;
++ unsigned idx=head; /* head is maintained < len by the original allpass update */
+  int32_t z=s->allpass[ch][stage][idx];
+  /* Inverted-signed Schroeder allpass g=0.5, output = z -g*x; storage = x + g*out. */
+  int32_t y=z-(x>>1);
+  s->allpass[ch][stage][idx]=clip16((int64_t)x+(y>>1));
+- s->allpass_head[ch][stage]=(uint16_t)((head+1)%len);
++ s->allpass_head[ch][stage]=(uint16_t)((head+1u)==len?0u:head+1u);
+  return y;
+ }
+ /* Nonlinear taper of DECAY keeps short rooms available while giving mid/high
+@@ -113,14 +113,14 @@
+  unsigned feedback=s->reverb_feedback_cached;
+  for(unsigned k=0;k<4;k++){
+    unsigned len=s->reverb_len_cached[k];
+-   unsigned read=(head+RN_SEND_REVERB_LEN-len)%RN_SEND_REVERB_LEN;
++   unsigned read=head>=len?head-len:head+RN_SEND_REVERB_LEN-len;
+    int32_t tap=s->comb[k][read];
+    s->comb_lp[k]+=(int32_t)(((int64_t)(tap-s->comb_lp[k])*attenuation)>>15);
+    int32_t v=input/3+(int32_t)(((int64_t)s->comb_lp[k]*feedback)>>15);
+    s->comb[k][head]=clip16(v);
+    if((k&1u)==0)sum_l+=tap;else sum_r+=tap;
+  }
+- s->reverb_head=(head+1)%RN_SEND_REVERB_LEN;
++ s->reverb_head=((head+1u)==RN_SEND_REVERB_LEN)?0u:head+1u;
+  /* Stereo diffusion; the extra factor compensates for the lower comb input. */
+  int32_t left=clip16(sum_l/2),right=clip16(sum_r/2);
+  left=allpass(s,0,0,left);left=allpass(s,0,1,left);
+@@ -187,10 +187,12 @@
+  }
+ }
+ RN_HOT void rn_sends_render(rn_sends *s,const int32_t input[4][2],int32_t *left,int32_t *right){
+- int64_t bus[4][2]={{0}};
++ /* Four Q23 sources sum inside signed 32-bit range (worst |sum| <= 33554432).
++  * Keep each product/division in int64_t to preserve all rounding. */
++ int32_t bus[4][2]={{0}};
+  for(unsigned p=0;p<4;p++)for(unsigned b=0;b<4;b++)if(s->send[p][b]){
+-   bus[b][0]+=(int64_t)input[p][0]*s->send[p][b]/127;
+-   bus[b][1]+=(int64_t)input[p][1]*s->send[p][b]/127;
++   bus[b][0]+=(int32_t)((int64_t)input[p][0]*s->send[p][b]/127);
++   bus[b][1]+=(int32_t)((int64_t)input[p][1]*s->send[p][b]/127);
+  }
+  int32_t w_l,w_r;
+  render_delay(s,clip24(bus[0][0]),clip24(bus[0][1]),&w_l,&w_r);
+--- v11/src/rn_v12_dualcore_kernel.c
++++ v12/src/rn_v12_dualcore_kernel.c
+@@ -52,7 +52,8 @@
+  if(!s||!out||frames!=128u)return -1;
+  /* CPU0 alone owns global FX and preserves exact interleaved per-sample order. */
+  for(unsigned j=0;j<256u;j+=2){
+-  int64_t mixL=0,mixR=0;
++  /* Four Q23 PART stems fit signed 32-bit with no loss of range. */
++  int32_t mixL=0,mixR=0;
+   int32_t send_input[4][2];
+   for(unsigned p=0;p<4u;p++){
+    send_input[p][0]=s->acoustic_stems[p][j];
+--- v11/src/rn_v12_audio.c
++++ v12/src/rn_v12_audio.c
+@@ -101,16 +101,19 @@
+         return;
+     }
+     render_ticks=elapsed(start, FM1_AUDIO_TIMER_COUNT);
+-    unsigned probe_slot=statistics.blocks;
+-    if(probe_slot<176u){
+-       rn_audio_pcm_probe_v11.row[probe_slot].block=probe_slot+1u;
+-    }
++    /* SDK mix remains mandatory for EVERY build and every audio block. */
+     fm1_output_mix(rendered);
+-    if(probe_slot<176u){
++#if !defined(RN_SKIP_FNV_DIAGNOSTIC)
++    /* Snapshot 1/16 blocks: preserve meaningful PCM fingerprints without
++       spending a full hash pass on every real-time interrupt. */
++    if(statistics.blocks<176u && !(statistics.blocks & 15u)){
++       unsigned probe_slot=statistics.blocks>>4;
++       rn_audio_pcm_probe_v11.row[probe_slot].block=statistics.blocks+1u;
+        rn_audio_pcm_probe_v11.row[probe_slot].pre_mix=probe_pcm(rendered);
+        rn_audio_pcm_probe_v11.count=probe_slot+1u;
+        rn_audio_pcm_probe_v11.magic=0xA11D1051u;
+     }
++#endif
+     mixed_ticks=elapsed(start, FM1_AUDIO_TIMER_COUNT);
+     peak=r2_peak(rendered,&nonzero);
+     r2_ring *counters=&r2_box.cpu[0];
+@@ -177,6 +180,9 @@
+     block_ticks = (uint32_t)((uint64_t)clock * FM1_BLOCK_FRAMES / FM1_AUDIO_HARDWARE_RATE);
+     if (!block_ticks) return -1;
+     r2_init(clock,block_ticks-(block_ticks>>3));
++#ifdef RN_SKIP_FNV_DIAGNOSTIC
++    rn_audio_pcm_probe_v11.magic=0u; /* keep layout/symbol; no per-block hash */
++#endif
+     cpu1_probe_blocks=0u;
+     r2_last_good=0u;
+     memset(receive, 0, sizeof receive);
