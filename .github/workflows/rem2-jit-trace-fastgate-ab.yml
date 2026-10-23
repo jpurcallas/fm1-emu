@@ -1,0 +1,75 @@
+name: REM2 LAB passive guest trace watch fast gate A-B
+on:
+  push:
+    branches:
+      - experiment/rem2-jit-trace-fastgate-20261023
+    paths:
+      - 'crates/fm1-core/src/jit_wasm.rs'
+      - '.github/workflows/rem2-jit-trace-fastgate-ab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/rem2-jit-pair64-memory-20261023
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          path: optimized
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: CPU and JIT regression tests
+        working-directory: optimized
+        run: |
+          cargo test --release -p fm1-core --lib
+          node --test web/worklet.test.mjs experiments/reminiscent2-lab/pcmprobe.test.mjs
+      - name: Baseline WASM
+        working-directory: baseline
+        run: |
+          tools/build_site.sh "$GITHUB_WORKSPACE/site_base"
+          cp "$GITHUB_WORKSPACE/site_base/fm1_web.wasm" "$GITHUB_WORKSPACE/baseline.wasm"
+      - name: Optimized WASM
+        working-directory: optimized
+        run: |
+          tools/build_site.sh "$GITHUB_WORKSPACE/site_opt"
+          cp "$GITHUB_WORKSPACE/site_opt/fm1_web.wasm" "$GITHUB_WORKSPACE/optimized.wasm"
+      - name: A-B identical input and compare PCM samples
+        working-directory: optimized
+        run: |
+          FM1_FWSC=fm1-sid/web/sidplayer.fwsc FM1_WASM="$GITHUB_WORKSPACE/baseline.wasm" FM1_BENCH_NOKEYS=1 FM1_WARMUP_MS=500 FM1_BENCH_JSON="$GITHUB_WORKSPACE/base.json" node web/bench.mjs 200 3 "$GITHUB_WORKSPACE/base.raw"
+          FM1_FWSC=fm1-sid/web/sidplayer.fwsc FM1_WASM="$GITHUB_WORKSPACE/optimized.wasm" FM1_BENCH_NOKEYS=1 FM1_WARMUP_MS=500 FM1_BENCH_JSON="$GITHUB_WORKSPACE/opt.json" node web/bench.mjs 200 3 "$GITHUB_WORKSPACE/opt.raw"
+          python3 - <<'PY'
+          import os, json, hashlib
+          a=open(os.environ['GITHUB_WORKSPACE']+'/base.raw','rb').read()
+          b=open(os.environ['GITHUB_WORKSPACE']+'/opt.raw','rb').read()
+          assert a and b
+          j=[json.load(open(os.environ['GITHUB_WORKSPACE']+'/'+x)) for x in ('base.json','opt.json')]
+          assert all(z['jit']['failed']==0 for z in j), f"JIT compilation errors: {[z['jit']['failed'] for z in j]}"
+          n=min(len(a),len(b))
+          assert a[:n]==b[:n],f"PCM sample discrepancy: first mismatch at byte {next(i for i in range(n) if a[i]!=b[i])}"
+          assert abs(len(a)-len(b))<=512, f"Different audio frame counts {len(a)} vs {len(b)}"
+          summary={'reference':'baseline PCM exact common prefix','compared_bytes':n,'base_bytes':len(a),'opt_bytes':len(b),
+                   'base_p50_ms':j[0]['steadyRenderMs']['p50'],'opt_p50_ms':j[1]['steadyRenderMs']['p50'],
+                   'base_p95_ms':j[0]['steadyRenderMs']['p95'],'opt_p95_ms':j[1]['steadyRenderMs']['p95'],
+                   'realtime_base':j[0]['steadyRealtime'],'realtime_opt':j[1]['steadyRealtime']}
+          print(json.dumps(summary,indent=2))
+          json.dump(summary,open(os.environ['GITHUB_WORKSPACE']+'/AB_RESULT.json','w'),indent=2)
+          PY
+      - name: Deliver instrumented A-B WASM and test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: REM2-JIT-TRACE-GATE-A-B-WASM-PCMPARITY
+          path: |
+            baseline.wasm
+            optimized.wasm
+            base.json
+            opt.json
+            AB_RESULT.json
+          retention-days: 30
