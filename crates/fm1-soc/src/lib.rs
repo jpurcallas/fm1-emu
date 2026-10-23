@@ -569,6 +569,9 @@ impl Bus for Soc {
     fn trace_guest_store(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
         self.record_biomech_coord(0, pc, addr, width, value);
     }
+    fn trace_guest_read(&mut self, pc: u32, addr: u32, width: u8, value: u32) {
+        self.record_biomech_coord_read(0, pc, addr, width, value);
+    }
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
             self.periph.next_due = 0;
