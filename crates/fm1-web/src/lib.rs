@@ -107,15 +107,40 @@ impl Machine {
         let jit = self.cpu.jit_on;
         if let Some(c1) = self.cpu1.as_mut() { c1.profile = self.cpu.profile; }
         let Machine { cpu, cpu1, soc, pending_tick, .. } = self;
-        if machine::run_dual(cpu1, soc, n, RAM_SIZE, jit, |soc, k| machine::run_blocks(cpu, soc, k, pending_tick)).is_err() {
-            self.halted = true;
-        }
+        // Diagnostic-only counterfactual: after the normal boot has released
+        // core 1, allow an explicit test to run cpu0 without interleaving cpu1.
+        // This does not change guest memory or firmware. It IS an experimental
+        // change in emulator scheduling; never use it as a production fix.
+        let cpu1_frozen = unsafe { CPU1_FREEZE_AFTER_MS != 0 }
+            && soc.periph.ms() >= unsafe { CPU1_FREEZE_AFTER_MS };
+        let outcome = if cpu1_frozen && cpu1.is_some() {
+            machine::run_blocks(cpu, soc, n, pending_tick)
+        } else {
+            machine::run_dual(cpu1, soc, n, RAM_SIZE, jit,
+                |soc, k| machine::run_blocks(cpu, soc, k, pending_tick))
+        };
+        if outcome.is_err() { self.halted = true; }
     }
 }
 
 static mut M: Option<Machine> = None;
 static mut JIT: bool = false;
 static mut JIT_PER_RENDER: u32 = 0;
+static mut CPU1_FREEZE_AFTER_MS: u32 = 0;
+
+/// Isolated emulator-only experiment; set 0 for the original behavior.
+/// Freezes CPU1 scheduling only after the selected emulated millisecond.
+#[no_mangle]
+pub extern "C" fn fm1_diag_freeze_cpu1_after(ms: u32) {
+    unsafe { CPU1_FREEZE_AFTER_MS = ms; }
+}
+
+/// Observe CPU1 execution count; no profiling or timing modification.
+#[no_mangle]
+pub extern "C" fn fm1_diag_cpu1_insns() -> u64 {
+    machine().and_then(|m| m.cpu1.as_ref().map(|c| c.insn_count)).unwrap_or(0)
+}
+
 static mut OUT_L: [f32; 1024] = [0.0; 1024];
 static mut OUT_R: [f32; 1024] = [0.0; 1024];
 static mut LEDS: [f32; 41] = [0.0; 41];
