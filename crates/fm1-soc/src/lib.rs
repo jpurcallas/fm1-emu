@@ -659,7 +659,9 @@ impl Bus for Soc {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
             let value = self.ram.read32(o as u32);
-            self.record_biomech_coord_read(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, value);
+            if self.biomech_coord_core == 0 {
+                self.record_biomech_coord_read(0, self.biomech_coord_pc[0], addr, 4, value);
+            }
             return value;
         }
         let x = addr.wrapping_sub(XIP_BASE) as usize;
