@@ -330,6 +330,7 @@ const I32_STORE: u8 = 0x36;
 const I32_STORE8: u8 = 0x3a;
 const I32_STORE16: u8 = 0x3b;
 const I32_CONST: u8 = 0x41;
+const I32_CLZ: u8 = 0x67;
 const I32_EQZ: u8 = 0x45;
 const I32_EQ: u8 = 0x46;
 const I32_NE: u8 = 0x47;
@@ -357,6 +358,11 @@ const I32_SHL: u8 = 0x74;
 const I32_SHR_S: u8 = 0x75;
 const I32_SHR_U: u8 = 0x76;
 const I32_WRAP_I64: u8 = 0xa7;
+const I64_EXTEND_I32_U: u8 = 0xad;
+const I64_OR: u8 = 0x84;
+const I64_SHL: u8 = 0x86;
+const I64_SHR_S: u8 = 0x87;
+const I64_ROTR: u8 = 0x8a;
 const I64_SHR_U: u8 = 0x88;
 const I64_CONST: u8 = 0x42;
 const I64_EQZ: u8 = 0x50;
@@ -1408,6 +1414,82 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 g.set(L_VAL);
                 g.jump_local(L_VAL, count);
                 ended = true;
+            }
+            // Unambiguous scalar unary ops: fast direct WebAssembly arithmetic.
+            // Case 2 implements wrapping signed abs, including INT_MIN.
+            // k=3,5,6 still use the reference executor for now.
+            Fast::Un { d, s, k } if matches!(k, 0 | 1 | 2 | 4) => {
+                g.ld_reg(s);
+                g.set(L_A);
+                g.get(L_CPU);
+                match k {
+                    0 => {
+                        g.get(L_A);
+                        g.i32c(u32::MAX);
+                        g.op(I32_XOR);
+                    }
+                    1 => {
+                        g.i32c(0);
+                        g.get(L_A);
+                        g.op(I32_SUB);
+                    }
+                    2 => {
+                        g.get(L_A);
+                        g.i32c(31);
+                        g.op(I32_SHR_S);
+                        g.set(L_B);
+                        g.get(L_A);
+                        g.get(L_B);
+                        g.op(I32_XOR);
+                        g.get(L_B);
+                        g.op(I32_SUB);
+                    }
+                    4 => { g.get(L_A); g.op(I32_CLZ); }
+                    _ => unreachable!(),
+                }
+                g.mem_op(I32_STORE, 2, off_reg(d));
+            }
+            // A hot 64-bit subset of PI32v2 Raw21: paired shift and rotate.
+            // Preserve the exact register mapping, count masking, arithmetic
+            // right shift and both halves. Other Raw21 patterns retain helper.
+            Fast::Raw { route: 21, raw } if matches!(raw as u8, 0xd0 | 0xd8 | 0xd4 | 0xdc) => {
+                let lo = ((raw >> 29) & 7) as u8 * 2;
+                let hi = lo + 1;
+                g.ld_reg(hi);
+                g.op(I64_EXTEND_I32_U);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHL);
+                g.ld_reg(lo);
+                g.op(I64_EXTEND_I32_U);
+                g.op(I64_OR);
+                let by_reg = matches!(raw as u8, 0xd8 | 0xdc);
+                if by_reg {
+                    g.ld_reg(((raw >> 24) & 0xf) as u8);
+                    g.i32c(63);
+                    g.op(I32_AND);
+                } else {
+                    g.i32c(((raw >> 16) & 0xf) | (((raw >> 24) & 3) << 4));
+                }
+                let shift_op = if matches!(raw as u8, 0xd4 | 0xdc) {
+                    I64_ROTR
+                } else {
+                    let op = if by_reg { (raw >> 16) & 3 } else { (raw >> 26) & 3 };
+                    match op { 0 | 1 => I64_SHL, 2 => I64_SHR_U, _ => I64_SHR_S }
+                };
+                g.op(shift_op);
+                g.set(L_OPRES);
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(lo));
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHR_U);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(hi));
             }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
