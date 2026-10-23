@@ -38,6 +38,9 @@ struct Machine {
     trace: VecDeque<(u32,u32,u64,u64,u64)>,
     // Emulator-owned input breadcrumbs: (kind, knob/key, delta/down, ms, CPU0 PC).
     control_events: VecDeque<(u32,u32,i32,u32,u32)>,
+    // Precise CPU0 branch tracing expires automatically, so it cannot slow
+    // a whole musical performance after a brief encoder diagnosis.
+    trace_until_ms: Option<u64>,
     flash0: Vec<u8>,
     usr: Option<usize>,
     started: bool,
@@ -62,6 +65,7 @@ impl Machine {
         let flash0 = soc.flash.mem.clone();
         Machine { cpu, cpu1: None, soc, pending_tick: false, audio: VecDeque::new(), halted: false, halt_reason: None, trace: VecDeque::with_capacity(256),
             control_events: VecDeque::with_capacity(64),
+            trace_until_ms: None,
             flash0, usr: None, started: false }
     }
 
@@ -126,6 +130,13 @@ impl Machine {
         if let Err(e) = result {
             self.halted = true;
             self.halt_reason = Some(e);
+        }
+        if let Some(until) = self.trace_until_ms {
+            if self.soc.periph.ms() >= until {
+                self.trace_until_ms = None;
+                self.cpu.br2_trace_on = false;
+                self.cpu.jit_on = unsafe { JIT };
+            }
         }
     }
 }
@@ -402,6 +413,9 @@ pub extern "C" fn fm1_enc(enc: u32, clicks: i32) {
         if clicks != 0 {
             m.cpu.br2_trace_on = true;
             m.cpu.jit_on = false;
+            // Earlier BIOMECH crash happened 14-55 ms after turning this encoder.
+            // Record 250 ms of branch history, then revert to selected JIT mode.
+            m.trace_until_ms = Some((m.soc.periph.ms() as u64).saturating_add(250));
         }
         m.soc.periph.apply(&Action::Enc { enc: enc as u8, clicks });
     }
@@ -461,8 +475,9 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
         let cpu1_counters = m.cpu1.as_ref().map_or("null".to_owned(),
             |c| format!("{{\"pc\":{},\"insn_count\":{}}}", c.pc, c.insn_count));
         // Reason is an emulator-generated diagnostic string, not untrusted guest text.
-        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{},\"cpu0_branches\":[{}],\"control_events\":[{}],\"branch_trace_armed\":{}}}",
-            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters,branches,inputs,m.cpu.br2_trace_on)
+        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{},\"cpu0_branches\":[{}],\"control_events\":[{}],\"branch_trace_armed\":{},\"cpu0_jit_enabled\":{},\"trace_until_ms\":{}}}",
+            m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters,branches,inputs,m.cpu.br2_trace_on,m.cpu.jit_on,
+            m.trace_until_ms.map_or("null".to_owned(),|v|v.to_string()))
     }).unwrap_or_else(|| "{\"schema\":\"BR2-WEB-BB1\",\"error\":\"no machine\"}".to_owned());
     unsafe {
         BLACKBOX_JSON = value.into_bytes();
