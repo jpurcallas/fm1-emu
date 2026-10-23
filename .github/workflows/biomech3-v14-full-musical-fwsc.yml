@@ -50,6 +50,17 @@ jobs:
                   sel.extend(range(max(0,i-1),min(len(rows),i+2)))
           for i in sorted(set(sel))[:190]:
               print('BR3_ADAPTER_CONTROL',i+1,rows[i][:190])
+          for i in range(145,min(274,len(rows))):
+              print('BR3_ADAPTER_AUDIO_PATH',i+1,rows[i][:190])
+          for target in ('app/audio_output.c','app/board/audio.c','app/midi_router.c'):
+              f=Path('/tmp/fm1-v14')/target
+              lines=f.read_text().splitlines()
+              select=set()
+              for j,line in enumerate(lines):
+                  if re.search(r'biomech_sdk|fm1_audio_start|FM1_MIDI_DIN',line,re.I):
+                      select.update(range(max(0,j-3),min(len(lines),j+5)))
+              for j in sorted(select)[:160]:
+                  print('BR3_ROUTING',target,j+1,lines[j][:190])
           PY
       - name: Compile and link ALL BIOMECH musical, UI and DMA sources
         shell: bash
