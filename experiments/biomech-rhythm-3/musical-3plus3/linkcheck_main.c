@@ -38,9 +38,27 @@ void __attribute__((noreturn)) br3_cpu0_main(void){
   br3_cpu1_attach();
 #endif
   for(unsigned t=0;t<BR_TRACKS;t++)br_note_on(&br3_synth,t,36u+t*4u,100);
+#ifdef BR3_NATIVE_STRESS
+  /* Standalone emulated native stress: overlap far more notes than the
+     64-slot pool and exercise deterministic voice stealing on each side. */
+  for(unsigned t=0;t<BR_TRACKS;t++){
+    BRTrack *v=&br3_synth.project.track[t];
+    v->env_decay_ms=900.0f;
+    v->env_sustain=80.0f;
+  }
+#endif
   float peak=0;
   uint32_t hash=2166136261u;
   for(unsigned b=0;b<32;b++){
+#ifdef BR3_NATIVE_STRESS
+    if(b<28u && !(b&1u)){
+      for(unsigned t=0;t<BR_TRACKS;t++)
+        br_note_on(&br3_synth,t,36u+(t*7u+b*3u)%46u,82u+(b%13u));
+    }
+    if(b==21u){
+      for(unsigned t=0;t<BR_TRACKS;t++)br_note_off(&br3_synth,t,36u+t*4u);
+    }
+#endif
     br_render(&br3_synth,br3_samples,128);
     for(unsigned i=0;i<256;i++){
       float x=br3_samples[i];
