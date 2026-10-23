@@ -1,0 +1,154 @@
+name: BIOMECH3 SDK V14 exact RAM symbol layout audit (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-control-scheduler-a-b-20261023]
+    paths:
+      - '.github/workflows/biomech3-v14-memory-map-audit.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deferred:
+    strategy:
+      fail-fast: false
+      matrix:
+        route: [whole-current]
+    env:
+      BR3_ROUTE: ${{ matrix.route }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned source and verified PI32 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage original unchanged musical DSP and signed V14 adapter
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Preserve musical DSP and test SDK archive linker ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          variant=os.environ['BR3_ROUTE']
+          root=Path('/tmp/fm1-v14/app')
+          p=root/'biomech/biomech_sdk_port.c'
+          src=p.read_text()
+          old='    br_fm1_render_q23(&runtime,out,frames);'
+          if src.count(old)!=1:raise SystemExit('C99 musical DSP entry missing')
+          # No music code changes in either comparison: only linker selection.
+          if variant not in ('whole-current','selective-link'):
+              raise SystemExit('Unknown mode '+variant)
+          p.write_text(src)
+          p=root/'screen.c';src=p.read_text()
+          incl='#include "biomech/biomech_sdk_port.h"'
+          if src.count(incl)!=1:raise SystemExit('Missing control header')
+          src=src.replace(incl,incl+'\nvolatile unsigned br3_screen_call_count;',1)
+          ctl='    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */'
+          if src.count(ctl)!=1:raise SystemExit('Missing control wrapper')
+          src=src.replace(ctl,'    ++br3_screen_call_count;\n'+ctl,1);p.write_text(src)
+          p=root/'midi_router.c';src=p.read_text()
+          if src.count(incl)!=1:raise SystemExit('Missing MIDI header')
+          src=src.replace(incl,incl+'\nvolatile unsigned br3_midi_callback_count,br3_midi_last_source,br3_midi_last_length;',1)
+          mid='    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */'
+          if src.count(mid)!=1:raise SystemExit('Missing MIDI hook')
+          src=src.replace(mid,'    ++br3_midi_callback_count;\n    br3_midi_last_source=source;\n    br3_midi_last_length=(unsigned)n;\n'+mid,1)
+          p.write_text(src)
+          if variant=='selective-link':
+              # Modify only CI checkout of the build script. Stock V14 and SDK
+              # archive are byte-identical; GNU ld archive membership changes.
+              p=Path('experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py')
+              src=p.read_text()
+              original='"--start-group","--whole-archive",'
+              later='SDK/"lib/libfm1_engine.a","--no-whole-archive",'
+              if src.count(original)!=1 or src.count(later)!=1:
+                  raise SystemExit('Unrecognized SDK native archive link flags')
+              src=src.replace(original,'"--start-group",',1)
+              src=src.replace(later,'SDK/"lib/libfm1_engine.a",',1)
+              p.write_text(src)
+          print('BR3_SELECTIVE_ARCHIVE_LAB',variant,'DP unchanged; SDK selection only, NO INSTALL')
+          PY
+      - name: Compile, link, measure 48KiB heap, pack no-install FWSC
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-${BR3_ROUTE}
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-${BR3_ROUTE}/sdk.elf > /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
+          grep -E 'br3_screen_call_count|br3_midi_callback_count|br3_midi_last_source' /tmp/br3-v14-${BR3_ROUTE}/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          for line in Path('/tmp/br3-v14-'+os.environ['BR3_ROUTE']+'/sdk.nm').read_text().splitlines():
+              if line.endswith(' _MALLOC_SIZE'):
+                  size=int(line.split()[0],16)
+                  print('BR3_SELECTIVE_ARCHIVE_HEAP',size,'48KiB_GATE',size>=49152)
+                  if size<49152:raise SystemExit('Heap below SDK floor')
+          PY
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-${BR3_ROUTE}
+          sha256sum /tmp/br3-v14-${BR3_ROUTE}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Profile actual PI32 linker RAM symbols and section occupancy
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/jieli/pi32v2/bin/nm -S --size-sort /tmp/br3-v14-$BR3_ROUTE/sdk.elf > /tmp/br3-v14-$BR3_ROUTE/sdk.size.nm 2>/tmp/br3-v14-$BR3_ROUTE/nm-size-errors.txt || true
+          python3 - <<'PY'
+          import os,re,pathlib
+          root=pathlib.Path('/tmp/br3-v14-'+os.environ['BR3_ROUTE'])
+          sizes=root/'sdk.size.nm';plain=root/'sdk.nm';report=[]
+          def out(*args):
+              line=' '.join(str(x) for x in args)
+              report.append(line)
+              print(line)
+          syms={}
+          for line in plain.read_text(errors='replace').splitlines():
+              parts=line.split()
+              if len(parts)>=3 and re.fullmatch('[0-9a-fA-F]+',parts[0]):
+                  syms[parts[-1]]=int(parts[0],16)
+          for name in ('_HEAP_BEGIN','_HEAP_END','_MALLOC_SIZE','_ram0_bss_vma','_ram0_bss_size','cache_ram_bss_vma','cache_ram_bss_size','cache_ram_data_vma','cache_ram_data_size'):
+              if name in syms:
+                  out('BR3_MEM_LINK_SYMBOL',name,hex(syms[name]),syms[name])
+          out('BR3_MEM_HEAP_REQUIRED_TESTED',116300,'CURRENT',syms.get('_MALLOC_SIZE','unavailable'),'GAP_TO_TESTED',max(0,116300-syms.get('_MALLOC_SIZE',0)))
+          regex=re.compile(r'^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+([a-zA-Z])\s+(\S+)\s*$')
+          parsed=[]
+          for line in sizes.read_text(errors='replace').splitlines():
+              m=regex.match(line)
+              if m:
+                  address,size,kind,name=int(m[1],16),int(m[2],16),m[3],m[4]
+                  if 0x1c00000<=address<0x1c80000 or 0x1f20000<=address<0x1f30000:
+                      parsed.append((size,address,kind,name))
+          out('BR3_MEM_NM_SIZE_COUNT',len(parsed),'ERRORS', (root/'nm-size-errors.txt').read_text()[:250])
+          for size,addr,kind,name in sorted(parsed,reverse=True)[:60]:
+              out('BR3_MEM_OBJECT',name,'bytes',size,'address',hex(addr),'type',kind)
+          if not parsed:
+              out('BR3_MEM_WARNING','JieLi nm -S no parsed sizes; sizes require map inspection; no estimates invented')
+          for key in ('runtime','effects','pixels','shadow_engine','br3_blackbox'):
+              candidates=[(size,name,hex(addr)) for size,addr,kind,name in parsed if key in name]
+              out('BR3_MEM_KNOWN',key,candidates[:8] or 'not in nm-size')
+          mapping=root/'sdk.map'
+          out('BR3_MEM_MAP_BYTES',mapping.stat().st_size if mapping.exists() else 'not found')
+          (root/'memory_audit.txt').write_text('\n'.join(report)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_MEMORY_AUDIT_${{ matrix.route }}_NO_INSTALL
+          path: |
+            /tmp/br3-v14-${{ matrix.route }}/memory_audit.txt
+            /tmp/br3-v14-${{ matrix.route }}/sdk.size.nm
+            /tmp/br3-v14-${{ matrix.route }}/sdk.map
+            /tmp/br3-v14-${{ matrix.route }}/nm-size-errors.txt
+            /tmp/br3-v14-${{ matrix.route }}/sdk.nm
+            /tmp/br3-v14-${{ matrix.route }}/build.log
+            /tmp/br3-v14-${{ matrix.route }}/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+          retention-days: 14
+          if-no-files-found: warn
