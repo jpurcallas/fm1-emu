@@ -83,12 +83,20 @@ jobs:
           command -v pwsh
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-full-8
           sha256sum /tmp/br3-v14-full-8/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+      - name: Build stock V14 FWSC using EXACT SAME experimental packaging pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-stock
+          mv /tmp/br3-v14-stock/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc
+          sha256sum /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: BIOMECH3_V14_FULL_LINK_EXPERIMENTAL_NO_INSTALL
           path: |
             /tmp/br3-v14-stock/build.log
+            /tmp/br3-v14-stock/V14_STOCK_SAME_PIPELINE_CONTROL_SOLO_EMULADOR.fwsc
             /tmp/br3-v14-full/build.log
             /tmp/br3-v14-full/sdk.elf
             /tmp/br3-v14-full/sdk.map
