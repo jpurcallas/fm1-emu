@@ -2,7 +2,7 @@
 // JIT OFF, direct TRS MIDI UART bytes into the real emulated firmware.
 // Do not claim CPU1 ownership, real-time DMA success or physical hardware.
 import {readFileSync,writeFileSync} from "node:fs";
-const [wasmPath,stockPath,br3Path,outDir]=process.argv.slice(2);
+const [wasmPath,stockPath,br3Path,outDir,nmPath]=process.argv.slice(2);
 if(!outDir)throw Error("usage: node smoke_fwsc_musical.mjs emulator.wasm stock.fwsc br3.fwsc outDir");
 const wasm=readFileSync(wasmPath);
 const framesPerBlock=128;
@@ -17,6 +17,35 @@ function encodeWav(left,right){
  for(let i=0;i<frames;i++){let a=Math.round(Math.max(-1,Math.min(1,left[i]))*32767),b=Math.round(Math.max(-1,Math.min(1,right[i]))*32767);
  buf.writeInt16LE(a,44+4*i);buf.writeInt16LE(b,46+4*i)}
  return buf;
+}
+function guestDiagnostic(x){
+  const p=x.fm1_blackbox_ram_ptr(),len=x.fm1_blackbox_ram_len();
+  const ram=new Uint8Array(x.memory.buffer,p,len),dv=new DataView(x.memory.buffer,p,len);
+  const symbols={};
+  if(nmPath){
+    for(const line of readFileSync(nmPath,"utf8").split("\\n")){
+      const match=line.trim().match(/^([0-9a-fA-F]+)\\s+[a-zA-Z]\\s+([^\\s]+)$/);
+      if(match && /^(runtime|initialized|midi_head|midi_tail|midi_dropped|br3_blackbox|br3_completed_jobs|br3_cpu1_stage|br3_cpu0_stage|biomech_sdk_audio|fm1_audio_start)/.test(match[2])){
+        const addr=parseInt(match[1],16),offs=addr-0x01c00000;
+        if(offs>=0&&offs+16<=len){
+          symbols[match[2]]={address:"0x"+addr.toString(16),u32:[0,4,8,12].map(j=>dv.getUint32(offs+j,true))};
+        }else symbols[match[2]]={address:"0x"+addr.toString(16)};
+      }
+    }
+  }
+  const magic=Buffer.from("BR3BBX01","ascii");let found=-1;
+  search:for(let i=0;i<=len-magic.length;i++){
+    for(let j=0;j<magic.length;j++)if(ram[i+j]!==magic[j])continue search;
+    found=i;break;
+  }
+  const marker=found>=0?{offset:found,schema:dv.getUint32(found+8,true),
+    build_tag:dv.getUint32(found+12,true),
+    events_cpu0:dv.getUint32(found+16,true),
+    events_cpu1:dv.getUint32(found+20,true),
+    jobs_sent:dv.getUint32(found+32,true),jobs_done:dv.getUint32(found+36,true),
+    fallback:dv.getUint32(found+48,true),dma_ok:dv.getUint32(found+52,true),
+    dma_missed:dv.getUint32(found+56,true),last_error:dv.getUint32(found+108,true)}:null;
+  return {memory_bytes:len,br3_marker:marker,symbols};
 }
 async function run(label,path){
  const {instance}=await WebAssembly.instantiate(wasm,{env:{fm1_jit_compile:()=>0}});
@@ -65,7 +94,8 @@ async function run(label,path){
    nonzero_stereo_frames:nonzero,peak:maxAbs,halted,reason:bb.reason,
    emulated_ms:bb.ms,cpu0_insn:bb.cpu0?.insn_count,cpu1_insn:bb.cpu1?.insn_count,
    lcd_revision:x.fm1_lcd_revision(),control_events:bb.control_events?.length??0,
-   midi_events_sent:events.length,midi_events:events,phase_samples:phases};
+   midi_events_sent:events.length,midi_events:events,phase_samples:phases,
+   guest_state:label==="biomech3-midi"?guestDiagnostic(x):undefined};
  writeFileSync(outDir+"/"+label+".json",JSON.stringify(result,null,2));
  writeFileSync(outDir+"/"+label+".wav",encodeWav(L,R));
  console.log("BR3_MUSICAL_BLACKBOX "+JSON.stringify(result));
