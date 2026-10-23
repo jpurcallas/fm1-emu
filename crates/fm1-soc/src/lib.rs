@@ -169,7 +169,7 @@ pub struct CoreWriterProbe {
     schedule_events: Vec<(u64,u64,u8,u32,u32,u8,u8,u8)>,
     irq127_writes: Vec<(u64,u64,u32,u32,u8,u32,u32,u8,u8)>,
     // CPU0/CPU1 acknowledgement byte: exact guest store, not a slice-end inference.
-    sync_ack_writes: Vec<(u64,u64,u8,u32,u32,u8,u8,u8,bool)>,
+    sync_ack_writes: Vec<(u64,u64,u8,u32,u32,u8,u8,u8,bool,u8,u8)>,
     sync_ack_dropped: u64,
 }
 impl CoreWriterProbe {
@@ -209,9 +209,9 @@ impl CoreWriterProbe {
             cycle,half,pc,addr,width,value,ilat,panel,producer
         )).collect::<Vec<_>>().join(",");
         let acknowledgements=self.sync_ack_writes.iter().enumerate().map(
-            |(seq,(cycle,half,core,pc,addr,width,before,after,jit))| format!(
-                r#"{{"seq":{},"cycle":{},"half":{},"core":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{},"jitCallback":{}}}"#,
-                seq,cycle,half,core,pc,addr,width,before,after,jit
+            |(seq,(cycle,half,core,pc,addr,width,before,after,jit,left,right))| format!(
+                r#"{{"seq":{},"cycle":{},"half":{},"core":{},"pc":"0x{:08x}","addr":"0x{:08x}","width":{},"before":{},"after":{},"jitCallback":{},"neighbor80":{},"neighbor88":{}}}"#,
+                seq,cycle,half,core,pc,addr,width,before,after,jit,left,right
             )
         ).collect::<Vec<_>>().join(",");
         format!(r#"{{"checks":{},"events":[{}],"irqCounts":{{{}}},"recentIrqs":[{}],"irqAtVoice":[{}],"exactStores":[{}],"irq11Snapshots":[{}],"otherStores":[{}],"schedule":[{}],"irq127Writes":[{}],"syncAckWrites":[{}],"syncAckDropped":{}}}"#,
@@ -448,10 +448,12 @@ impl Soc {
         if ack_hit {
             let before=self.ram.read8(ACK-RAM_BASE);
             let after=((value >> (8*(ACK-addr))) & 255) as u8;
+            let left=self.ram.read8(ACK-RAM_BASE-4);
+            let right=self.ram.read8(ACK-RAM_BASE+4);
             if let Some(p)=self.writer_probe.as_mut() {
                 if p.sync_ack_writes.len()<8192 {
                     p.sync_ack_writes.push((self.periph.cycles,self.periph.audio_halves,
-                        core,pc,addr,width,before,after,from_jit));
+                        core,pc,addr,width,before,after,from_jit,left,right));
                 } else {
                     p.sync_ack_dropped+=1;
                 }
