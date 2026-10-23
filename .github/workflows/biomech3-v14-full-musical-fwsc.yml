@@ -1,0 +1,80 @@
+name: BIOMECH3 V14 full UI MIDI DMA musical FWSC candidate
+on:
+  push:
+    branches: [experiment/biomech-rhythm-3-dualcore-3plus3-20261023]
+    paths:
+      - 'experiments/biomech-rhythm-3/sdk-v14/**'
+      - '.github/workflows/biomech3-v14-full-musical-fwsc.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact original V14 and verified JieLi PI32
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Original V14 full stock 65-file SHA gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-stock
+      - name: Reconstruct original BIOMECH V14 adapter, preserve SDK originals
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Compile and link ALL BIOMECH musical, UI and DMA sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-full
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-full/sdk.elf > /tmp/br3-v14-full/sdk.nm
+          grep -E 'biomech_sdk_init$|biomech_sdk_audio$|br_render$|br3_cpu1_main$|fm1_audio_irq$' /tmp/br3-v14-full/sdk.nm
+          echo 'BIOMECH3 V14 FULL LINKED; NO CPU1 LEASE PROVEN; NOT INSTALLABLE'
+      - name: Linker budget and symbol differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-stock/sdk.elf > /tmp/br3-v14-stock/sdk.nm
+          python3 - <<'PY'
+          import pathlib
+          def symbols(path):
+            out={}
+            for line in pathlib.Path(path).read_text().splitlines():
+              a=line.split()
+              if len(a)==3:
+                try:out[a[2]]=int(a[0],16)
+                except ValueError:pass
+            return out
+          stock=symbols('/tmp/br3-v14-stock/sdk.nm')
+          full=symbols('/tmp/br3-v14-full/sdk.nm')
+          for name in ('_MALLOC_SIZE','_HEAP_BEGIN','_HEAP_END','br3_seg','br3_mailbox','br3_blackbox'):
+            print('BR3_FULL_V14_LINK_BUDGET',name,'stock',hex(stock[name]) if name in stock else None,'full',hex(full[name]) if name in full else None)
+          if '_MALLOC_SIZE' in full:
+            print('BR3_FULL_V14_48KiB_MIN',full['_MALLOC_SIZE']>=49152)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_V14_FULL_LINK_EXPERIMENTAL_NO_INSTALL
+          path: |
+            /tmp/br3-v14-stock/build.log
+            /tmp/br3-v14-full/build.log
+            /tmp/br3-v14-full/sdk.elf
+            /tmp/br3-v14-full/sdk.map
+            /tmp/br3-v14-full/sdk.nm
+          if-no-files-found: warn
+          retention-days: 14
