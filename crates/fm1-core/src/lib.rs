@@ -4311,6 +4311,36 @@ mod tests {
     }
 
     #[test]
+    fn fpu_ftof_rounding_vendor_encodings() {
+        // Vendor PI32v2 clang emits df/ef/ff for trunc/ceil/floor.
+        // BIOMECH v0.2's crash: 3f e5 ff 01 is floor(r1) -> r0.
+        for (opcode, x, expected) in [
+            (0xdf, -2.75f32, -2.0f32),
+            (0xdf,  2.75f32,  2.0f32),
+            (0xef, -2.75f32, -2.0f32),
+            (0xef,  2.25f32,  3.0f32),
+            (0xff, -2.25f32, -3.0f32),
+            (0xff,  2.75f32,  2.0f32),
+            (0xff, -0.0f32, -0.0f32),
+            (0xff,  f32::INFINITY, f32::INFINITY),
+        ] {
+            let mut ram = FlatRam::new(vec![0x3f, 0xe5, opcode, 0x01, 0x80, 0x00, 0, 0]);
+            let mut cpu = Cpu::new(0);
+            cpu.regs[1] = x.to_bits();
+            cpu.regs[0] = 0xdead_beef;
+            cpu.step(&mut ram).unwrap();
+            assert_eq!(cpu.regs[0], expected.to_bits(), "opcode {opcode:02x}, input {x}");
+            assert_eq!(cpu.pc, 4);
+        }
+        // The paired (f5) variant also decodes, preserving the same semantics.
+        let mut ram = FlatRam::new(vec![0x3f, 0xf5, 0xff, 0x01, 0x00, 0x00, 0, 0]);
+        let mut cpu = Cpu::new(0);
+        cpu.regs[1] = (-1.2f32).to_bits();
+        cpu.step(&mut ram).unwrap();
+        assert_eq!(cpu.pc, 4);
+    }
+
+    #[test]
     fn short_shift_by_32() {
         // `df a0` r7 = r5 >>> 32, `32 a0` r2 = r3 << 32 (count field 0 = 32)
         let mut mem = vec![0u8; 0x100];
@@ -5284,7 +5314,8 @@ fn fcond(c: Cond, l: u32, r: u32) -> bool {
 }
 
 /// The FPU ops (`3f e5`, see fm1-isa's fpu.rs): binary op 0 +, 1 -, 2 *, 3 /, 5 fmin, 6 fmax on
-/// (a, b); unary 0x1f ftoi, 0x5f ftou (both truncating), 0x8f itof, 0x9f utof on a.
+/// (a, b); unary 0x1f ftoi, 0x5f ftou, 0x8f itof, 0x9f utof.
+/// 0xdf/0xef/0xff are float-to-float trunc/ceil/floor (JieLi clang -mcpu=r3).
 fn fpu(op: u8, a: u32, b: u32) -> u32 {
     let (x, y) = (f32::from_bits(a), f32::from_bits(b));
     match op {
@@ -5297,6 +5328,10 @@ fn fpu(op: u8, a: u32, b: u32) -> u32 {
         0x1f => x as i32 as u32,
         0x5f => x as u32,
         0x8f => (a as i32 as f32).to_bits(),
+        0x9f => (a as f32).to_bits(),
+        0xdf => x.trunc().to_bits(),
+        0xef => x.ceil().to_bits(),
+        0xff => x.floor().to_bits(),
         _ => (a as f32).to_bits(),
     }
 }
