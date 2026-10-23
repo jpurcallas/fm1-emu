@@ -819,7 +819,7 @@ function boot(options = {}) {
       });
       node.port.postMessage({ type: "boot", seq, wasm: wasm.slice(0), package: got.bytes.slice().buffer,
         sectors: packSectors(sectors).buffer, syx: importedBank ? importedBank.slice().buffer : null,
-        mhz: clock, jit: params.get("jit") !== "0" });
+        mhz: clock, jit: params.get("jit") !== "0", pcmProbe: params.get("pcmprobe") !== "0" });
       status.textContent = `booting ${f.name}…`;
       await ready;
       if (bank === importedBank) bank = null; // imports seed flash once; saved edits win on later boots
@@ -922,6 +922,12 @@ function onWorklet(e) {
     blackboxStatus.textContent = complete
       ? `BLACK BOX captured (${m.trigger}; ${m.ram.length} RAM bytes). Export the JSON now.`
       : `Partial BLACK BOX captured (${m.trigger}; ${m.ramError || "CPU register snapshot unavailable"}). Export diagnostics.`;
+    if (m.audioOutput?.enabled) {
+      const a = m.audioOutput;
+      const summary = `WORKLET PCM: ${a.nonzeroFrames}/${a.requestedFrames} frames with signal, `+
+        `short quanta ${a.shortQuanta}, late wall quanta ${a.wallLateQuanta}. Export JSON.`;
+      blackboxStatus.textContent = summary;
+    }
     if (m.trigger !== "manual") status.textContent = `${fw.name}: CPU stopped — BLACK BOX captured, click Export.`;
     return;
   }
