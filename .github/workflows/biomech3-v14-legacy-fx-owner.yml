@@ -1,0 +1,69 @@
+name: BIOMECH3 V14 legacy FX state owner and references (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-control-scheduler-a-b-20261023]
+    paths: ['.github/workflows/biomech3-v14-legacy-fx-owner.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned SDK and exact JieLi PI32v2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Identify object owner and external users of 48KiB legacy fx state
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/br3-memory-owner
+          /tmp/jieli/pi32v2/bin/nm -A /tmp/fm1-v14/sdk/lib/libfm1_engine.a > /tmp/br3-memory-owner/archive-nm.txt
+          /tmp/jieli/pi32v2/bin/nm -A /tmp/fm1-v14/sdk/lib/libc.a > /tmp/br3-memory-owner/libc-nm.txt
+          ar t /tmp/fm1-v14/sdk/lib/libfm1_engine.a > /tmp/br3-memory-owner/archive-members.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('/tmp/br3-memory-owner')
+          lines=(root/'archive-nm.txt').read_text(errors='replace').splitlines()
+          syms=('fm1_fx_states','factory_raw','fm1_engine_render','groove_effects','fm1_engine_pause','fm1_control_request','fm1_transport_bt_pcm')
+          out=[]
+          for symbol in syms:
+              hits=[x for x in lines if re.search(r'(?<!\w)'+re.escape(symbol)+r'\s*$',x)]
+              out.append('BR3_OWNER_SYMBOL '+symbol+' HITS '+str(len(hits)))
+              out.extend('BR3_OWNER_MEMBER '+x[:450] for x in hits[:35])
+          for name in ('fm1_fx_states','factory_raw'):
+              owners=[x for x in lines if re.search(r'\b[BbDdCc]\s+'+name+r'$',x)]
+              undefs=[x for x in lines if re.search(r'\bU\s+'+name+r'$',x)]
+              out.append('BR3_OWNER_XREF '+name+' DEFINED '+str(len(owners))+' EXTERNAL_USERS '+str(len(undefs)))
+          out.append('BR3_OWNER_ARCHIVE_MEMBERS '+str(len((root/'archive-members.txt').read_text().splitlines())))
+          source=Path('/tmp/fm1-v14/app')
+          for fname in ('fm_factory.c','fm_library.c','board/audio.c','screen.c'):
+              p=source/fname
+              if p.exists():
+                  lines=p.read_text(errors='replace').splitlines()
+                  for i,line in enumerate(lines):
+                      if 'factory_raw' in line or 'fm1_engine_render' in line:
+                          out.append('BR3_OWNER_PUBLIC_SRC '+fname+':'+str(i+1)+' '+line.strip()[:190])
+          (root/'owner_report.txt').write_text('\n'.join(out)+'\n')
+          for line in out:print(line)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_V14_LEGACY_FX_ARCHIVE_OWNER_NO_INSTALL
+          path: |
+            /tmp/br3-memory-owner/owner_report.txt
+            /tmp/br3-memory-owner/archive-nm.txt
+            /tmp/br3-memory-owner/libc-nm.txt
+            /tmp/br3-memory-owner/archive-members.txt
+          retention-days: 14
+          if-no-files-found: warn
