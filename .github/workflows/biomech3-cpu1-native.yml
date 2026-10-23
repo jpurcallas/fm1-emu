@@ -32,7 +32,7 @@ jobs:
           /tmp/jieli/pi32v2/bin/clang -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -ffreestanding -fno-builtin -ffunction-sections -fno-stack-protector -c "$S/probe.c" -o /tmp/br3/probe.o
           /tmp/jieli/pi32v2/bin/ld --gc-sections -T "$S/app.ld" -e _start /tmp/br3/entry.o /tmp/br3/probe.o -o /tmp/br3/br3_probe.elf
           /tmp/jieli/common/bin/objcopy -O binary -j .text /tmp/br3/br3_probe.elf /tmp/br3/br3_probe.bin
-          /tmp/jieli/common/bin/nm /tmp/br3/br3_probe.elf > /tmp/br3/br3_probe.nm
+          /tmp/jieli/pi32v2/bin/nm /tmp/br3/br3_probe.elf > /tmp/br3/br3_probe.nm
           test "$(stat -c %s /tmp/br3/br3_probe.bin)" -gt 100
           head -c 8 /tmp/br3/br3_probe.bin | od -An -tx1
           sha256sum /tmp/br3/br3_probe.bin
