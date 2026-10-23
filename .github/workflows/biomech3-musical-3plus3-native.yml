@@ -127,6 +127,9 @@ jobs:
       - name: Stress native CPU1 with 64-slot overlap and voice stealing, identical PCM required
         shell: bash
         run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_native_stress_pi32.sh
+      - name: Full native serial versus 3+3 byte exact PCM (including voice stealing)
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_pcm_dump_pi32.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
