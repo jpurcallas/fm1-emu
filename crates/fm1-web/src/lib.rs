@@ -599,6 +599,29 @@ pub extern "C" fn fm1_halt_reason() -> *const u8 {
     }
 }
 
+// Passive per-core registers for a post-halt BLACK BOX report. Read-only: never
+// advances the emulated machine, resets CPU1, or touches the audio path.
+static mut BLACKBOX_CPU_BYTES: Vec<u8> = Vec::new();
+
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_blackbox_cpu_json() -> *const u8 {
+    let report = machine().map_or_else(|| "{}".to_owned(), |m| {
+        let cpu_json = |c: &Cpu| format!(
+            r#"{{"pc":"0x{:08x}","sp":"0x{:08x}","lr":"0x{:08x}","regs":{:?},"irqDepth":{}}}"#,
+            c.pc, c.sp, c.regs[15], c.regs, c.irq_levels.len()
+        );
+        let cpu1 = m.cpu1.as_ref().map_or_else(|| "null".to_owned(), cpu_json);
+        format!(r#"{{"cpu0":{},"cpu1":{},"halted":{}}}"#,
+            cpu_json(&m.cpu), cpu1, m.halted)
+    });
+    unsafe {
+        BLACKBOX_CPU_BYTES = report.into_bytes();
+        BLACKBOX_CPU_BYTES.push(0);
+        BLACKBOX_CPU_BYTES.as_ptr()
+    }
+}
+
 // ---------------------------------------------------------------- the front panel (page side)
 
 static mut PANEL_BASE: Vec<u32> = Vec::new();
