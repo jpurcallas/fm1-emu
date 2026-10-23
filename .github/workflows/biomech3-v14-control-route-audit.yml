@@ -1,0 +1,55 @@
+name: BIOMECH3 exact V14 control route audit (no firmware)
+on:
+  push:
+    branches: [experiment/biomech3-v14-musical-blackbox-20261023]
+    paths:
+      - '.github/workflows/biomech3-v14-control-route-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch protected pinned upstream V14
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          mkdir -p /tmp/stock-control
+          for p in app/screen.c app/midi_router.c app/audio_output.c app/board/audio.c; do
+            cp "/tmp/fm1-v14/$p" "/tmp/stock-control/$(basename "$(dirname "$p")")_$(basename "$p")"
+          done
+      - name: Stage ONLY overlay into disposable SDK and report exact routing diffs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 - <<'PY'
+          import difflib,pathlib,re
+          root=pathlib.Path('/tmp/fm1-v14')
+          before=pathlib.Path('/tmp/stock-control')
+          for name in ['app/screen.c','app/midi_router.c','app/audio_output.c','app/board/audio.c']:
+              path=root/name
+              old=(before/(name.split('/')[-2]+'_'+name.split('/')[-1])).read_text().splitlines()
+              new=path.read_text().splitlines()
+              diff=list(difflib.unified_diff(old,new,fromfile='V14_STOCK/'+name,tofile='BR3_STAGED/'+name,n=8))
+              print('BEGIN_BR3_ROUTING_DIFF',name,len(diff))
+              for line in diff[:240]:print('CONTROL_DIFF',line[:260])
+              print('END_BR3_ROUTING_DIFF',name)
+          for name,terms in [('app/screen.c',r'biomech_sdk_|groove_screen_control|groove_screen_init'),
+                             ('app/midi_router.c',r'biomech_sdk_|groove_midi_init|fm1_app_midi_received')]:
+              lines=(root/name).read_text().splitlines()
+              for i,line in enumerate(lines):
+                  if re.search(terms,line):
+                      print('CONTROL_CALL_CONTEXT',name,i+1,' '.join(f'{j+1}:{lines[j].strip()}' for j in range(max(0,i-5),min(len(lines),i+7)))[:1050])
+          p=root/'app/biomech/biomech_sdk_port.c'
+          lines=p.read_text().splitlines()
+          for i in list(range(39,133))+list(range(147,180)):
+              if i<len(lines):print('BIOMECH_ADAPTER',i+1,lines[i][:180])
+          PY
