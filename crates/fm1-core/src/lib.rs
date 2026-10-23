@@ -160,6 +160,10 @@ pub struct Cpu {
     pub rets: u32,
     /// Total instructions retired (for traces and tests).
     pub insn_count: u64,
+    /// Experimental crash diagnosis: only enabled on CPU0 after an encoder turn.
+    /// With CPU0 JIT paused this keeps the last actual executed branches.
+    pub br2_trace_on: bool,
+    pub br2_branches: std::collections::VecDeque<(u32,u32,u64)>,
     /// Hardware repeat block `rep N rR { … }` / `rep N #k { … }`: the block
     /// is the N bytes after the rep instruction; when execution falls off
     /// its end the counter is decremented and, if non-zero, pc returns to
@@ -306,6 +310,7 @@ impl Cpu {
     /// Enter an interrupt handler: `reti` = the interrupted pc (the ISR
     /// wrapper saves `{psr, rets, reti}` itself and returns with `rti`).
     pub fn interrupt(&mut self, handler: u32, prio: u8) {
+        self.br2_branch(self.pc, handler, self.insn_count);
         self.sreg_store[1] = self.pc;
         // From user mode the ISR runs on ssp (the user sp waits in usp: the stock RTOS's
         // context switch saves the task's frame through it and picks the next task's);
@@ -537,8 +542,10 @@ impl Cpu {
                     sync!();
                     return Ok((n, true));
                 }
+                let old_pc = pc;
                 let next_pc = pc + op.len as u32;
-                if !(careful || op.careful) {
+                let is_careful = careful || op.careful;
+                if !is_careful {
                     // plain micro-op: cannot start or end a pair, block or loop
                     pc = self.exec_fast(bus, op.fast, next_pc).unwrap_or(next_pc);
                     n += 1;
@@ -555,6 +562,8 @@ impl Cpu {
                     }
                 }
                 if pc != next_pc {
+                    // exec_careful logs through finish(); the plain fast path logs here.
+                    if !is_careful { self.br2_branch(old_pc, pc, self.insn_count + (n - synced) as u64); }
                     break; // taken branch, skip or loop: look up the next block
                 }
             }
@@ -857,6 +866,14 @@ impl Cpu {
             self.pair_pending = Some((before, after));
         }
         jumped
+    }
+
+    /// Retain a bounded record of actual branches only while knob diagnosis is armed.
+    #[inline]
+    fn br2_branch(&mut self, from: u32, to: u32, insns: u64) {
+        if !self.br2_trace_on || from == to { return; }
+        if self.br2_branches.len() == 512 { self.br2_branches.pop_front(); }
+        self.br2_branches.push_back((from,to,insns));
     }
 
     /// Fetch/decode/execute one instruction. Fetches a 6-byte window (the
@@ -2837,6 +2854,7 @@ impl Cpu {
     /// Retire an instruction: next pc, predicated-block skips, rep loops.
     #[inline]
     fn finish(&mut self, jumped: Option<u32>, next_pc: u32) {
+        let from = self.pc;
         self.insn_count += 1;
         self.hold_irq = 0;
         self.pc = jumped.unwrap_or(next_pc);
@@ -2868,6 +2886,7 @@ impl Cpu {
                 self.rep_end = 0;
             }
         }
+        self.br2_branch(from, self.pc, self.insn_count);
     }
 }
 
