@@ -340,6 +340,27 @@ pub extern "C" fn fm1_biomech_symbol_report() -> *const u8 {
     }
 }
 
+/// Read-only CPU1 presence/coordination snapshot. Does not advance guest time,
+/// change scheduling, or alter either CPU. Intended for BIOMECH v0.35.
+static mut BIOMECH_CPU1_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_biomech_cpu1_status() -> *const u8 {
+    let report = machine().map(|m| {
+        let c1 = m.cpu1.as_ref();
+        format!(r#"{{"cycle":{},"cpu0Pc":"0x{:08x}","cpu1Started":{},"cpu1Pc":"0x{:08x}","cpu1Sp":"0x{:08x}","cpu1Paused":{},"cpu0Paused":{},"cpu1IrqDepth":{},"halted":{}}}"#,
+            m.soc.periph.cycles, m.cpu.pc, c1.is_some(),
+            c1.map_or(0, |c| c.pc), c1.map_or(0, |c| c.sp),
+            m.soc.core_paused(1), m.soc.core_paused(0),
+            c1.map_or(0, |c| c.irq_levels.len()), m.halted)
+    }).unwrap_or_else(||r#"{"available":false}"#.to_owned());
+    unsafe {
+        BIOMECH_CPU1_JSON = report.into_bytes();
+        BIOMECH_CPU1_JSON.push(0);
+        BIOMECH_CPU1_JSON.as_ptr()
+    }
+}
+
 /// Install the same timestamped input script used by the native benchmark.
 #[no_mangle]
 pub extern "C" fn fm1_bench_script(ptr: *mut u8, len: u32) -> u32 {
