@@ -160,3 +160,42 @@ test('a firmware without a user bank still boots when a DX7 bank is selected', a
   assert.ok(h.messages.some(m => m.type === 'booted' && m.seq === 2));
   assert.equal(h.messages.some(m => m.type === 'error'), false);
 });
+
+test('BLACK BOX captures frozen RAM and both CPUs exactly once when the guest halts', () => {
+  const h = harness();
+  h.context.TextDecoder = TextDecoder;
+  const data = new Uint8Array(h.memory.buffer);
+  data.set(new TextEncoder().encode('{"cpu0":{"pc":"0x01c01111"},"cpu1":{"pc":"0x01c02222"}}\\0'), 40000);
+  data.set(new TextEncoder().encode('illegal opcode; cpu0_pc=0x01c01111\\0'), 40200);
+  data.fill(23, 40500, 41524);
+  Object.assign(h.p.x, {
+    fm1_halted: () => true, fm1_blackbox_cpu_json: () => 40000,
+    fm1_halt_reason: () => 40200,
+    fm1_guest_ram_ptr: () => 40500, fm1_guest_ram_len: () => 1024
+  });
+  h.render();
+  const saved = h.messages.filter(m => m.type === 'blackbox');
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].trigger, 'cpu-halted');
+  assert.equal(saved[0].cpu.cpu0.pc, '0x01c01111');
+  assert.equal(saved[0].cpu.cpu1.pc, '0x01c02222');
+  assert.match(saved[0].haltReason, /illegal opcode/);
+  assert.equal(saved[0].ram.length, 1024);
+  data[40500] = 0;
+  assert.equal(saved[0].ram[0], 23, 'snapshot must not alias guest RAM');
+  h.render();
+  assert.equal(h.messages.filter(m => m.type === 'blackbox').length, 1);
+});
+test('render trap preserves a partial BLACK BOX before the worklet clears the machine', () => {
+  const h = harness();
+  h.p.x.fm1_guest_ram_ptr = () => 40500;
+  h.p.x.fm1_guest_ram_len = () => 1024;
+  h.p.x.fm1_render = () => { throw new Error('synthetic trap'); };
+  h.render();
+  const b = h.messages.find(m => m.type === 'blackbox');
+  assert.ok(b);
+  assert.equal(b.trigger, 'wasm-trap');
+  assert.equal(b.ram.length, 1024);
+  assert.match(b.error, /synthetic trap/);
+  assert.equal(h.p.x, null);
+});
