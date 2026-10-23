@@ -124,6 +124,18 @@ class Fm1 extends AudioWorkletProcessor {
     this.bbTrace = [];
     this.bbCaptured = false;
     this.bbLastTick = 0;
+    // Host-side PCM observations, separate from firmware R2TB and DMA counters.
+    // Recorded after fm1_render and immediately before returning output to Chrome.
+    // Instrumentation can be disabled via ?pcmprobe=0 for cost comparison.
+    this.pcmProbe = m.pcmProbe !== false;
+    this.pcmStats = {
+      schema:"REM2-AUDIOWORKLET-PCM-1", enabled:this.pcmProbe,
+      sampleRate: sampleRate, quanta:0, requestedFrames:0, renderedFrames:0,
+      shortQuanta:0, nonzeroFrames:0, nonzeroQuanta:0, silentQuanta:0,
+      outputPeak:0, firstNonzeroGuestMs:null, lastNonzeroGuestMs:null,
+      wallLateQuanta:0, worstWorkletMs:0, recent:[],
+      threshold:1/32768
+    };
     this.bbRecord("boot");
     this.paused = false;
     this.snapshots = [];
@@ -222,6 +234,9 @@ class Fm1 extends AudioWorkletProcessor {
       haltReason: this.bbCString("fm1_halt_reason"),
       cpu: this.bbCpu(),
       trace: (this.bbTrace || []).slice(),
+      audioOutput: this.pcmStats ? {
+        ...this.pcmStats, recent: this.pcmStats.recent.slice()
+      } : null,
       guestRamBase: "0x01c00000", ram, ramError,
       emulatedMs: (() => { try { return x.fm1_ms(); } catch { return null; } })()
     };
@@ -255,6 +270,40 @@ class Fm1 extends AudioWorkletProcessor {
     const { l, r } = this.views;
     out[0].set(l);
     if (out[1]) out[1].set(r);
+    // Observation point AFTER copying PCM to the AudioWorklet output.
+    // This is not a loudspeaker recording: it measures the browser-bound
+    // sample buffer. Do not conflate successful DMA with audible playback.
+    const p = this.pcmStats;
+    if (p && p.enabled) {
+      let nonzero = 0, peak = 0;
+      for (let i=0; i<n; i++) {
+        const a = Math.max(Math.abs(out[0][i]), Math.abs(out[1] ? out[1][i] : 0));
+        if (a > p.threshold) nonzero++;
+        if (a > peak) peak = a;
+      }
+      p.quanta++;
+      p.requestedFrames += n;
+      p.renderedFrames += have;
+      if (have < n) p.shortQuanta++;
+      p.nonzeroFrames += nonzero;
+      if (nonzero > 0) {
+        p.nonzeroQuanta++;
+        if (p.firstNonzeroGuestMs === null) p.firstNonzeroGuestMs = x.fm1_ms();
+        p.lastNonzeroGuestMs = x.fm1_ms();
+      } else p.silentQuanta++;
+      if (peak > p.outputPeak) p.outputPeak = peak;
+      const durationMs = now()-t0;
+      if (durationMs > p.worstWorkletMs) p.worstWorkletMs = durationMs;
+      if (durationMs > 1000*n/sampleRate) p.wallLateQuanta++;
+      // Do not allocate an event object in every ~2.9ms audio quantum.
+      if ((p.quanta & 15) === 0 || (p.quanta===1)) {
+        p.recent.push({
+          guestMs:x.fm1_ms(), have, requested:n, nonzero,
+          peak, renderWorkMs:durationMs
+        });
+        if (p.recent.length > 32) p.recent.shift();
+      }
+    }
     this.short = (this.short || 0) + (have < n ? 1 : 0);
     this.reportFrames += n;
     this.reportCalls++;
