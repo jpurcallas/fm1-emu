@@ -13,9 +13,13 @@ const addr=name=>{
 const {instance}=await WebAssembly.instantiate(readFileSync(wasmName),{env:{fm1_jit_compile:()=>0}});
 const x=instance.exports;
 x.fm1_jit(0,0);
-const p=x.fm1_alloc(bin.length);
-new Uint8Array(x.memory.buffer,p,bin.length).set(bin);
-x.fm1_boot(p,bin.length,0x02000120,200);
+// fm1_boot maps the supplied bytes from 0x02000000, whereas the JieLi
+// application itself begins at XIP + 0x120. The FWSC loader normally pads it.
+const imageLength=0x120+bin.length;
+const p=x.fm1_alloc(imageLength);
+new Uint8Array(x.memory.buffer,p,imageLength).fill(0xFF);
+new Uint8Array(x.memory.buffer,p+0x120,bin.length).set(bin);
+x.fm1_boot(p,imageLength,0x02000120,200);
 const fields=["br3_status","br3_cpu0_trace","br3_cpu1_trace","br3_result_expected","br3_result_observed"];
 const locations=Object.fromEntries(fields.map(f=>[f,addr(f)]));
 function read(a){
