@@ -118,6 +118,9 @@ jobs:
       - name: Profile native CPU0 prep/submit/voices/wait/mix versus CPU1 work
         shell: bash
         run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_phase_profile_pi32.sh
+      - name: Test 64-slot pool with active-voice traversal against original PCM and CPU effort
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_active_slots_pi32.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BIOMECH3_MUSICAL_CPU1_NATIVE_PROOF_NO_INSTALL
