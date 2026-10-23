@@ -366,6 +366,9 @@ const I64_ROTR: u8 = 0x8a;
 const I64_SHR_U: u8 = 0x88;
 const I64_CONST: u8 = 0x42;
 const I64_EQZ: u8 = 0x50;
+const I64_LT_S: u8 = 0x53;
+const I64_GT_S: u8 = 0x55;
+const I64_GT_U: u8 = 0x56;
 const F32_REINTERPRET_I32: u8 = 0xbe;
 const I32_REINTERPRET_F32: u8 = 0xbc;
 const F32_ADD: u8 = 0x92;
@@ -1493,6 +1496,73 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                 g.op(I64_SHR_U);
                 g.op(I32_WRAP_I64);
                 g.mem_op(I32_STORE, 2, off_reg(hi));
+            }
+            // PI32v2 Raw21 de/df: saturated 64-bit >> to 32-bit. These
+            // used to call the Rust interpreter per operation. The result
+            // is clamped (signed) or bounded to UINT32_MAX (unsigned),
+            // exactly like Cpu::exec_raw route 21; all source registers
+            // and shift counts are captured before the destination write.
+            Fast::Raw { route: 21, raw } if matches!(raw as u8, 0xde | 0xdf) => {
+                let q = ((raw >> 21) & 7) as u8;
+                let d = ((raw >> 28) & 0xf) as u8;
+                let by_reg = raw as u8 == 0xdf;
+                let signed = if by_reg { raw & 0x1_0000 != 0 }
+                             else { raw & 0x0800_0000 != 0 };
+                // x = regs[2*q+1]<<32 | regs[2*q], as one i64.
+                g.ld_reg(2 * q + 1);
+                g.op(I64_EXTEND_I32_U);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHL);
+                g.ld_reg(2 * q);
+                g.op(I64_EXTEND_I32_U);
+                g.op(I64_OR);
+                if by_reg {
+                    g.ld_reg(((raw >> 24) & 0xf) as u8);
+                    g.i32c(63);
+                    g.op(I32_AND);
+                    g.op(I64_EXTEND_I32_U);
+                } else {
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, (((raw >> 16) & 0xf) | (((raw >> 24) & 3) << 4)) as i64);
+                }
+                g.op(if signed { I64_SHR_S } else { I64_SHR_U });
+                g.set(L_OPRES);
+                g.get(L_CPU); // destination address for store
+                if signed {
+                    // i64 signed clamp to [i32::MIN, i32::MAX]
+                    g.get(L_OPRES);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, i32::MAX as i64);
+                    g.op(I64_GT_S);
+                    g.op(IF); g.op(T_I32); g.nest += 1;
+                    g.i32c(i32::MAX as u32);
+                    g.op(ELSE);
+                    g.get(L_OPRES);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, i32::MIN as i64);
+                    g.op(I64_LT_S);
+                    g.op(IF); g.op(T_I32); g.nest += 1;
+                    g.i32c(i32::MIN as u32);
+                    g.op(ELSE);
+                    g.get(L_OPRES);
+                    g.op(I32_WRAP_I64);
+                    g.end();
+                    g.end();
+                } else {
+                    // u64 clamp to [0, u32::MAX].
+                    g.get(L_OPRES);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, u32::MAX as i64);
+                    g.op(I64_GT_U);
+                    g.op(IF); g.op(T_I32); g.nest += 1;
+                    g.i32c(u32::MAX);
+                    g.op(ELSE);
+                    g.get(L_OPRES);
+                    g.op(I32_WRAP_I64);
+                    g.end();
+                }
+                g.mem_op(I32_STORE, 2, off_reg(d));
             }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
