@@ -23,8 +23,8 @@ function guestDiagnostic(x){
   const ram=new Uint8Array(x.memory.buffer,p,len),dv=new DataView(x.memory.buffer,p,len);
   const symbols={};
   if(nmPath){
-    for(const line of readFileSync(nmPath,"utf8").split("\\n")){
-      const match=line.trim().match(/^([0-9a-fA-F]+)\\s+[a-zA-Z]\\s+([^\\s]+)$/);
+    for(const line of readFileSync(nmPath,"utf8").split("\n")){
+      const match=line.trim().match(/^([0-9a-fA-F]+)\\s+[a-zA-Z]\s+([^\s]+)$/);
       if(match && /^(runtime|initialized|midi_head|midi_tail|midi_dropped|br3_blackbox|br3_completed_jobs|br3_cpu1_stage|br3_cpu0_stage|biomech_sdk_audio|fm1_audio_start)/.test(match[2])){
         const addr=parseInt(match[1],16),offs=addr-0x01c00000;
         if(offs>=0&&offs+16<=len){
