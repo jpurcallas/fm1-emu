@@ -2,8 +2,10 @@
  * Isolated test, NOT a user-facing audio firmware or installable .fwsc.
  */
 #include "biomech.h"
+#ifndef BR3_SERIAL_REFERENCE
 #include "br3_cpu1_runtime.h"
 #include "br3_blackbox.h"
+#endif
 #include <stdint.h>
 #include <math.h>
 #define BR3_TEST_PASS 0xB330A11Fu
@@ -28,11 +30,13 @@ void __attribute__((noreturn)) br3_cpu0_main(void){
     v->bit_mix=(float)(t*4);
   }
   br3_test_status=0xB3300002u;
+#ifndef BR3_SERIAL_REFERENCE
   if(!br3_cpu1_start()){
     br3_test_status=BR3_TEST_FAIL_CPU1;
     goto park;
   }
   br3_cpu1_attach();
+#endif
   for(unsigned t=0;t<BR_TRACKS;t++)br_note_on(&br3_synth,t,36u+t*4u,100);
   float peak=0;
   uint32_t hash=2166136261u;
@@ -50,8 +54,12 @@ void __attribute__((noreturn)) br3_cpu0_main(void){
   }
   {union {float f;uint32_t u;} peakbits;peakbits.f=peak; br3_test_peakbits=peakbits.u;}
   br3_test_checksum=hash;
+#ifdef BR3_SERIAL_REFERENCE
+  br3_test_status=(peak>0.00001f)?BR3_TEST_PASS:BR3_TEST_FAIL_DSP;
+#else
   br3_test_status=(peak>0.00001f && br3_blackbox.jobs_sent>0u &&
      br3_blackbox.jobs_done>0u && br3_blackbox.job_timeouts==0u)?BR3_TEST_PASS:BR3_TEST_FAIL_DSP;
+#endif
 park:
   for(;;)__asm__ volatile("csync":::"memory");
 }
