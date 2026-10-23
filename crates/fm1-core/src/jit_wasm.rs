@@ -358,6 +358,7 @@ const I32_SHL: u8 = 0x74;
 const I32_SHR_S: u8 = 0x75;
 const I32_SHR_U: u8 = 0x76;
 const I32_WRAP_I64: u8 = 0xa7;
+const I64_EXTEND_I32_S: u8 = 0xac;
 const I64_EXTEND_I32_U: u8 = 0xad;
 const I64_OR: u8 = 0x84;
 const I64_SHL: u8 = 0x86;
@@ -366,6 +367,9 @@ const I64_ROTR: u8 = 0x8a;
 const I64_SHR_U: u8 = 0x88;
 const I64_CONST: u8 = 0x42;
 const I64_EQZ: u8 = 0x50;
+const I64_EQ: u8 = 0x51;
+const I64_DIV_S: u8 = 0x7f;
+const I64_DIV_U: u8 = 0x80;
 const F32_REINTERPRET_I32: u8 = 0xbe;
 const I32_REINTERPRET_F32: u8 = 0xbc;
 const F32_ADD: u8 = 0x92;
@@ -1547,6 +1551,75 @@ fn block<B: Bus>(g: &mut Gen<'_>, pc0: u32, ops: &[crate::BOp]) {
                     g.st_reg_from(hi, L_VAL);
                 }
                 bus_used = true;
+            }
+            // PI32v2 Raw21 f6: 64-bit pair divided by 32-bit register,
+            // returning the low 64 bits to a register pair. The interpreter
+            // returns zero for divisor zero; signed i64::MIN/-1 wraps rather
+            // than trapping (Wasm's plain i64.div_s traps, so guard it).
+            Fast::Raw { route: 21, raw } if raw as u8 == 0xf6 => {
+                let lo = ((raw >> 29) & 7) as u8 * 2;
+                let hi = lo + 1;
+                let q = ((raw >> 21) & 7) as u8 * 2;
+                let divisor_reg = ((raw >> 24) & 15) as u8;
+                let signed = raw & 0x1000_0000 != 0;
+                // Read dividend and divisor BEFORE the destination pair.
+                g.ld_reg(q+1);
+                g.op(I64_EXTEND_I32_U);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHL);
+                g.ld_reg(q);
+                g.op(I64_EXTEND_I32_U);
+                g.op(I64_OR);
+                g.set(L_OPRES);
+                g.ld_reg(divisor_reg);
+                g.set(L_A);
+                // if divisor != 0, divide; else zero
+                g.get(L_A);
+                g.if_();
+                g.op(T_I64);
+                if signed {
+                    // Guard i64 MIN/-1; modulo signed overflow returns MIN.
+                    g.get(L_OPRES);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, i64::MIN);
+                    g.op(I64_EQ);
+                    g.get(L_A);
+                    g.i32c(u32::MAX);
+                    g.op(I32_EQ);
+                    g.op(I32_AND);
+                    g.if_();
+                    g.op(T_I64);
+                    g.c.push(I64_CONST);
+                    sleb(&mut g.c, i64::MIN);
+                    g.op(ELSE);
+                    g.get(L_OPRES);
+                    g.get(L_A);
+                    g.op(I64_EXTEND_I32_S);
+                    g.op(I64_DIV_S);
+                    g.end();
+                } else {
+                    g.get(L_OPRES);
+                    g.get(L_A);
+                    g.op(I64_EXTEND_I32_U);
+                    g.op(I64_DIV_U);
+                }
+                g.op(ELSE);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 0);
+                g.end();
+                g.set(L_OPRES);
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(lo));
+                g.get(L_CPU);
+                g.get(L_OPRES);
+                g.c.push(I64_CONST);
+                sleb(&mut g.c, 32);
+                g.op(I64_SHR_U);
+                g.op(I32_WRAP_I64);
+                g.mem_op(I32_STORE, 2, off_reg(hi));
             }
             // PI32v2 binary32 arithmetic: in the previous JIT these four hot
             // operations invoked the interpreter once per individual float op.
