@@ -10,6 +10,8 @@ TOOL=pathlib.Path(sys.argv[2]).resolve()
 BUILD=pathlib.Path(sys.argv[3]).resolve()
 SDK=ROOT/"sdk";APP=ROOT/"app";BIN=TOOL/"pi32v2/bin"
 BR3_LINK=os.getenv("BR3_LINK_ENGINE","0")=="1"
+BR3_FULL=os.getenv("BR3_FULL_V14","0")=="1"
+if BR3_LINK and BR3_FULL:raise SystemExit("Choose either BR3_LINK_ENGINE or BR3_FULL_V14, not both")
 BR3_SRC=pathlib.Path(__file__).resolve().parents[1]/"musical-3plus3"
 BUILD.mkdir(parents=True,exist_ok=True)
 OBJ=BUILD/"obj";OBJ.mkdir(exist_ok=True)
@@ -39,11 +41,14 @@ for rel,expected in PINNED_SHA256.items():
  if actual!=expected:raise SystemExit("WRONG V14 REVISION "+rel+": "+actual+" != "+expected)
 data=json.loads((SDK/"manifest.json").read_text())
 assert data["abi"]==131072
+changed_stock={"app/screen.c","app/audio_output.c","app/board/audio.c","app/board/fm1_audio.h","app/midi_router.c"} if BR3_FULL else set()
 for rel,expected in data["files"].items():
  path=ROOT/rel
- if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=expected:
+ if not path.is_file():
+  raise SystemExit("V14 file missing "+rel)
+ if rel not in changed_stock and hashlib.sha256(path.read_bytes()).hexdigest()!=expected:
   raise SystemExit("V14 FILE INTEGRITY FAILURE "+rel)
-note("FM1 OPEN V14 SDK AUTHOR COPY VERIFIED "+str(len(data["files"]))+" manifest entries")
+note("FM1 OPEN V14 protected SDK verified (65 manifests, "+str(len(changed_stock))+" audited adapter stock replacements)")
 flags=["-target","pi32v2","-integrated-as","-mcpu=r3","-mfprev1","-Wuninitialized",
  "-Wno-invalid-noreturn","-fno-common","-flto","-fallow-pointer-null",
  "-fprefer-gnu-section","-femulated-tls","-Wno-shift-negative-value",
@@ -51,10 +56,14 @@ flags=["-target","pi32v2","-integrated-as","-mcpu=r3","-mfprev1","-Wuninitialize
  "-ffunction-sections","-fdata-sections","-fmessage-length=0",
  "-cl-single-precision-constant","-mllvm","-pi32v2-large-program=true",
  "-D__GCC_PI32V2__","-O2","-I"+str(TOOL/"pi32v2/include")]
-for d in ["sdk/include","sdk/include/libc","app/synth","sdk/config","app","app/board"]:
+for d in ["sdk/include","sdk/include/libc","app/synth","sdk/config","app","app/board","app/biomech"]:
  flags.extend(["-I"+str(ROOT/d)])
 sources=sorted(p for p in APP.rglob("*")
  if p.suffix in (".c",".S") and not p.is_relative_to(APP/"synth"))
+if BR3_FULL:
+ flags+=["-DBR3_DUAL_CORE","-DBR3_PI32V2","-DBR3_EMULATOR_LAB",
+         "-DBR3_SDK_CPU1_PROBE_SERIAL","-DBR3_ACTIVE_SLOTS_LAB",
+         "-DBR3_SDK_NATIVE_AUDIO"]
 note("APP SOURCES "+str(len(sources)))
 objs=[]
 for i,path in enumerate(sources):
@@ -108,15 +117,27 @@ link=[BIN/"ld","--plugin",BIN/"LLVMgold.so","-o","sdk.elf",*objs,"-flto",
  "--undefined=connectivity_wl82_bluetooth_start",
  "--undefined=audio_app_bluetooth_open",
  "--undefined=bt_get_local_name","--undefined=bt_get_mac_addr"]
+if BR3_FULL:
+ link+=["--undefined=biomech_sdk_init","--undefined=biomech_sdk_audio",
+        "--undefined=br_render","--undefined=br3_cpu1_main","--undefined=br3_blackbox"]
 if BR3_LINK:
  # Force both music and CPU1 work symbols to be retained. Otherwise
  # --gc-sections could fake a successful integration by dropping all BR3.
  link+=["--undefined=br_render","--undefined=br3_cpu1_start",
         "--undefined=br3_cpu1_main","--undefined=br3_blackbox"]
-note("LINK STOCK V14 + REAL BR3 OBJECTS" if BR3_LINK else "LINK ORIGINAL SDK ONLY")
+note("LINK FULL V14 BIOMECH3 UI+MIDI+SEQ+FX+DMA + CPU1 diagnostic" if BR3_FULL else
+     "LINK STOCK V14 + REAL BR3 OBJECTS" if BR3_LINK else "LINK ORIGINAL SDK ONLY")
 run(link)
 run([BIN/"nm","-n","sdk.elf"])
-if BR3_LINK:
+if BR3_FULL:
+ out=run([BIN/"nm","-n","sdk.elf"])
+ for symbol in ("br_render","br3_cpu1_main","br3_blackbox",
+                "biomech_sdk_init","biomech_sdk_audio","br_fm1_render_q23",
+                "fm1_audio_irq"):
+  if not any(line.strip().endswith(" "+symbol) for line in out.splitlines()):
+   raise RuntimeError("FULL BR3 V14 required symbol not linked "+symbol)
+ note("BR3 V14 ALL MUSICAL/PANEL/MIDI/DMA SOURCES COMPILED AND LINKED; NOT YET BOOT VALIDATED")
+elif BR3_LINK:
  out=run([BIN/"nm","-n","sdk.elf"])
  for symbol in ("br_render","br3_cpu1_start","br3_cpu1_main","br3_blackbox"):
   if not any(line.strip().endswith(" "+symbol) for line in out.splitlines()):
