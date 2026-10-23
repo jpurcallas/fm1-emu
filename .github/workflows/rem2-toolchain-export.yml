@@ -1,0 +1,36 @@
+name: REminiSCENT 2 LAB - Export JieLi compiler to private workspace
+on:
+  push:
+    branches:
+      - experiment/reminiscent-2-lab-cpu1-libre-20261022
+    paths:
+      - '.github/workflows/rem2-toolchain-export.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  toolchain:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare verified compiler bundle
+        run: |
+          set -euo pipefail
+          mkdir -p temp
+          curl -fLsS --retry 3 --connect-timeout 20 --max-time 240 https://pkgman.jieliapp.com/s/linux-toolchain | tar -xJ -C temp
+          TC="$(find temp -maxdepth 1 -type d -name 'jieli-linux-toolchains-*' | sort | tail -1)"
+          test -n "$TC"
+          find "$TC" -type f -name clang -print -quit
+          du -sh "$TC"
+          tar -C temp -cJf rem2-jieli-pi32v2-toolchain.tar.xz "$(basename "$TC")"
+          sha256sum rem2-jieli-pi32v2-toolchain.tar.xz > SHA256SUMS.txt
+          du -h rem2-jieli-pi32v2-toolchain.tar.xz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem2-jieli-pi32v2-toolchain-for-local-lab-NO-FIRMWARE
+          path: |
+            rem2-jieli-pi32v2-toolchain.tar.xz
+            SHA256SUMS.txt
+          compression-level: 0
+          retention-days: 1
