@@ -42,6 +42,25 @@ jobs:
           /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-music/sdk.elf > /tmp/br3-v14-music/sdk.nm
           grep -E 'br_render$|br3_cpu1_start$|br3_cpu1_main$|br3_blackbox$' /tmp/br3-v14-music/sdk.nm
           sha256sum /tmp/br3-v14-music/sdk.elf
+          python3 - <<'PY'
+          import pathlib
+          def read(p):
+              data={}
+              for line in pathlib.Path(p).read_text().splitlines():
+                  row=line.split()
+                  if len(row)==3:
+                      try:data[row[2]]=int(row[0],16)
+                      except ValueError:pass
+              return data
+          base=read('/tmp/br3-v14/sdk.nm')
+          br3=read('/tmp/br3-v14-music/sdk.nm')
+          for symbol in ('_MALLOC_SIZE','_HEAP_BEGIN','_HEAP_END','br3_seg','br3_mailbox','br3_blackbox','br_render','br3_cpu1_entry','br3_cpu1_main'):
+              print('BR3_V14_MEMORY',symbol, 'base',hex(base[symbol]) if symbol in base else None,
+                    'br3',hex(br3[symbol]) if symbol in br3 else None)
+          if '_MALLOC_SIZE' in base and '_MALLOC_SIZE' in br3:
+              print('BR3_V14_HEAP_DELTA',br3['_MALLOC_SIZE']-base['_MALLOC_SIZE'])
+              print('BR3_V14_HEAP_FLOOR_48K',br3['_MALLOC_SIZE']>=49152)
+          PY
       - name: Inspect ELF RAM budget
         shell: bash
         run: |
