@@ -46,8 +46,9 @@ if os.getenv("BR3_DISPLAY_CACHE_SHADOW")=="1":
  code=code.replace(old,new)
  old2="    shadow_panel.engine=&shadow_engine;"
  new2="    memset(&shadow_engine,0,sizeof(shadow_engine));\n    shadow_panel.engine=&shadow_engine;"
- if code.count(old2)!=1:raise SystemExit("Cannot identify snapshot init")
- code=code.replace(old2,new2)
+ init_at=code.find("void biomech_sdk_init(void){")
+ if init_at<0 or code.find(old2,init_at)<0:raise SystemExit("Cannot identify UI init")
+ code=code[:init_at]+code[init_at:].replace(old2,new2,1)
  ui.write_text(code)
  print("BR3_DISPLAY_CACHE_SHADOW 21376 byte visual mirror now in .cache_ram_bss; DSP untouched")
 # Reuse the exact, versioned six-track CPU0/CPU1 music and blackbox files in
