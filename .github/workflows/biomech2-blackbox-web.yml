@@ -18,6 +18,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Rust wasm target
         run: rustup target add wasm32-unknown-unknown
+      - name: Verify PI32v2 floating-point decoder and execution
+        run: |
+          cargo test -p fm1-core fpu_ftof_rounding_vendor_encodings -- --nocapture
+          cargo test -p fm1-core fpu_ops_and_float_compare -- --nocapture
+          cargo test -p fm1-isa --lib
       - name: Build instrumented web emulator
         run: tools/build_site.sh _site
       - name: Verify mandatory BLACK BOX exports and UI
