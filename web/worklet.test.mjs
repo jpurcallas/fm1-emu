@@ -165,8 +165,8 @@ test('BLACK BOX captures frozen RAM and both CPUs exactly once when the guest ha
   const h = harness();
   h.context.TextDecoder = TextDecoder;
   const data = new Uint8Array(h.memory.buffer);
-  data.set(new TextEncoder().encode('{"cpu0":{"pc":"0x01c01111"},"cpu1":{"pc":"0x01c02222"}}\\0'), 40000);
-  data.set(new TextEncoder().encode('illegal opcode; cpu0_pc=0x01c01111\\0'), 40200);
+  data.set(new TextEncoder().encode('{"cpu0":{"pc":"0x01c01111"},"cpu1":{"pc":"0x01c02222"}}'), 40000);
+  data.set(new TextEncoder().encode('illegal opcode; cpu0_pc=0x01c01111'), 40200);
   data.fill(23, 40500, 41524);
   Object.assign(h.p.x, {
     fm1_halted: () => true, fm1_blackbox_cpu_json: () => 40000,
