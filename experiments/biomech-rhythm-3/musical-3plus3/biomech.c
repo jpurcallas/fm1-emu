@@ -578,6 +578,16 @@ void br3_set_executor(const BR3Executor *ops){
 #ifndef BR3_SLICE_FRAMES
 #define BR3_SLICE_FRAMES 32u /* baseline; alternative slice budgets require testing */
 #endif
+/* Static A/B research only. Default preserves agreed CPU0 1-3 / CPU1 4-6.
+ * Every mask MUST contain exactly three of the six tracks. Voices/algorithms
+ * are unchanged; only execution ownership moves between cores. */
+#ifndef BR3_CPU1_TRACK_MASK
+#define BR3_CPU1_TRACK_MASK 0x38u
+#endif
+#if BR3_CPU1_TRACK_MASK != 0x38u && BR3_CPU1_TRACK_MASK != 0x2Au && BR3_CPU1_TRACK_MASK != 0x15u
+#error "Only validated 3/3 assignments 0x38, 0x2A, 0x15 are allowed in the lab"
+#endif
+#define BR3_ON_CPU1(t) (((BR3_CPU1_TRACK_MASK>>(t))&1u)!=0u)
 #if BR3_SLICE_FRAMES < 1u || BR3_SLICE_FRAMES > 32u
 #error "BR3_SLICE_FRAMES must be 1..32"
 #endif
@@ -597,7 +607,7 @@ static void BR_RAMCODE br3_upper_segment(void *data){
   for(uint32_t n=0;n<s->frames;n++){
     for(int i=0;i<BR_POLYPHONY;i++){
       BRPlayingVoice *q=&s->cpu1_shadow[i];
-      if(s->ready[n][i] && q->track>=3)
+      if(s->ready[n][i] && BR3_ON_CPU1(q->track))
         s->sample[n][i]=br_voice_post(NULL,q,&e->project.track[q->track],s->env[n][i],s->noise[n][i]);
     }
   }
@@ -694,7 +704,7 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     for(uint32_t n=0;n<span;n++){
       for(int i=0;i<BR_POLYPHONY;i++){
         BRPlayingVoice *q=&e->active[i];
-        if(s->ready[n][i] && q->track<3)
+        if(s->ready[n][i] && !BR3_ON_CPU1(q->track))
           s->sample[n][i]=br_voice_post(NULL,q,&e->project.track[q->track],s->env[n][i],s->noise[n][i]);
 
       }
@@ -708,7 +718,7 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
       br3_upper_segment(s);
     }
     for(int i=0;i<BR_POLYPHONY;i++){
-      if(simulated[i].track>=3)e->active[i]=s->cpu1_shadow[i];
+      if(BR3_ON_CPU1(simulated[i].track))e->active[i]=s->cpu1_shadow[i];
       /* Envelope state was advanced in serial-order by CPU0's preflight.
          Oscillator/filter state was advanced independently by its owner. */
       e->active[i].active=simulated[i].active;
