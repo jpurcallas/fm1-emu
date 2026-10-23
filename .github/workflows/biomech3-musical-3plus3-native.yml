@@ -13,6 +13,9 @@ jobs:
     timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
+      - name: GCC/Clang long-form active slot parity and CPU1 fallback
+        shell: bash
+        run: bash experiments/biomech-rhythm-3/musical-3plus3/verify_active_slots_host.sh
       - name: Install verified vendor PI32v2 toolchain
         shell: bash
         run: |
