@@ -74,6 +74,17 @@
         </div>
       </section>
 
+      <section class="box" aria-labelledby="h-blackbox">
+        <h2 class="eyebrow" id="h-blackbox">BIOMECH BLACK BOX · emulator only</h2>
+        <p id="blackbox-status" role="status" aria-live="polite">Recording from boot. On CPU halt, the diagnostic is captured automatically.</p>
+        <div class="row">
+          <button type="button" id="blackbox-capture">Capture now</button>
+          <button type="button" id="blackbox-export" disabled>Export BLACK BOX .json</button>
+        </div>
+        <p class="dim">Exports CPU0/CPU1 registers, PC, emulator halt reason, recent checkpoints,
+        and a full guest-RAM snapshot (including any firmware BLACK BOX). No physical FM-1 access.</p>
+      </section>
+
       <section class="box save-box" aria-labelledby="h-save">
         <h2 class="eyebrow" id="h-save">Your save</h2>
         <span id="save-status" role="status" aria-live="polite">Start to restore saved settings and patches</span>
