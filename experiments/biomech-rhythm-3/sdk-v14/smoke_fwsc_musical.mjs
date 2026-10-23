@@ -2,7 +2,7 @@
 // JIT OFF, direct TRS MIDI UART bytes into the real emulated firmware.
 // Do not claim CPU1 ownership, real-time DMA success or physical hardware.
 import {readFileSync,writeFileSync} from "node:fs";
-const [wasmPath,stockPath,br3Path,outDir,nmPath]=process.argv.slice(2);
+const [wasmPath,stockPath,br3Path,outDir,nmPath,bootNotePath]=process.argv.slice(2);
 if(!outDir)throw Error("usage: node smoke_fwsc_musical.mjs emulator.wasm stock.fwsc br3.fwsc outDir");
 const wasm=readFileSync(wasmPath);
 const framesPerBlock=128;
@@ -105,7 +105,7 @@ async function run(label,path,mode='midi'){
    emulated_ms:bb.ms,cpu0_insn:bb.cpu0?.insn_count,cpu1_insn:bb.cpu1?.insn_count,
    lcd_revision:x.fm1_lcd_revision(),control_events:bb.control_events?.length??0,
    stimulus_mode:mode,events_sent:events.length,input_events:events,phase_samples:phases,
-   guest_state:label==="biomech3-midi"?guestDiagnostic(x):undefined};
+   guest_state:label.startsWith("biomech3-")?guestDiagnostic(x):undefined};
  writeFileSync(outDir+"/"+label+".json",JSON.stringify(result,null,2));
  writeFileSync(outDir+"/"+label+".wav",encodeWav(L,R));
  console.log("BR3_MUSICAL_BLACKBOX "+JSON.stringify(result));
@@ -115,5 +115,6 @@ async function run(label,path,mode='midi'){
 const stock=await run("stock-midi",stockPath);
 const br3=await run("biomech3-midi",br3Path);
 const keys=await run("biomech3-keys",br3Path,"keys");
-console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_keyboard_pcm:keys.nonzero_stereo_frames,br3_keyboard_peak:keys.peak,br3_fwsc_boot:true}));
+const tone=bootNotePath?await run("biomech3-direct-note",bootNotePath,"none"):null;
+console.log("BR3_MUSICAL_GUARD "+JSON.stringify({stock_pcm:stock.nonzero_stereo_frames,br3_pcm:br3.nonzero_stereo_frames,stock_peak:stock.peak,br3_peak:br3.peak,br3_keyboard_pcm:keys.nonzero_stereo_frames,br3_keyboard_peak:keys.peak,direct_note_pcm:tone?.nonzero_stereo_frames??null,direct_note_peak:tone?.peak??null,br3_fwsc_boot:true}));
 console.log("STAGE: real firmware booted; MIDI was injected. Nonzero PCM and musical behavior remain separately evidenced.");
