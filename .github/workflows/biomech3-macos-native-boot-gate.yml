@@ -35,7 +35,7 @@ jobs:
           code=${PIPESTATUS[0]}
           echo "$code" | tee /tmp/biomech-native/NATIVE_EXIT_CODE.txt
           exit "$code"
-      - uses: actions/upload-artifact@v4
+      - name: Capture actual native boot display and audio peak\n        shell: bash\n        run: |\n          set -euo pipefail\n          mkdir -p work\n          ./target/release/fm1-live --fwsc /tmp/biomech-native/BIOMECH3_v07_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 2>&1 | tee /tmp/biomech-native/NATIVE_SHOT.log\n          test -s work/panel.ppm\n          cp work/panel.ppm /tmp/biomech-native/NATIVE_PANEL_1800ms.ppm\n      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: biomech3-v07-native-macos-fm1-live-evidence
