@@ -1,0 +1,71 @@
+name: BIOMECH3 polyphonic Mac emulator candidate v0.5 (NO INSTALL)
+on:
+  push:
+    branches:
+      - experiment/biomech3-v14-polyphony-mac-audio-20261023
+    paths:
+      - .github/workflows/biomech3-v14-polyphony-mac-v05.yml
+      - experiments/biomech-rhythm-3/sdk-v14/patch_polyphony_mac_v05.py
+      - experiments/biomech-rhythm-3/sdk-v14/smoke_polyphony_mac_v05.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real_guest_polyphonic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned original V14 and verified JieLi PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage protected six-track full BR3 music + experimental auto-polyphonic audio input
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_polyphony_mac_v05.py /tmp/fm1-v14
+          grep -n br3_poly_before_audio /tmp/fm1-v14/app/biomech/biomech_sdk_port.c
+      - name: Compile original V14 and full original 6-track/FX/SEQ BR3 with lab notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-poly-v05
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-poly-v05/sdk.elf > /tmp/br3-poly-v05/sdk.nm
+          grep -E 'br3_poly_stage$|br3_poly_active_at_trigger$|br3_poly_triggers$|br_render$' /tmp/br3-poly-v05/sdk.nm
+          grep ' _MALLOC_SIZE$' /tmp/br3-poly-v05/sdk.nm || true
+      - name: Pack true .fwsc with the stock V14 update packaging route
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-poly-v05
+          mv /tmp/br3-poly-v05/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_MAC_SOLO_EMULADOR_NO_INSTALAR.fwsc
+          (cd /tmp/br3-poly-v05 && sha256sum BIOMECH3_POLYPHONY_v05_MAC_SOLO_EMULADOR_NO_INSTALAR.fwsc > SHA256SUMS.txt)
+      - name: Boot in actual 200 MHz emulator and record 1-6 and 6-track simultaneous polyphony
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_polyphony_mac_v05.mjs /tmp/fm1_web.wasm /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_MAC_SOLO_EMULADOR_NO_INSTALAR.fwsc /tmp/br3-poly-v05/sdk.nm /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_EMULATOR_EVIDENCE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_POLYPHONY_v05_MAC_SOLO_EMULADOR_NO_INSTALAR
+          path: |
+            /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_MAC_SOLO_EMULADOR_NO_INSTALAR.fwsc
+            /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_EMULATOR_EVIDENCE.wav
+            /tmp/br3-poly-v05/BIOMECH3_POLYPHONY_v05_EMULATOR_EVIDENCE.json
+            /tmp/br3-poly-v05/SHA256SUMS.txt
+            /tmp/br3-poly-v05/build.log
+            /tmp/br3-poly-v05/sdk.nm
+          retention-days: 14
+          if-no-files-found: warn
