@@ -63,7 +63,8 @@ for(let i=0;i<frames;i++){
 }
 writeFileSync(outPath+".wav",wav);
 const report={model:"FM1 V14 PI32v2 BR3 unchanged DSP v0.6 A/B",scenario,fwsc:fwscPath,jit:false,mhz:200,
- frames,short,nonzero,peak,firstAudio,halted,state,snapshots,\n expected_notes:scenario==="single"?1:6,guest_progress:state.br3_v06_render_returned>=60,
+ frames,short,nonzero,peak,firstAudio,halted,state,snapshots,
+ expected_notes:scenario==="single"?1:6,guest_progress:state.br3_v06_render_returned>=60,
  warning:"AUTO-generated notes in real C99 audio owner; not external MIDI/keys, not safe CPU1 3+3 or physical FM1 certification."};
 writeFileSync(outPath+".json",JSON.stringify(report,null,2));
 console.log("BR3_POLYPHONY_V06 "+JSON.stringify(report));
