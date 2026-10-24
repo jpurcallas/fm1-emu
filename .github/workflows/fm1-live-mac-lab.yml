@@ -4,7 +4,7 @@ on:
     branches: ['experiment/fm1-live-groove-memory-watch-20261024']
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   mac:
     runs-on: macos-15
@@ -81,6 +81,21 @@ jobs:
         with:
           name: FM1-LIVE-LAB-v2-CONTROLES-GROOVE-TRACE-MAC-ARM64
           path: FM1-LIVE-LAB-v2-CONTROLES-GROOVE-TRACE-MAC-ARM64.tar.gz
+      - name: Publish persistent GitHub Release download (diagnostic, Mac only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="fm1-live-lab-v2-groove-trace-20261024"
+          file="FM1-LIVE-LAB-v2-CONTROLES-GROOVE-TRACE-MAC-ARM64.tar.gz"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" "$file" --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$tag" "$file" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+              --title "FM1-LIVE-LAB v2 Mac ARM64 · Groove memory trace (experimental)" \
+              --notes "Emulador Mac ARM64 con controles, MIDI, WAV y BLACK BOX, más diagnóstico opcional de acceso a bancos Groove. Solo diagnóstico; firmware BIOMECH no modificado ni aprobado."
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
