@@ -1,0 +1,56 @@
+name: FM1 Live Mac LAB Blackbox
+on:
+  push:
+    branches: ['experiment/fm1-live-mac-blackbox-20261023']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mac:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustc --version
+          uname -m
+      - name: Tests and native build
+        env:
+          FM1_LAB_BUILD: ${{ github.sha }}
+        run: |
+          cargo test --locked -p fm1-core -p fm1-isa -p fm1-soc > core-tests.txt 2>&1
+          cargo test --locked -p fm1-live > live-tests.txt 2>&1
+          cargo build --release --locked -p fm1-live -p fm1-emu --target aarch64-apple-darwin
+          lipo -verify_arch arm64 target/aarch64-apple-darwin/release/fm1-live
+      - name: Headless runtime check on runner
+        env:
+          FM1_LAB_BUILD: ${{ github.sha }}
+        run: |
+          cargo build --release --locked -p fm1-live
+          target/release/fm1-live --version
+          target/release/fm1-live --fwsc fm1-sid/web/sidplayer.fwsc --bench 3000 > bench.txt 2>&1
+          grep -q "ms emulated" bench.txt
+      - name: Package
+        run: |
+          mkdir -p dist/FM1-LIVE-LAB-MAC
+          cp target/aarch64-apple-darwin/release/fm1-live target/aarch64-apple-darwin/release/fm1-emu dist/FM1-LIVE-LAB-MAC/
+          cp experiments/native-mac-lab/ABRIR_FIRMWARE.command experiments/native-mac-lab/LEEME.txt dist/FM1-LIVE-LAB-MAC/
+          chmod +x dist/FM1-LIVE-LAB-MAC/fm1-live dist/FM1-LIVE-LAB-MAC/fm1-emu dist/FM1-LIVE-LAB-MAC/ABRIR_FIRMWARE.command
+          git rev-parse HEAD > dist/FM1-LIVE-LAB-MAC/BUILD.txt
+          cat core-tests.txt live-tests.txt bench.txt > dist/FM1-LIVE-LAB-MAC/CHECKS.txt
+          (cd dist/FM1-LIVE-LAB-MAC && shasum -a 256 fm1-live fm1-emu ABRIR_FIRMWARE.command > SHA256SUMS.txt)
+          tar -czf FM1-LIVE-LAB-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FM1-LIVE-LAB-MAC-ARM64
+          path: FM1-LIVE-LAB-MAC-ARM64.tar.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FM1-LIVE-LAB-build-logs
+          path: |
+            core-tests.txt
+            live-tests.txt
+            bench.txt
