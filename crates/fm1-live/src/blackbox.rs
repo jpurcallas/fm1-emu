@@ -74,4 +74,23 @@ mod tests {
         assert_eq!(quote("a\"\\\n\t\u{1}"), "\"a\\\"\\\\\\n\\t\\u0001\"");
         assert_eq!(quote("sí"), "\"sí\"");
     }
+
+    #[test] fn capture_preserves_machine_and_exports_ram() {
+        let mut m=crate::Machine {
+            cpu:fm1_core::Cpu::new(0x01c00010),
+            cpu1:Some(fm1_core::Cpu::new(0x01c00020)),
+            soc:fm1_soc::Soc::new(64,vec![0;4]),
+            skip_log:None,blocks:true,pending_tick:false,watch_call:None,watch_hits:0,
+        };
+        m.soc.ram.write32(0,0x12345678);
+        let before=(m.cpu.pc,m.soc.periph.cycles,m.soc.ram.read32(0));
+        let dir=std::env::temp_dir().join(format!("fm1-blackbox-test-{}",std::process::id()));
+        let p=capture(&m,"test.fwsc","halt",Some("test reason"),7,&dir).unwrap();
+        let json=std::fs::read_to_string(&p).unwrap();
+        assert!(json.contains("\"halted\":true"));
+        assert!(json.contains("\"hostAudioUnderruns\":7"));
+        assert_eq!(before,(m.cpu.pc,m.soc.periph.cycles,m.soc.ram.read32(0)));
+        if let Some(out)=std::env::var_os("FM1_BLACKBOX_TEST_OUTPUT") { std::fs::copy(&p,out).unwrap(); }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
 }
