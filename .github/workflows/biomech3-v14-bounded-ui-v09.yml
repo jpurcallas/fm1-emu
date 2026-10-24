@@ -116,7 +116,9 @@ jobs:
               match=re.search(r"(?m)^([0-9a-fA-F]+) [A-Za-z] "+key+r"$",nm)
               assert match,key
               off=int(match.group(1),16)-0x01c00000
-              print("BR3_V09_NATIVE_RAM",key,struct.unpack_from("<I",ram,off)[0])
+              val=struct.unpack_from("<I",ram,off)[0]
+              print("BR3_V09_NATIVE_RAM",key,val)
+              if key=="last_paint": assert val>1200, "UI stalled while audio advanced"
           PY
       - uses: actions/upload-artifact@v4
         if: always()
