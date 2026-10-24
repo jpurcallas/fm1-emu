@@ -55,6 +55,18 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
         m.soc.periph.hz/1_000_000,quote(trigger),underruns,ram.len(),quote(&encoded),
         reason.is_some(),quote(reason.unwrap_or("")),m.soc.periph.ms(),m.soc.periph.cycles,
         m.soc.periph.audio_halves,cpu(&m.cpu),c1);
+    let access_events = m.soc.groove_mem_events.iter().map(|e| {
+        format!(r#"{"cycle":{},"core":{},"pc":{},"addr":{},"width":{},"write":{}}"#,
+            e.cycle, e.core, e.pc, e.addr, e.width, e.write)
+    }).collect::<Vec<_>>().join(",");
+    let access_report = format!(
+        r#"{"enabled":{},"regionNames":["scratch","pattern","undo","fm1_fx_states"],"counts":{:?},"events":[{}]}"#,
+        m.soc.groove_mem_watch, m.soc.groove_mem_counts, access_events
+    );
+    let mut json = json;
+    if let Some(end) = json.rfind('}') {
+        json.insert_str(end, &format!(r#","grooveMem":{}"#, access_report));
+    }
     let stem=format!("FM1_BLACKBOX_{stamp}_{trigger}");
     let path=dir.join(format!("{stem}.json"));
     let temp=dir.join(format!("{stem}.tmp"));
