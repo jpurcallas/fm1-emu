@@ -4,8 +4,8 @@ on:
     branches:
       - experiment/biomech3-v09-incremental-ui-20261024
     paths:
-      - '.github/workflows/biomech3-v14-lcd-recovery-v09.yml'
-      - 'experiments/biomech-rhythm-3/sdk-v14/patch_lcd_v09.py'
+      - '.github/workflows/biomech3-v14-bounded-ui-v09.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/patch_display_incremental_v09.py'
       - 'experiments/biomech-rhythm-3/sdk-v14/smoke_polyphony_mac_v06.mjs'
   workflow_dispatch:
 permissions:
@@ -40,7 +40,8 @@ jobs:
           set -euo pipefail
           BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
           python3 experiments/biomech-rhythm-3/sdk-v14/patch_polyphony_mac_v07.py /tmp/fm1-v14
-          python3 experiments/biomech-rhythm-3/sdk-v14/patch_lcd_v09.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_lcd_v08.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_display_incremental_v09.py /tmp/fm1-v14
           grep -n br3_v06_guest_frames /tmp/fm1-v14/app/biomech/biomech_sdk_port.c
       - name: Compile and link real V14 plus original musical DSP/FX/seq (no audio substitution)
         shell: bash
