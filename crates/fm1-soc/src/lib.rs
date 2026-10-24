@@ -1076,3 +1076,23 @@ mod tests {
         assert!(!soc.flash.busy());
     }
 }
+
+#[cfg(test)]
+mod groove_mem_watch_tests {
+    use super::*;
+    #[test]
+    fn bounded_counters_identify_cpu_and_access_direction() {
+        let mut soc = Soc::new(1 << 20, Vec::new());
+        soc.groove_mem_watch = true;
+        soc.record_groove_mem(0, 0x1234, 0x01c68060, 4, false);
+        soc.record_groove_mem(1, 0x5678, 0x01c4f780, 2, true);
+        soc.record_groove_mem(0, 0x1234, 0x01c00000, 4, false);
+        assert_eq!(soc.groove_mem_counts[0], [1, 0, 0, 0]);
+        assert_eq!(soc.groove_mem_counts[3], [0, 0, 0, 1]);
+        assert_eq!(soc.groove_mem_events.len(), 2);
+        assert_eq!(soc.groove_mem_events[1].pc, 0x5678);
+        soc.groove_mem_watch = false;
+        soc.record_groove_mem(0, 0x1234, 0x01c68060, 4, true);
+        assert_eq!(soc.groove_mem_counts[0], [1, 0, 0, 0]);
+    }
+}
