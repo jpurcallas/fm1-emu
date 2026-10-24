@@ -8,7 +8,7 @@ fi
 mkdir -p "$HOME/Desktop/FM1_BLACKBOX"
 stamp=$(date +%Y%m%d-%H%M%S)
 echo "FM1 LAB · firmware: $fw"
-echo "F9 (o Fn+F9): guardar caja negra. También se guarda al cerrar o detenerse."
+echo "Barra superior: ABRIR FWSC, MHZ, EXPORTAR JSON, GRABAR WAV y VER ARCHIVOS."
 echo "Registros en Escritorio / FM1_BLACKBOX."
 /usr/bin/shasum -a 256 "$fw" > "$HOME/Desktop/FM1_BLACKBOX/firmware-$stamp.sha256"
 ./fm1-live --mhz 200 --fwsc "$fw" 2>&1 | /usr/bin/tee "$HOME/Desktop/FM1_BLACKBOX/session-$stamp.log"
