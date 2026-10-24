@@ -29,10 +29,9 @@ inject=r"""
           br3_v06_scenario=BR3_V06_SCENARIO_ID;
           for(i=0;i<BR3_V06_NOTE_COUNT;i++) {
              /* LAB PROGRAM ONLY: six tracks get different existing timbral parameters. */
-             runtime.engine.project.track[i].family=(uint8_t)(i%5u);
+             /* Preserve Resonance family, gain, texture, ADSR and FX.
+                Only choose one of four pre-existing waveforms per track. */
              runtime.engine.project.track[i].waveform=(uint8_t)(1u+i%4u);
-             runtime.engine.project.track[i].texture=(float)(i*14u);
-             runtime.engine.project.track[i].body=(float)(30u+i*8u);
              br_trigger(&runtime.engine,BR3_V06_TRACK_MODE?i:0u,100u,(int)notes[i]);
              ++br3_v06_notes_sent;
           }
