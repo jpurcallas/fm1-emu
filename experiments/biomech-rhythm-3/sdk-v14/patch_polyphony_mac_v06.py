@@ -13,7 +13,7 @@ anchor="    br_fm1_render_q23(&runtime,out,frames);"
 if src.count(anchor)!=1: raise SystemExit("audio-owner callsite not unambiguous")
 # Inject six notes *together* at first render, as a completely independent guest test.
 # The previous v0.5 instrument stalled before the sixth timed stage.
-counters=String if False else r"""
+counters=r"""
 /* BR3 V06 EMULATOR AUTO NOTES (not a production voice dispatcher).
    No DSP source or effects change. Note events in the original audio owner. */
 volatile unsigned br3_v06_scenario,br3_v06_notes_sent,br3_v06_active_at_start;
