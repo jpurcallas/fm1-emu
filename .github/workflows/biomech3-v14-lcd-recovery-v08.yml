@@ -92,13 +92,13 @@ jobs:
           set -euo pipefail
           cargo build --release --locked -p fm1-live
           mkdir -p work
-          ./target/release/fm1-live --fwsc /tmp/br3-native/BIOMECH3_v08_LCD_RESCUE_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 | tee /tmp/br3-native/NATIVE_SHOT.log
+          FM1_DUMPRAM=/tmp/br3-native/RAM_1800ms.bin ./target/release/fm1-live --fwsc /tmp/br3-native/BIOMECH3_v08_LCD_RESCUE_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 | tee /tmp/br3-native/NATIVE_SHOT.log
           test -s work/panel.ppm
           cp work/panel.ppm /tmp/br3-native/NATIVE_PANEL_1800ms.ppm
           python3 - <<'PY'
           from pathlib import Path
           blob=Path("work/panel.ppm").read_bytes()
-          parts=blob.split(b"\\n",3)
+          parts=blob.split(bytes([10]),3)
           assert len(parts)==4
           pix=parts[3]; w=1280
           count=0
@@ -108,6 +108,14 @@ jobs:
                   if max(pix[o:o+3])>18: count+=1
           print("BR3_V08_NATIVE_SCREEN_ACTIVE_PIXELS",count)
           assert count>250, "Native LCD remains black"
+          import re, struct
+          nm=Path("/tmp/br3-native/sdk.nm").read_text()
+          ram=Path("/tmp/br3-native/RAM_1800ms.bin").read_bytes()
+          for key in ["initialized","blocks","snapshot_state","last_paint"]:
+              match=re.search(r"(?m)^([0-9a-fA-F]+) [A-Za-z] "+key+r"$",nm)
+              assert match,key
+              off=int(match.group(1),16)-0x01c00000
+              print("BR3_V08_NATIVE_RAM",key,struct.unpack_from("<I",ram,off)[0])
           PY
       - uses: actions/upload-artifact@v4
         if: always()
