@@ -67,6 +67,16 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
     if let Some(end) = json.rfind('}') {
         json.insert_str(end, &format!(r#","grooveMem":{}"#, access_report));
     }
+    let flight_events = m.soc.cpu0_flight.iter().map(|e| format!(
+        r#"{{"cycle":{},"from":{},"to":{},"sp":{},"rets":{},"kind":{}}}"#,
+        e.cycle, e.before, e.after, e.sp, e.rets, quote(e.kind)
+    )).collect::<Vec<_>>().join(",");
+    if let Some(end) = json.rfind('}') {
+        json.insert_str(end, &format!(
+            r#","cpu0Flight":{{"capacity":256,"total":{},"retained":{},"events":[{}]}}"#,
+            m.soc.cpu0_flight_total, m.soc.cpu0_flight.len(), flight_events
+        ));
+    }
     let stem=format!("FM1_BLACKBOX_{stamp}_{trigger}");
     let path=dir.join(format!("{stem}.json"));
     let temp=dir.join(format!("{stem}.tmp"));
