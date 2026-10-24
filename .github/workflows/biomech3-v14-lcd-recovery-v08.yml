@@ -1,0 +1,116 @@
+name: BIOMECH3 v0.8 native LCD restore (NO INSTALL)
+on:
+  push:
+    branches:
+      - experiment/biomech3-native-mac-validation-20261024
+    paths:
+      - '.github/workflows/biomech3-v14-lcd-recovery-v08.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/patch_lcd_v08.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_polyphony_mac_v06.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real_guest_polyphonic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [tracks6]
+    env:
+      BR3_V06_SCENARIO: ${{ matrix.scenario }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned V14 and verified JieLi PI32v2 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage unchanged six-track C99 BR3 and inject test notes into audio owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_polyphony_mac_v07.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_lcd_v08.py /tmp/fm1-v14
+          grep -n br3_v06_guest_frames /tmp/fm1-v14/app/biomech/biomech_sdk_port.c
+      - name: Compile and link real V14 plus original musical DSP/FX/seq (no audio substitution)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v08
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v08/sdk.elf > /tmp/br3-v08/sdk.nm
+          grep -E 'br_render$|br3_v06_active_at_start$|br3_v06_render_returned$|br3_v06_notes_sent$' /tmp/br3-v08/sdk.nm
+          grep ' _MALLOC_SIZE$' /tmp/br3-v08/sdk.nm
+      - name: Package real V14 update-format FWSC for emulator only
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v08
+          mv /tmp/br3-v08/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc "/tmp/br3-v08/BIOMECH3_v08_LCD_RESCUE_timbres_${BR3_V06_SCENARIO}_SOLO_EMULADOR_NO_INSTALAR.fwsc"
+          (cd /tmp/br3-v08 && sha256sum BIOMECH3_v08_LCD_RESCUE_timbres_*.fwsc > SHA256SUMS.txt)
+      - name: Guest boot/audio test 200MHz + independent RAW PCM/WAV and guest progress
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_polyphony_mac_v06.mjs /tmp/fm1_web.wasm "/tmp/br3-v08/BIOMECH3_v08_LCD_RESCUE_timbres_${BR3_V06_SCENARIO}_SOLO_EMULADOR_NO_INSTALAR.fwsc" /tmp/br3-v08/sdk.nm "/tmp/br3-v08/BIOMECH3_v08_LCD_RESCUE_timbres_${BR3_V06_SCENARIO}_EVIDENCE" "${BR3_V06_SCENARIO}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_v08_LCD_RESCUE_timbres_${{ matrix.scenario }}_SOLO_EMULADOR_NO_INSTALAR
+          path: |
+            /tmp/br3-v08/*.fwsc
+            /tmp/br3-v08/*EVIDENCE.wav
+            /tmp/br3-v08/*EVIDENCE.json
+            /tmp/br3-v08/SHA256SUMS.txt
+            /tmp/br3-v08/build.log
+            /tmp/br3-v08/sdk.nm
+          retention-days: 14
+          if-no-files-found: warn
+
+  native_mac_screen:
+    runs-on: macos-15
+    needs: real_guest_polyphonic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: BIOMECH3_v08_LCD_RESCUE_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR
+          path: /tmp/br3-native
+      - name: Compile native fm1-live and render LCD screenshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --release --locked -p fm1-live
+          mkdir -p work
+          ./target/release/fm1-live --fwsc /tmp/br3-native/BIOMECH3_v08_LCD_RESCUE_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 | tee /tmp/br3-native/NATIVE_SHOT.log
+          test -s work/panel.ppm
+          cp work/panel.ppm /tmp/br3-native/NATIVE_PANEL_1800ms.ppm
+          python3 - <<'PY'
+          from pathlib import Path
+          blob=Path("work/panel.ppm").read_bytes()
+          parts=blob.split(b"\\n",3)
+          assert len(parts)==4
+          pix=parts[3]; w=1280
+          count=0
+          for y in range(250,470,2):
+              for x in range(480,800,2):
+                  o=(y*w+x)*3
+                  if max(pix[o:o+3])>18: count+=1
+          print("BR3_V08_NATIVE_SCREEN_ACTIVE_PIXELS",count)
+          assert count>250, "Native LCD remains black"
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: biomech3-v08-native-macos-screen-evidence
+          path: /tmp/br3-native/
