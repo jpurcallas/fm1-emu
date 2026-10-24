@@ -32,16 +32,19 @@ impl Bus for Core1Bus<'_> {
     }
     fn read8(&mut self, a: u32) -> u8 {
         let value = self.soc.core1_read8(a);
+        self.soc.record_groove_mem(1, self.soc.biomech_coord_pc[1], a, 1, false);
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 1, value as u32);
         value
     }
     fn read16(&mut self, a: u32) -> u16 {
         let value = self.soc.core1_read16(a);
+        self.soc.record_groove_mem(1, self.soc.biomech_coord_pc[1], a, 2, false);
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 2, value as u32);
         value
     }
     fn read32(&mut self, a: u32) -> u32 {
         let value = self.soc.core1_read32(a);
+        self.soc.record_groove_mem(1, self.soc.biomech_coord_pc[1], a, 4, false);
         self.soc.record_biomech_coord_read(1, self.soc.biomech_coord_pc[1], a, 4, value as u32);
         value
     }
