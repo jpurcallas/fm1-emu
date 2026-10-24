@@ -56,11 +56,11 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
         reason.is_some(),quote(reason.unwrap_or("")),m.soc.periph.ms(),m.soc.periph.cycles,
         m.soc.periph.audio_halves,cpu(&m.cpu),c1);
     let access_events = m.soc.groove_mem_events.iter().map(|e| {
-        format!(r#"{"cycle":{},"core":{},"pc":{},"addr":{},"width":{},"write":{}}"#,
+        format!(r#"{{"cycle":{},"core":{},"pc":{},"addr":{},"width":{},"write":{}}}"#,
             e.cycle, e.core, e.pc, e.addr, e.width, e.write)
     }).collect::<Vec<_>>().join(",");
     let access_report = format!(
-        r#"{"enabled":{},"regionNames":["scratch","pattern","undo","fm1_fx_states"],"counts":{:?},"events":[{}]}"#,
+        r#"{{"enabled":{},"regionNames":["scratch","pattern","undo","fm1_fx_states"],"counts":{:?},"events":[{}]}}"#,
         m.soc.groove_mem_watch, m.soc.groove_mem_counts, access_events
     );
     let mut json = json;
