@@ -1,29 +1,59 @@
-FM1 LIVE LAB para Mac Apple Silicon — SOLO EMULADOR
-Base de código: 5603881f5c4c7c52ed1dc8cb5e6c64f0d6c3ede5.
-Corrección PI32v2 floor conservada; no cambia el firmware ni su DSP.
+FM1 LIVE LAB v2 — CONTROLES PARA MAC APPLE SILICON
+Uso solo en emulador. No instala ni modifica el firmware del FM-1.
 
-Abrí ABRIR_FIRMWARE.command y elegí el archivo .fwsc.
-Reloj inicial: 200 MHz. Tecla Espacio: PLAY. Piano: A W S E D F T G Y H U J...
-Para otro reloj, Terminal: ./fm1-live --mhz 240 --fwsc /ruta/al/archivo.fwsc
+INICIO
+Abrí ABRIR_FIRMWARE.command y elegí tu .fwsc.
+Reloj inicial: 200 MHz. Espacio: PLAY. Piano: A W S E D F T G Y H U J...
+La ventana se puede agrandar o achicar; el panel conserva sus controles.
 
-Caja negra:
-- F9 (o Fn+F9 en Mac): captura manual.
-- Captura automática si el emulador detecta halt, y al cerrar normalmente.
-- Archivos JSON completos en Escritorio/FM1_BLACKBOX: RAM, ambos núcleos,
-  motivo de detención, reloj y contador de underruns del audio del Mac.
-- El lanzador guarda además log y SHA256 del firmware.
-- Capturar pausa momentáneamente la emulación para escribir el archivo:
-  puede introducir un corte. No interpretar ese corte como fallo del DSP.
-- No protege contra cierre forzado del proceso o del sistema operativo.
-- La RAM incluye los registros internos de la caja negra que tenga el firmware.
-  Los extractores web que esperan ram_base64 pueden leer el volcado;
-  un lector que espere guestRamBase64 necesita adaptar la clave.
-- El JSON tiene esquema nativo propio; no fingimos métricas del AudioWorklet.
+BARRA SUPERIOR
+ABRIR FWSC: seleccioná otro archivo sin cerrar el programa.
+Si el archivo no se puede leer o no es válido, se conserva la sesión anterior.
 
-Programa no firmado/notarizado. Desde esta carpeta, si macOS lo bloquea:
+- / + / APLICAR MHZ: elegí 80, 100, 120, 160, 192, 200, 240 o 320 MHz.
+El número amarillo es el reloj seleccionado; la segunda línea indica el activo.
+APLICAR MHZ reinicia el firmware con ese reloj, incluso si elegís el mismo valor.
+ABRIR FWSC también usa el valor seleccionado y arranca desde cero.
+Reiniciar pierde la edición en RAM de la sesión. Guarda primero si corresponde.
+Un reloj menor no demuestra que el firmware pueda correr a su reloj de destino.
+
+EXPORTAR JSON: guarda inmediatamente la caja negra y muestra el resultado.
+También funcionan F9/Fn+F9. El botón sigue funcionando tras un halt.
+
+GRABAR WAV / DETENER WAV: inicia y termina una grabación estéreo PCM16 a
+44100 Hz. El WAV se guarda automáticamente al detener, cambiar de firmware,
+aplicar MHz, cerrar normalmente o si el emulador detecta un halt.
+La grabación toma el PCM DMA antes del remuestreo y de la salida del Mac:
+conserva exactamente las muestras del emulador. Los huecos por falta de tiempo
+del Mac NO se insertan como silencios en este WAV. Consultar underruns/JSON
+para distinguir esos huecos de repeticiones o fallos del firmware.
+Escritura en hilo separado. Si el disco no da abasto o falla, la grabación se
+interrumpe con error visible; no se descartan bloques silenciosamente.
+No se garantiza recuperar un WAV ante cierre forzado, crash o corte de energía.
+
+VER ARCHIVOS: abre Escritorio/FM1_BLACKBOX en Finder.
+Ahí se guardan JSON, WAV y los logs del lanzador.
+
+CAJA NEGRA
+RAM y registros de ambos núcleos, reloj, ciclos, audio_halves, motivo de halt,
+ruta del firmware, build y contador de underruns de salida del Mac.
+Capturas automáticas en halt, cierre normal, recarga y comienzo/final manual
+ de grabación. Capturar puede causar una pausa momentánea: no interpretarla
+como fallo DSP. La RAM incluye las cajas negras internas del firmware.
+No incluye métricas de AudioWorklet ni historial de instrucciones web.
+
+MACOS
+Programa no firmado/notarizado. Si macOS lo bloquea, desde esta carpeta:
 xattr -d com.apple.quarantine fm1-live fm1-emu ABRIR_FIRMWARE.command
 
-BUILD.txt y CHECKS.txt identifican compilación y comprobaciones.
-Una compilación correcta no demuestra continuidad ni valida instalación física.
-Esta variante contiene las correcciones de su base fijada, no todos los cambios
-posteriores del upstream ni todos los experimentos incompatibles de otras ramas.
+VALIDACION
+BUILD.txt identifica el commit; CHECKS.txt conserva las pruebas y el smoke.
+Las pruebas de grabación verifican PCM bit a bit, cabecera y decodificación WAV,
+exportación JSON/RAM y reconstrucción de máquina con otro reloj.
+La imagen controls.ppm muestra la composición de la interfaz sobre un firmware
+ de referencia. No sustituye una prueba de interacción en tu Mac con BIOMECH
+ o REminiSCENT. No se afirma continuidad sonora de esos dos firmwares.
+
+Base preservada: 5603881f5c4c7c52ed1dc8cb5e6c64f0d6c3ede5 y cambios de la rama
+experiment/fm1-live-mac-blackbox-20261023. Conserva la corrección PI32v2 floor.
+Los controles nuevos son para FM-1; el panel SMK-37 conserva la interfaz previa.
