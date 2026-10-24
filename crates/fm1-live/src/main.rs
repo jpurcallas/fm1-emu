@@ -175,7 +175,8 @@ impl Machine {
         soc.periph.skip_idle = true;
         soc.flaky_core1 = o.flaky_core1.map(|rate| fm1_soc::flaky::FlakyCore1::new(rate, o.seed.unwrap_or(1)));
         let mut cpu = Cpu::new(stock.as_ref().map_or(o.entry, |st| st.entry));
-        cpu.jit_on = std::env::var("FM1_NO_JIT").is_err();
+        // Memory watch must observe interpreter bus access, never bypass it via JIT.
+        cpu.jit_on = std::env::var("FM1_NO_JIT").is_err() && std::env::var("FM1_GROOVE_MEM_TRACE").is_err();
         // the SPL hands cpu0 over in user mode (see fm1-emu)
         cpu.user = std::env::var_os("FM1_SUPERVISOR_START").is_none();
         // the SPL's boot-parameter struct (see fm1-emu): an all-zero pair
