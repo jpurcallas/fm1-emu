@@ -20,7 +20,7 @@ lab=r'''
  * No front-panel control claim: this is an AUTO polyphony listening test. */
 volatile unsigned br3_poly_stage, br3_poly_triggers, br3_poly_audio_calls;
 volatile unsigned br3_poly_rendered_frames, br3_poly_mode, br3_poly_offs;\nvolatile unsigned br3_poly_active_at_trigger;
-static void br3_poly_before_audio(unsigned frames) {
+/* IN_AUDIO_SCOPE_START */\n{
     static const unsigned notes[6]={48,52,55,60,64,67};
     static unsigned next_change,step,current_count,current_track_mode;
     unsigned i,kind,count;
