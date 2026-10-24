@@ -1,0 +1,32 @@
+name: BIOMECH UI adapter source inspection
+on:
+  workflow_dispatch:
+  push:
+    branches: [experiment/biomech3-native-mac-validation-20261024]
+    paths: ['.github/workflows/biomech3-ui-source-inspection.yml']
+permissions:
+  contents: read
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare pinned vendor source and exact UI adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          mkdir -p /tmp/ui-diagnostic
+          cp /tmp/fm1-v14/app/biomech/biomech_sdk_port.c /tmp/ui-diagnostic/
+          cp /tmp/fm1-v14/app/biomech/biomech_sdk_port.h /tmp/ui-diagnostic/
+          find /tmp/fm1-v14/app/biomech -maxdepth 1 -type f -printf '%f\n' > /tmp/ui-diagnostic/FILES.txt
+          grep -RinE 'lcd|screen|display|dma|draw|render|ui|gfx' /tmp/fm1-v14/app/biomech/*.c > /tmp/ui-diagnostic/UI_CALLS.txt || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: biomech3-v07-actual-ui-source
+          path: /tmp/ui-diagnostic/
+          retention-days: 7
