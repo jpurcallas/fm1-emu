@@ -1,0 +1,43 @@
+name: BIOMECH3 v0.7 native macOS fm1-live boot gate
+on:
+  push:
+    branches: [experiment/biomech3-native-mac-validation-20261024]
+    paths: ['.github/workflows/biomech3-macos-native-boot-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native_mac:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact v0.7 tested firmware artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/biomech-native
+          gh run download 40072751553 --repo jpurcallas/fm1-emu --name BIOMECH3_v07_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR --dir /tmp/biomech-native
+          ls -la /tmp/biomech-native
+          shasum -a 256 /tmp/biomech-native/*.fwsc
+          echo '561dc47d2840516ee5bed63b1d796fda220949e401cdde930526e2ce5fec51bc  /tmp/biomech-native/BIOMECH3_v07_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc' | shasum -a 256 -c
+      - name: Compile actual native macOS fm1-live application
+        run: cargo build --release --locked -p fm1-live
+      - name: Native FM1-LIVE-LAB version and firmware headless boot diagnostics
+        shell: bash
+        run: |
+          set -uo pipefail
+          ./target/release/fm1-live --version | tee /tmp/biomech-native/VERSION.txt
+          set +e
+          ./target/release/fm1-live --fwsc /tmp/biomech-native/BIOMECH3_v07_timbres_tracks6_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --bench 1800 2>&1 | tee /tmp/biomech-native/NATIVE_BENCH.log
+          code=${PIPESTATUS[0]}
+          echo "$code" | tee /tmp/biomech-native/NATIVE_EXIT_CODE.txt
+          exit "$code"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: biomech3-v07-native-macos-fm1-live-evidence
+          path: /tmp/biomech-native/
+          retention-days: 14
