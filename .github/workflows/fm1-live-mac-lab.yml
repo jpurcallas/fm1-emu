@@ -1,7 +1,7 @@
-name: FM1 Live Mac LAB Blackbox
+name: FM1 Live Mac LAB Controls
 on:
   push:
-    branches: ['experiment/fm1-live-mac-blackbox-20261023']
+    branches: ['experiment/fm1-live-mac-controls-20261024']
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,9 +21,9 @@ jobs:
           FM1_LAB_BUILD: ${{ github.sha }}
         run: |
           cargo test --locked -p fm1-core -p fm1-isa -p fm1-soc > core-tests.txt 2>&1
-          FM1_BLACKBOX_TEST_OUTPUT="$RUNNER_TEMP/blackbox-test.json" cargo test --locked -p fm1-live > live-tests.txt 2>&1
-          python3 - "$RUNNER_TEMP/blackbox-test.json" <<'PY'
-          import base64, json, sys
+          FM1_WAV_TEST_OUTPUT="$RUNNER_TEMP/recorder-test.wav" FM1_BLACKBOX_TEST_OUTPUT="$RUNNER_TEMP/blackbox-test.json" cargo test --locked -p fm1-live > live-tests.txt 2>&1
+          python3 - "$RUNNER_TEMP/blackbox-test.json" "$RUNNER_TEMP/recorder-test.wav" <<'PY'
+          import base64, json, sys, wave
           j = json.load(open(sys.argv[1]))
           ram = base64.b64decode(j["ram_base64"], validate=True)
           assert len(ram) == j["ram_bytes"] == 64
@@ -32,6 +32,10 @@ jobs:
           assert j["emulator"]["cpu0"]["pc"] == 0x01c00010
           assert j["hostAudioUnderruns"] == 7
           print("Independent JSON/base64/RAM snapshot check: PASS")
+          with wave.open(sys.argv[2], "rb") as w:
+              assert (w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()) == (2,2,44100,3)
+              assert w.readframes(3) == bytes.fromhex("0080ffff0000ff7f7b0038fe")
+          print("Independent WAV decoding and exact samples: PASS")
           PY
           cargo build --release --locked -p fm1-live -p fm1-emu --target aarch64-apple-darwin
           lipo target/aarch64-apple-darwin/release/fm1-live -verify_arch arm64
@@ -43,20 +47,31 @@ jobs:
           target/release/fm1-live --version
           target/release/fm1-live --fwsc fm1-sid/web/sidplayer.fwsc --bench 3000 > bench.txt 2>&1
           grep -q "ms emulated" bench.txt
+          FM1_LAB_SMOKE_DIR="$PWD/lab-smoke" target/release/fm1-live --mhz 200 --fwsc fm1-sid/web/sidplayer.fwsc > lab-smoke.txt 2>&1
+          grep -q "LAB SMOKE PASS" lab-smoke.txt
+          python3 - <<'PYTEST'
+          import glob, wave, json, base64
+          with wave.open(glob.glob("lab-smoke/*.wav")[0]) as w:
+              assert w.getnframes() > 0 and w.getframerate() == 44100 and w.getnchannels() == 2
+          j = json.load(open(glob.glob("lab-smoke/*.json")[0]))
+          assert j["clockMHz"] == 200 and len(base64.b64decode(j["ram_base64"])) == j["ram_bytes"]
+          print("Native reference WAV and JSON: PASS")
+          PYTEST
       - name: Package
         run: |
           mkdir -p dist/FM1-LIVE-LAB-MAC
           cp target/aarch64-apple-darwin/release/fm1-live target/aarch64-apple-darwin/release/fm1-emu dist/FM1-LIVE-LAB-MAC/
-          cp experiments/native-mac-lab/ABRIR_FIRMWARE.command experiments/native-mac-lab/LEEME.txt dist/FM1-LIVE-LAB-MAC/
+          cp experiments/native-mac-lab/ABRIR_FIRMWARE.command experiments/native-mac-lab/LEEME.txt LICENSE dist/FM1-LIVE-LAB-MAC/
+          cp lab-smoke/controls.ppm dist/FM1-LIVE-LAB-MAC/
           chmod +x dist/FM1-LIVE-LAB-MAC/fm1-live dist/FM1-LIVE-LAB-MAC/fm1-emu dist/FM1-LIVE-LAB-MAC/ABRIR_FIRMWARE.command
           git rev-parse HEAD > dist/FM1-LIVE-LAB-MAC/BUILD.txt
-          cat core-tests.txt live-tests.txt bench.txt > dist/FM1-LIVE-LAB-MAC/CHECKS.txt
+          cat core-tests.txt live-tests.txt bench.txt lab-smoke.txt > dist/FM1-LIVE-LAB-MAC/CHECKS.txt
           (cd dist/FM1-LIVE-LAB-MAC && shasum -a 256 fm1-live fm1-emu ABRIR_FIRMWARE.command > SHA256SUMS.txt)
-          tar -czf FM1-LIVE-LAB-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
+          tar -czf FM1-LIVE-LAB-v2-CONTROLES-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
       - uses: actions/upload-artifact@v4
         with:
-          name: FM1-LIVE-LAB-MAC-ARM64
-          path: FM1-LIVE-LAB-MAC-ARM64.tar.gz
+          name: FM1-LIVE-LAB-v2-CONTROLES-MAC-ARM64
+          path: FM1-LIVE-LAB-v2-CONTROLES-MAC-ARM64.tar.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -65,3 +80,6 @@ jobs:
             core-tests.txt
             live-tests.txt
             bench.txt
+            lab-smoke.txt
+            lab-smoke/controls.ppm
+
