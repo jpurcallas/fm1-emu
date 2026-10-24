@@ -1,0 +1,29 @@
+FM1 LIVE LAB para Mac Apple Silicon — SOLO EMULADOR
+Base de código: 5603881f5c4c7c52ed1dc8cb5e6c64f0d6c3ede5.
+Corrección PI32v2 floor conservada; no cambia el firmware ni su DSP.
+
+Abrí ABRIR_FIRMWARE.command y elegí el archivo .fwsc.
+Reloj inicial: 200 MHz. Tecla Espacio: PLAY. Piano: A W S E D F T G Y H U J...
+Para otro reloj, Terminal: ./fm1-live --mhz 240 --fwsc /ruta/al/archivo.fwsc
+
+Caja negra:
+- F9 (o Fn+F9 en Mac): captura manual.
+- Captura automática si el emulador detecta halt, y al cerrar normalmente.
+- Archivos JSON completos en Escritorio/FM1_BLACKBOX: RAM, ambos núcleos,
+  motivo de detención, reloj y contador de underruns del audio del Mac.
+- El lanzador guarda además log y SHA256 del firmware.
+- Capturar pausa momentáneamente la emulación para escribir el archivo:
+  puede introducir un corte. No interpretar ese corte como fallo del DSP.
+- No protege contra cierre forzado del proceso o del sistema operativo.
+- La RAM incluye los registros internos de la caja negra que tenga el firmware.
+  Los extractores web que esperan ram_base64 pueden leer el volcado;
+  un lector que espere guestRamBase64 necesita adaptar la clave.
+- El JSON tiene esquema nativo propio; no fingimos métricas del AudioWorklet.
+
+Programa no firmado/notarizado. Desde esta carpeta, si macOS lo bloquea:
+xattr -d com.apple.quarantine fm1-live fm1-emu ABRIR_FIRMWARE.command
+
+BUILD.txt y CHECKS.txt identifican compilación y comprobaciones.
+Una compilación correcta no demuestra continuidad ni valida instalación física.
+Esta variante contiene las correcciones de su base fijada, no todos los cambios
+posteriores del upstream ni todos los experimentos incompatibles de otras ramas.
