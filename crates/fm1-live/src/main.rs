@@ -31,6 +31,7 @@ use panel::{Ctl, ENCS, H, W};
 
 mod panel;
 mod blackbox;
+mod lab;
 mod panel_smk;
 use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -45,6 +46,7 @@ const LEAD_MS: f64 = 60.0;
 /// this much sound is queued: the audio device sets the pace.
 const AUDIO_TARGET_MS: f64 = 50.0;
 
+#[derive(Clone)]
 struct Opts {
     bin: String,
     entry: u32,
@@ -175,7 +177,6 @@ impl Machine {
         soc.periph.skip_idle = true;
         soc.flaky_core1 = o.flaky_core1.map(|rate| fm1_soc::flaky::FlakyCore1::new(rate, o.seed.unwrap_or(1)));
         let mut cpu = Cpu::new(stock.as_ref().map_or(o.entry, |st| st.entry));
-        // Memory watch must observe interpreter bus access, never bypass it via JIT.
         cpu.jit_on = std::env::var("FM1_NO_JIT").is_err() && std::env::var("FM1_GROOVE_MEM_TRACE").is_err();
         // the SPL hands cpu0 over in user mode (see fm1-emu)
         cpu.user = std::env::var_os("FM1_SUPERVISOR_START").is_none();
@@ -652,9 +653,16 @@ fn main() {
         eprintln!("{USAGE}");
         std::process::exit(2);
     };
+    if o.mhz == 0 || o.mhz > 1000 {
+        eprintln!("El reloj debe estar entre 1 y 1000 MHz");
+        std::process::exit(2);
+    }
     if o.seed.is_some() && o.flaky_core1.is_none() {
         eprintln!("error: --seed needs --flaky-core1 (it seeds its misreads)");
         std::process::exit(2);
+    }
+    if let Some(dir)=std::env::var_os("FM1_LAB_SMOKE_DIR") {
+        return lab_smoke(&o,std::path::Path::new(&dir));
     }
     if let Some(ms) = o.shot {
         return shot(&o, ms);
@@ -695,6 +703,9 @@ fn main() {
     let snapshot = Arc::new(AtomicBool::new(false));
     let capture_dir = blackbox::directory();
     let firmware_path = o.fwsc.as_ref().unwrap_or(&o.bin).clone();
+    let view = Arc::new(Mutex::new(lab::View { firmware:firmware_path.clone(), mhz:o.mhz, recording:false,
+        message:"ABRIR FWSC / MHZ REINICIA / JSON / WAV PCM 44100 HZ".into(), generation:0, pot }));
+    let (control_tx, control_rx) = mpsc::channel::<lab::Command>();
     eprintln!("BLACK BOX: F9 (Mac: Fn+F9); automatic on halt and exit. Folder: {}", capture_dir.display());
     let (tx, rx) = mpsc::channel::<Action>();
     let _midi = midi_inputs(&o, &tx);
@@ -703,24 +714,99 @@ fn main() {
     let emu = {
         let (ring, lcd, leds, pads, status, quit) = (ring.clone(), lcd.clone(), leds.clone(), pads.clone(), status.clone(), quit.clone());
         let snapshot = snapshot.clone();
+        let view = view.clone();
+        let mut session_opts=o.clone();
         std::thread::spawn(move || {
             high_priority();
-            let mut stopped = false;
+            let mut halt_reason: Option<String> = None;
+            let mut recorder: Option<lab::Recorder> = None;
+            let mut firmware_path = firmware_path;
             let start = Instant::now();
             let mut offset_ms = 0.0f64; // wall-clock time given up after falling behind
             let mut last_lcd = Instant::now();
             let mut last_stat = Instant::now();
             let (mut stat_emu, mut stat_wall) = (0u64, Instant::now());
             while !quit.load(Ordering::Relaxed) {
-                if snapshot.swap(false, Ordering::Relaxed) {
-                    match blackbox::capture(&m, &firmware_path, "manual", None, ring.underruns.load(Ordering::Relaxed), &capture_dir) {
-                        Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
-                        Err(e) => eprintln!("BLACK BOX save failed: {e}"),
+                // The emulation owner handles host commands at instruction batch boundaries.
+                while let Ok(cmd) = control_rx.try_recv() {
+                    match cmd {
+                        lab::Command::Snapshot => { snapshot.store(true,Ordering::Relaxed); }
+                        lab::Command::Record => {
+                            if recorder.is_some() {
+                                lab::stop_recording(&mut recorder,&view);
+                                let _=blackbox::capture(&m,&firmware_path,"record_stop",halt_reason.as_deref(),ring.underruns.load(Ordering::Relaxed),&capture_dir);
+                            } else if halt_reason.is_some() {
+                                view.lock().unwrap().message="NO SE PUEDE GRABAR / EMULADOR DETENIDO / ABRI OTRO FWSC".into();
+                            } else {
+                                match lab::Recorder::start(&capture_dir) {
+                                    Ok(r)=>{
+                                        eprintln!("WAV start: {} / {} / {} MHz",r.path.display(),firmware_path,session_opts.mhz);
+                                        recorder=Some(r);
+                                        let _=blackbox::capture(&m,&firmware_path,"record_start",None,ring.underruns.load(Ordering::Relaxed),&capture_dir);
+                                        let mut v=view.lock().unwrap(); v.recording=true;
+                                        v.message="GRABANDO WAV PCM / PULSA DETENER WAV PARA GUARDAR".into();
+                                    }
+                                    Err(e)=>view.lock().unwrap().message=format!("ERROR WAV / {e}"),
+                                }
+                            }
+                        }
+                        cmd @ (lab::Command::Load(..) | lab::Command::Clock(_)) => {
+                            let mut next=session_opts.clone();
+                            match cmd {
+                                lab::Command::Load(path,mhz)=>{
+                                    next.name=std::path::Path::new(&path).file_stem().unwrap_or_default().to_string_lossy().into_owned();
+                                    next.fwsc=Some(path); next.syx=None; next.mhz=mhz;
+                                }
+                                lab::Command::Clock(mhz)=>next.mhz=mhz,
+                                _=>unreachable!(),
+                            }
+                            if next.mhz==0 || next.mhz>1000 {
+                                view.lock().unwrap().message="RELOJ FUERA DE RANGO".into(); continue;
+                            }
+                            match Machine::new(&next) {
+                                Ok(new) if new.soc.board==m.soc.board => {
+                                    lab::stop_recording(&mut recorder,&view);
+                                    let _=blackbox::capture(&m,&firmware_path,"reload",halt_reason.as_deref(),ring.underruns.load(Ordering::Relaxed),&capture_dir);
+                                    // Old input/audio cannot leak into the new firmware.
+                                    while rx.try_recv().is_ok() {}
+                                    ring.q.lock().unwrap().clear();
+                                    ring.started.store(false,Ordering::Relaxed);
+                                    ring.underruns.store(0,Ordering::Relaxed);
+                                    m=new; session_opts=next;
+                                    firmware_path=session_opts.fwsc.as_ref().unwrap_or(&session_opts.bin).clone();
+                                    halt_reason=None;
+                                    lcd.lock().unwrap().copy_from_slice(&m.soc.lcd.fb);
+                                    *leds.lock().unwrap()=[0.;41];
+                                    offset_ms=start.elapsed().as_secs_f64()*1000.;
+                                    stat_emu=0; stat_wall=Instant::now(); last_stat=Instant::now();
+                                    let mut v=view.lock().unwrap();
+                                    v.firmware=firmware_path.clone(); v.mhz=session_opts.mhz; v.generation+=1;
+                                    v.pot=m.soc.periph.adc_value[4];
+                                    v.message="FIRMWARE REINICIADO / ESPACIO PLAY".into();
+                                    *status.lock().unwrap()="booting".into();
+                                    eprintln!("Loaded: {} / {} MHz",firmware_path,session_opts.mhz);
+                                }
+                                Ok(_)=>view.lock().unwrap().message="EL ARCHIVO NO ES PARA LA MISMA PLACA / SE CONSERVA LA SESION".into(),
+                                Err(e)=>view.lock().unwrap().message=format!("ERROR AL ABRIR / {e}"),
+                            }
+                        }
                     }
                 }
-                while let Ok(a) = rx.try_recv() {
-                    m.soc.periph.apply(&a);
+                if snapshot.swap(false, Ordering::Relaxed) {
+                    match blackbox::capture(&m, &firmware_path, "manual", halt_reason.as_deref(), ring.underruns.load(Ordering::Relaxed), &capture_dir) {
+                        Ok(p) => {
+                            eprintln!("BLACK BOX saved: {}", p.display());
+                            view.lock().unwrap().message=format!("JSON GUARDADO / {}",p.file_name().unwrap_or_default().to_string_lossy());
+                        }
+                        Err(e) => view.lock().unwrap().message=format!("ERROR JSON / {e}"),
+                    }
                 }
+                if halt_reason.is_some() {
+                    while rx.try_recv().is_ok() {}
+                    std::thread::sleep(Duration::from_millis(10));
+                    continue;
+                }
+                while let Ok(a) = rx.try_recv() { m.soc.periph.apply(&a); }
                 let real = start.elapsed().as_secs_f64() * 1000.0 - offset_ms;
                 let emu_ms = m.soc.periph.cycles as f64 * 1000.0 / m.soc.periph.hz as f64;
                 if real - emu_ms > 250.0 {
@@ -737,17 +823,28 @@ fn main() {
                         *status.lock().unwrap() = format!("halted: {e}");
                         eprintln!("halted: {e}");
                         lcd.lock().unwrap().copy_from_slice(&m.soc.lcd.fb);
-                        match blackbox::capture(&m, &firmware_path, "halt", Some(&e), ring.underruns.load(Ordering::Relaxed), &capture_dir) {
-                            Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
-                            Err(err) => eprintln!("BLACK BOX save failed: {err}"),
-                        }
-                        stopped = true;
-                        break;
+                        let capture_note=match blackbox::capture(&m, &firmware_path, "halt", Some(&e), ring.underruns.load(Ordering::Relaxed), &capture_dir) {
+                            Ok(p) => { eprintln!("BLACK BOX saved: {}", p.display()); "JSON GUARDADO".to_string() }
+                            Err(err) => { eprintln!("BLACK BOX save failed: {err}"); format!("ERROR JSON {err}") }
+                        };
+                        // Preserve tail PCM before finalizing the recording.
+                        if let Some(r)=&recorder { if let Err(err)=r.push(&m.soc.periph.audio) { eprintln!("WAV tail interrupted: {err}"); } }
+                        m.soc.periph.audio.clear();
+                        lab::stop_recording(&mut recorder,&view);
+                        view.lock().unwrap().message=format!("HALT / {e} / {capture_note} / PODES ABRIR OTRO FWSC");
+                        halt_reason=Some(e);
+                        continue;
                     }
                 } else {
                     std::thread::sleep(Duration::from_millis(1));
                 }
                 if !m.soc.periph.audio.is_empty() {
+                    let error=recorder.as_ref().and_then(|r|r.push(&m.soc.periph.audio).err());
+                    if let Some(e)=error {
+                        lab::stop_recording(&mut recorder,&view);
+                        view.lock().unwrap().message=format!("GRABACION INTERRUMPIDA / {e}");
+                        eprintln!("WAV interrupted: {e}");
+                    }
                     let mut q = ring.q.lock().unwrap();
                     q.extend(m.soc.periph.audio.drain(..));
                     ring.started.store(true, Ordering::Relaxed);
@@ -785,7 +882,8 @@ fn main() {
                     last_stat = Instant::now();
                 }
             }
-            if !stopped {
+            lab::stop_recording(&mut recorder,&view);
+            if halt_reason.is_none() {
                 match blackbox::capture(&m, &firmware_path, "exit", None, ring.underruns.load(Ordering::Relaxed), &capture_dir) {
                     Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
                     Err(e) => eprintln!("BLACK BOX save failed: {e}"),
@@ -800,7 +898,7 @@ fn main() {
         let _ = emu.join();
         return;
     }
-    let mut win = match Window::new(&format!("FM-1 · {} (emulated)", o.name), W, H, WindowOptions::default()) {
+    let mut win = match Window::new(&format!("FM-1 · {} (emulated)", o.name), 1024, (H + lab::BAR_H)*4/5, WindowOptions { resize:true, scale_mode:minifb::ScaleMode::Stretch, ..WindowOptions::default() }) {
         Ok(w) => w,
         Err(e) => {
             eprintln!("window: {e}");
@@ -811,7 +909,10 @@ fn main() {
     };
     win.set_target_fps(60);
     let base = panel::base();
-    let mut buf = vec![0u32; W * H];
+    let mut buf = vec![0u32; W * (H + lab::BAR_H)];
+    let mut selected_mhz=o.mhz;
+    let mut generation=0u64;
+    let mut picker: Option<std::sync::mpsc::Receiver<Result<Option<String>,String>>> = None;
     let mut down = [false; 41];
     let mut enc_clicks = [0i32; 7];
     let mut turning = [0u32; 8];
@@ -825,6 +926,20 @@ fn main() {
     eprintln!("keys: A W S E D F T G Y H U J K O L P ; ' = C4..F5, Z/X OCT, Space PLAY, R REC, 1..0 buttons, arrows and , . for SELECT/PRESETS/ALGORITHM; Esc quits");
 
     while win.is_open() && !win.is_key_down(Key::Escape) {
+        let current=view.lock().unwrap().clone();
+        if current.generation!=generation {
+            generation=current.generation; selected_mhz=current.mhz; pot=current.pot;
+            enc_clicks=[0;7]; turning=[0;8]; down=[false;41]; shown_leds=[0.;41];
+            grab=None;
+        }
+        if let Some(result)=picker.as_ref().and_then(|rx|rx.try_recv().ok()) {
+            picker=None;
+            match result {
+                Ok(Some(path))=>{ let _=control_tx.send(lab::Command::Load(path,selected_mhz)); }
+                Ok(None)=>{}
+                Err(e)=>view.lock().unwrap().message=format!("ERROR SELECTOR / {e}"),
+            }
+        }
         if win.is_key_pressed(Key::F9, KeyRepeat::No) {
             snapshot.store(true, Ordering::Relaxed);
         }
@@ -835,8 +950,34 @@ fn main() {
         };
 
         // ---- mouse
-        let pos = win.get_mouse_pos(MouseMode::Clamp);
+        let (ww,wh)=win.get_size();
+        let raw_pos = win.get_unscaled_mouse_pos(MouseMode::Discard).map(|(x,y)|
+            (x*W as f32/ww.max(1) as f32,y*(H+lab::BAR_H) as f32/wh.max(1) as f32));
         let pressed = win.get_mouse_down(MouseButton::Left);
+        if pressed && !was_pressed {
+            if let Some((mx,my))=raw_pos {
+                if let Some(b)=lab::hit(mx,my) {
+                    match b {
+                        lab::Button::Open if picker.is_none()=>{
+                            // Release panel keys before a system file dialog steals focus.
+                            for id in 0..41 { if down[id] { let _=tx.send(Action::Key{id:id as u8,down:false}); down[id]=false; } }
+                            let (px,pr)=mpsc::channel(); picker=Some(pr);
+                            std::thread::spawn(move || { let _=px.send(lab::pick_firmware()); });
+                        }
+                        lab::Button::ClockDown=>selected_mhz=lab::next_clock(selected_mhz,false),
+                        lab::Button::ClockUp=>selected_mhz=lab::next_clock(selected_mhz,true),
+                        lab::Button::ApplyClock=>{ let _=control_tx.send(lab::Command::Clock(selected_mhz)); }
+                        lab::Button::Json=>{ let _=control_tx.send(lab::Command::Snapshot); }
+                        lab::Button::Record=>{ let _=control_tx.send(lab::Command::Record); }
+                        lab::Button::Folder=>{
+                            if let Err(e)=lab::open_folder(&blackbox::directory()) { view.lock().unwrap().message=format!("ERROR CARPETA / {e}"); }
+                        }
+                        _=>{}
+                    }
+                }
+            }
+        }
+        let pos=raw_pos.filter(|(_,y)|*y>=lab::BAR_H as f32).map(|(x,y)|(x,y-lab::BAR_H as f32));
         if let Some((mx, my)) = pos {
             if pressed && !was_pressed {
                 grab = panel::hit(mx, my);
@@ -895,14 +1036,14 @@ fn main() {
                 }
             }
         }
-        if !pressed {
+        if !pressed || pos.is_none() || picker.is_some() {
             grab = None;
         }
         was_pressed = pressed;
 
         // ---- held keys and buttons: computer keyboard + mouse
         let mut want = [false; 41];
-        for k in win.get_keys() {
+        for k in win.get_keys().into_iter().filter(|_|picker.is_none() && win.is_active()) {
             if let Some(id) = piano(k).or_else(|| button(k)) {
                 want[id as usize] = true;
             }
@@ -916,7 +1057,7 @@ fn main() {
                 let _ = tx.send(Action::Key { id: id as u8, down: want[id] });
             }
         }
-        for k in win.get_keys_pressed(KeyRepeat::Yes) {
+        for k in win.get_keys_pressed(KeyRepeat::Yes).into_iter().filter(|_|picker.is_none() && win.is_active()) {
             match k {
                 Key::Left => turn(0, -1, &mut enc_clicks, &mut turning),
                 Key::Right => turn(0, 1, &mut enc_clicks, &mut turning),
@@ -941,13 +1082,14 @@ fn main() {
         {
             let fb = lcd.lock().unwrap();
             let st = panel::State { lcd: &fb, enc_clicks: &enc_clicks, pot, down: &down, leds: &shown_leds, turning: &turning };
-            panel::draw(&mut buf, &base, &st);
+            panel::draw(&mut buf[W*lab::BAR_H..], &base, &st);
         }
-        if win.update_with_buffer(&buf, W, H).is_err() {
+        lab::draw(&mut buf,&view.lock().unwrap(),selected_mhz);
+        if win.update_with_buffer(&buf, W, H+lab::BAR_H).is_err() {
             break;
         }
         if last_title.elapsed() >= Duration::from_millis(500) {
-            win.set_title(&format!("FM-1 · {} — {}", o.name, status.lock().unwrap()));
+            win.set_title(&format!("FM-1 LAB · {} — {}", view.lock().unwrap().firmware, status.lock().unwrap()));
             last_title = Instant::now();
         }
     }
@@ -1119,4 +1261,46 @@ fn window_smk(o: &Opts, tx: &mpsc::Sender<Action>, lcd: &Mutex<Vec<u16>>, leds: 
             last_title = Instant::now();
         }
     }
+}
+
+
+/// Reproducible native integration check, intentionally without a host audio device.
+fn lab_smoke(o: &Opts, dir: &std::path::Path) {
+    std::fs::create_dir_all(dir).unwrap();
+    let mut m=Machine::new(o).expect("smoke firmware");
+    let rec=lab::Recorder::start(dir).expect("start WAV");
+    let mut expected=Vec::new();
+    m.soc.periph.script.push_back((m.soc.periph.cycle_of_ms(800),Action::Key{id:21,down:true}));
+    m.soc.periph.script.push_back((m.soc.periph.cycle_of_ms(900),Action::Key{id:25,down:true}));
+    while m.soc.periph.ms()<2500 {
+        m.run(20_000).expect("smoke execution");
+        if !m.soc.periph.audio.is_empty() {
+            rec.push(&m.soc.periph.audio).expect("record PCM");
+            expected.extend(m.soc.periph.audio.drain(..));
+        }
+    }
+    let (wav,frames)=rec.stop().expect("finalize WAV");
+    assert!(frames>0,"reference must emit DMA PCM");
+    let bytes=std::fs::read(&wav).unwrap();
+    let want:Vec<u8>=expected.iter().flat_map(|s|s.to_le_bytes()).collect();
+    assert_eq!(&bytes[44..],want.as_slice(),"recorded PCM must be bit exact");
+    let firmware=o.fwsc.as_ref().unwrap_or(&o.bin);
+    let json=blackbox::capture(&m,firmware,"smoke",None,0,dir).unwrap();
+    assert_eq!(m.soc.periph.hz,o.mhz*1_000_000);
+    let mut reset=o.clone(); reset.mhz=240;
+    let next=Machine::new(&reset).expect("new clock machine");
+    assert_eq!(next.soc.periph.hz,240_000_000);
+    assert_eq!(next.soc.periph.cycles,0);
+    let mut bad=reset.clone(); bad.fwsc=Some(dir.join("missing.fwsc").to_string_lossy().into_owned());
+    assert!(Machine::new(&bad).is_err());
+    assert!(m.soc.periph.cycles>0,"failed load does not mutate live machine");
+    let mut buf=vec![0;W*(H+lab::BAR_H)];
+    let leds=m.soc.periph.led_take();
+    let st=panel::State {lcd:&m.soc.lcd.fb,enc_clicks:&[0;7],pot:512,down:&[false;41],leds:&leds,turning:&[0;8]};
+    panel::draw(&mut buf[W*lab::BAR_H..],&panel::base(),&st);
+    lab::draw(&mut buf,&lab::View {firmware:firmware.clone(),mhz:o.mhz,recording:false,generation:0,pot:512,message:"WAV Y JSON GUARDADOS / PRUEBA NATIVA CORRECTA".into()},240);
+    let mut ppm=format!("P6\n{} {}\n255\n",W,H+lab::BAR_H).into_bytes();
+    ppm.extend(buf.iter().flat_map(|p|[(p>>16) as u8,(p>>8) as u8,*p as u8]));
+    std::fs::write(dir.join("controls.ppm"),ppm).unwrap();
+    println!("LAB SMOKE PASS / {} frames PCM bit exact / clock reload 240 MHz / JSON {} / WAV {}",frames,json.display(),wav.display());
 }
