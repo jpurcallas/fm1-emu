@@ -22,7 +22,7 @@ jobs:
           BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
           mkdir -p /tmp/ui-diagnostic
           cp /tmp/fm1-v14/app/biomech/biomech_sdk_port.c /tmp/ui-diagnostic/
-          cp /tmp/fm1-v14/app/biomech/biomech_sdk_port.h /tmp/ui-diagnostic/\n          find /tmp/fm1-v14/app/biomech -name '*display*' -o -name '*panel*' | xargs -r -n1 cp -t /tmp/ui-diagnostic/
+          cp /tmp/fm1-v14/app/biomech/biomech_sdk_port.h /tmp/ui-diagnostic/\n          find /tmp/fm1-v14/app/biomech -type f \\( -name '*display*' -o -name '*panel*' \\) -exec cp -t /tmp/ui-diagnostic/ {} +
           find /tmp/fm1-v14/app/biomech -maxdepth 1 -type f -printf '%f\n' > /tmp/ui-diagnostic/FILES.txt
           grep -RinE 'lcd|screen|display|dma|draw|render|ui|gfx' /tmp/fm1-v14/app/biomech/*.c > /tmp/ui-diagnostic/UI_CALLS.txt || true
       - uses: actions/upload-artifact@v4
