@@ -182,11 +182,21 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
             if let Some((irq, prio)) = soc.pending_irq() {
                 if cpu.irq_ready(prio) {
                     let handler = soc.read32(VEC_BASE + 4 * irq as u32);
+                    let old_pc = cpu.pc;
                     cpu.interrupt(handler, prio);
+                    if soc.groove_mem_watch { soc.record_cpu0_flight(old_pc, cpu.pc, cpu.sp, cpu.rets, "irq"); }
                 }
             }
         }
-        if soc.biomech_cpu0_profile.as_ref().is_some_and(|p| p.enabled) {
+        if soc.groove_mem_watch {
+            // No run_fast for this diagnostic: record every decoded instruction and all control transfers.
+            let before = cpu.pc;
+            let outcome = cpu.step(soc);
+            let kind = if outcome.is_err() { "fault" } else if cpu.pc != before.wrapping_add(2) { "step" } else { "sequential" };
+            soc.record_cpu0_flight(before, cpu.pc, cpu.sp, cpu.rets, kind);
+            if let Err(e) = outcome { return Err(format!("{e:?} at pc {:#010x}", cpu.pc)); }
+            done += 1;
+        } else if soc.biomech_cpu0_profile.as_ref().is_some_and(|p| p.enabled) {
             // Exact PC accounting via the ordinary interpreted step; opt-in only.
             // No JIT allowed for this diagnostic: host verifies JIT=OFF explicitly.
             let pc = cpu.pc;
