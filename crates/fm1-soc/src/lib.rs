@@ -161,6 +161,10 @@ impl BiomechCpu0Profile {
     }
 }
 
+pub struct Cpu0FlightEvent {
+    pub cycle: u64, pub before: u32, pub after: u32,
+    pub sp: u32, pub rets: u32, pub kind: &'static str,
+}
 pub struct GrooveMemEvent {
     pub cycle: u64, pub core: u8, pub pc: u32, pub addr: u32,
     pub width: u8, pub write: bool,
@@ -190,6 +194,8 @@ pub struct Soc {
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
+    pub cpu0_flight: std::collections::VecDeque<Cpu0FlightEvent>,
+    pub cpu0_flight_total: u64,
     pub groove_mem_watch: bool,
     pub groove_mem_counts: [[u64; 4]; 4], // region x CPU0 read/write, CPU1 read/write
     pub groove_mem_events: Vec<GrooveMemEvent>,
@@ -245,6 +251,12 @@ impl Soc {
     /// Addresses below are verified against BIOMECH3 v0.8 LCD rescue sdk.nm ONLY.
     /// Do not interpret results from another firmware as Groove bank accesses.
     #[inline]
+    pub fn record_cpu0_flight(&mut self, before:u32, after:u32, sp:u32, rets:u32, kind:&'static str) {
+        // Fixed-size ring: the final 256 transitions survive regardless of boot duration.
+        self.cpu0_flight_total = self.cpu0_flight_total.saturating_add(1);
+        if self.cpu0_flight.len() == 256 { self.cpu0_flight.pop_front(); }
+        self.cpu0_flight.push_back(Cpu0FlightEvent { cycle:self.periph.cycles, before, after, sp, rets, kind });
+    }
     pub fn record_groove_mem(&mut self, core: u8, pc: u32, addr: u32, width: u8, write: bool) {
         if !self.groove_mem_watch || width == 0 { return; }
         const REGIONS: [(u32, u32); 4] = [
@@ -326,6 +338,8 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             biomech_cpu0_profile: None,
+            cpu0_flight: std::collections::VecDeque::with_capacity(256),
+            cpu0_flight_total: 0,
             groove_mem_watch: std::env::var_os("FM1_GROOVE_MEM_TRACE").is_some(),
             groove_mem_counts: [[0; 4]; 4],
             groove_mem_events: Vec::new(),
