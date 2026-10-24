@@ -34,7 +34,7 @@ jobs:
           print("Independent JSON/base64/RAM snapshot check: PASS")
           PY
           cargo build --release --locked -p fm1-live -p fm1-emu --target aarch64-apple-darwin
-          lipo -verify_arch arm64 target/aarch64-apple-darwin/release/fm1-live
+          lipo target/aarch64-apple-darwin/release/fm1-live -verify_arch arm64
       - name: Headless runtime check on runner
         env:
           FM1_LAB_BUILD: ${{ github.sha }}
