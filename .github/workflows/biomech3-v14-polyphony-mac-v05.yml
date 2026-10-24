@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
           python3 experiments/biomech-rhythm-3/sdk-v14/patch_polyphony_mac_v05.py /tmp/fm1-v14
-          grep -n br3_poly_before_audio /tmp/fm1-v14/app/biomech/biomech_sdk_port.c
+          grep -n br3_poly_rendered_frames /tmp/fm1-v14/app/biomech/biomech_sdk_port.c
       - name: Compile original V14 and full original 6-track/FX/SEQ BR3 with lab notes
         shell: bash
         run: |
