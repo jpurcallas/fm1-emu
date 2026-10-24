@@ -242,15 +242,16 @@ fn dbg_line(addr: u32) -> &'static str {
 
 impl Soc {
     /// Observe real bus accesses, not changes between PCM blocks. Experimental native Mac diagnostic.
-    /// Symbol addresses must be verified against the EXACT firmware ELF.
+    /// Addresses below are verified against BIOMECH3 v0.8 LCD rescue sdk.nm ONLY.
+    /// Do not interpret results from another firmware as Groove bank accesses.
     #[inline]
     pub fn record_groove_mem(&mut self, core: u8, pc: u32, addr: u32, width: u8, write: bool) {
         if !self.groove_mem_watch || width == 0 { return; }
         const REGIONS: [(u32, u32); 4] = [
-            (0x01c67f80, 8192), // scratch
-            (0x01c69f80, 2048), // pattern
-            (0x01c6b200, 4064), // undo
-            (0x01c4f6a0, 48832), // fm1_fx_states
+            (0x01c68060, 8192), // scratch
+            (0x01c6a060, 2048), // pattern
+            (0x01c6b2e0, 4064), // undo
+            (0x01c4f780, 48832), // fm1_fx_states
         ];
         for (i, &(base, size)) in REGIONS.iter().enumerate() {
             if addr < base.saturating_add(size) && addr.saturating_add(width as u32) > base {
