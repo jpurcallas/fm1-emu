@@ -1,7 +1,7 @@
 name: FM1 Live Mac LAB Blackbox
 on:
   push:
-    branches: ['experiment/fm1-live-mac-blackbox-20261023']
+    branches: ['experiment/fm1-live-groove-memory-watch-20261024']
   workflow_dispatch:
 permissions:
   contents: read
@@ -48,10 +48,19 @@ jobs:
           mkdir -p dist/FM1-LIVE-LAB-MAC
           cp target/aarch64-apple-darwin/release/fm1-live target/aarch64-apple-darwin/release/fm1-emu dist/FM1-LIVE-LAB-MAC/
           cp experiments/native-mac-lab/ABRIR_FIRMWARE.command experiments/native-mac-lab/LEEME.txt dist/FM1-LIVE-LAB-MAC/
-          chmod +x dist/FM1-LIVE-LAB-MAC/fm1-live dist/FM1-LIVE-LAB-MAC/fm1-emu dist/FM1-LIVE-LAB-MAC/ABRIR_FIRMWARE.command
+          cp dist/FM1-LIVE-LAB-MAC/ABRIR_FIRMWARE.command dist/FM1-LIVE-LAB-MAC/ABRIR_DIAGNOSTICO.command
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("dist/FM1-LIVE-LAB-MAC/ABRIR_DIAGNOSTICO.command")
+          s=p.read_text()
+          assert s.startswith("#!/bin/bash")
+          s=s.replace("#!/bin/bash", "#!/bin/bash\nexport FM1_GROOVE_MEM_TRACE=1", 1)
+          p.write_text(s)
+          PY
+          chmod +x dist/FM1-LIVE-LAB-MAC/fm1-live dist/FM1-LIVE-LAB-MAC/fm1-emu dist/FM1-LIVE-LAB-MAC/ABRIR_FIRMWARE.command dist/FM1-LIVE-LAB-MAC/ABRIR_DIAGNOSTICO.command
           git rev-parse HEAD > dist/FM1-LIVE-LAB-MAC/BUILD.txt
           cat core-tests.txt live-tests.txt bench.txt > dist/FM1-LIVE-LAB-MAC/CHECKS.txt
-          (cd dist/FM1-LIVE-LAB-MAC && shasum -a 256 fm1-live fm1-emu ABRIR_FIRMWARE.command > SHA256SUMS.txt)
+          (cd dist/FM1-LIVE-LAB-MAC && shasum -a 256 fm1-live fm1-emu ABRIR_FIRMWARE.command ABRIR_DIAGNOSTICO.command > SHA256SUMS.txt)
           tar -czf FM1-LIVE-LAB-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
       - uses: actions/upload-artifact@v4
         with:
