@@ -1,0 +1,43 @@
+--- a/src/rn_hw_screen.c
++++ b/src/rn_hw_screen.c
+@@ -63,7 +63,11 @@
+ /* Yeti Fingers navigation: shortcuts select area; ALGORITHM walks area. */
+ enum {A_SOUND,A_PERF,A_MIX,A_SEQ,A_COUNT};
+ static unsigned area=A_SEQ, ram_slot[4];
+-static uint8_t ram_patches[4][4][RN_UI_PAGE_COUNT][4];
++/* Keep only PART-local patch pages, not HOME/SEQ/global bus state.
++ * 704 B of RAM presets go in cache, preserving the SDK's main heap.
++ * This is still volatile RAM: never imply flash persistence. */
++static uint8_t ram_patches[4][4][RN_UI_SENDS - RN_UI_SOURCE + 1u][4]
++    __attribute__((section(".memp_memory_x"), aligned(4)));
+ static uint8_t changed_patch[4];
+ static const uint8_t area_starts[A_COUNT]={0,11,13,19};
+ static const uint8_t area_pages[]={
+@@ -147,14 +151,14 @@
+  return pg>=RN_UI_SOURCE&&pg<=RN_UI_SENDS;
+ }
+ static void save_ram_patch(void){
+- memcpy(ram_patches[sel_part][ram_slot[sel_part]],knobs[sel_part],sizeof(knobs[0]));
++ memcpy(ram_patches[sel_part][ram_slot[sel_part]], &knobs[sel_part][RN_UI_SOURCE], sizeof(ram_patches[0][0]));
+  changed_patch[sel_part]=0;change=1;
+ }
+ static void load_ram_patch(unsigned new_slot){
+  unsigned p=sel_part;
+  if(new_slot>=4)return;
+  ram_slot[p]=new_slot;
+- memcpy(knobs[p],ram_patches[p][new_slot],sizeof(knobs[0]));
++ memcpy(&knobs[p][RN_UI_SOURCE], ram_patches[p][new_slot], sizeof(ram_patches[0][0]));
+  changed_patch[p]=0;
+  for(unsigned i=RN_UI_SOURCE;i<=RN_UI_SENDS;i++)param(i,p);
+  change=1;
+@@ -184,9 +188,9 @@
+  shared[RN_UI_REVERB][0]=90;shared[RN_UI_REVERB][1]=95;shared[RN_UI_REVERB][2]=45;shared[RN_UI_REVERB][3]=110;
+  route_mode=0;sel_part=0;page=RN_UI_SEQ;step_page=0;selected_step=0;octave=0;area=A_SEQ;
+  for(unsigned p=0;p<4;p++)for(unsigned slot=0;slot<4;slot++){
+-  memcpy(ram_patches[p][slot],knobs[p],sizeof(knobs[0]));
++  memcpy(ram_patches[p][slot], &knobs[p][RN_UI_SOURCE], sizeof(ram_patches[p][slot]));
+   /* Four deliberately temporary RAM audition slots, not factory presets. */
+-  if(slot)ram_patches[p][slot][RN_UI_OSC][1]=(uint8_t)(32u*slot);
++  if(slot)ram_patches[p][slot][RN_UI_OSC - RN_UI_SOURCE][1]=(uint8_t)(32u*slot);
+  }
+  memset(ram_slot,0,sizeof(ram_slot));memset(changed_patch,0,sizeof(changed_patch));
