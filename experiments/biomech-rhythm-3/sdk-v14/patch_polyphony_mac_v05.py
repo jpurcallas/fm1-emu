@@ -42,7 +42,7 @@ inject=r'''
             br3_poly_mode=count?(current_track_mode?2U:1U):0U;
             br3_poly_stage=kind+1U;
             ++step;
-            next_change+=26460U; /* 0.6s at unchanged 44.1 kHz */
+            next_change+=7000U; /* per DSP-owner render frames; emulator DMA/renders differ */
         }
         br3_poly_rendered_frames+=(unsigned)frames;
     }
