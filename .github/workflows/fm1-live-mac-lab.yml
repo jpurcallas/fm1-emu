@@ -80,7 +80,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: FM1-LIVE-LAB-v2-CONTROLES-GROOVE-TRACE-MAC-ARM64
-          path: FM1-LIVE-LAB-v2-CONTROLES-MAC-ARM64.tar.gz
+          path: FM1-LIVE-LAB-v2-CONTROLES-GROOVE-TRACE-MAC-ARM64.tar.gz
       - uses: actions/upload-artifact@v4
         if: always()
         with:
