@@ -161,6 +161,11 @@ impl BiomechCpu0Profile {
     }
 }
 
+pub struct GrooveMemEvent {
+    pub cycle: u64, pub core: u8, pub pc: u32, pub addr: u32,
+    pub width: u8, pub write: bool,
+}
+
 pub struct CoordStoreEvent {
     pub cycle: u64, pub core: u8, pub pc: u32, pub addr: u32,
     pub width: u8, pub value: u32,
@@ -185,6 +190,9 @@ pub struct Soc {
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
+    pub groove_mem_watch: bool,
+    pub groove_mem_counts: [[u64; 4]; 4], // region x CPU0 read/write, CPU1 read/write
+    pub groove_mem_events: Vec<GrooveMemEvent>,
     pub biomech_coord_watch: bool,
     pub biomech_coord_events: Vec<CoordStoreEvent>,
     pub biomech_coord_reads: Vec<CoordStoreEvent>,
@@ -233,6 +241,30 @@ fn dbg_line(addr: u32) -> &'static str {
 }
 
 impl Soc {
+    /// Observe real bus accesses, not changes between PCM blocks. Experimental native Mac diagnostic.
+    /// Symbol addresses must be verified against the EXACT firmware ELF.
+    #[inline]
+    pub fn record_groove_mem(&mut self, core: u8, pc: u32, addr: u32, width: u8, write: bool) {
+        if !self.groove_mem_watch || width == 0 { return; }
+        const REGIONS: [(u32, u32); 4] = [
+            (0x01c67f80, 8192), // scratch
+            (0x01c69f80, 2048), // pattern
+            (0x01c6b200, 4064), // undo
+            (0x01c4f6a0, 48832), // fm1_fx_states
+        ];
+        for (i, &(base, size)) in REGIONS.iter().enumerate() {
+            if addr < base.saturating_add(size) && addr.saturating_add(width as u32) > base {
+                let bucket = ((core.min(1) as usize) * 2) + (write as usize);
+                self.groove_mem_counts[i][bucket] = self.groove_mem_counts[i][bucket].saturating_add(1);
+                if self.groove_mem_events.len() < 512 {
+                    self.groove_mem_events.push(GrooveMemEvent {
+                        cycle: self.periph.cycles, core, pc, addr, width, write
+                    });
+                }
+                break;
+            }
+        }
+    }
     pub fn record_biomech_coord_read(&mut self, core: u8, pc: u32, addr: u32, width: u8, value: u32) {
         const WORDS: [u32; 6] = [0x01c574c0, 0x01c574e0, 0x01c57500,
             0x01c5b290, 0x01c5b2a8, 0x01c5b2ac];
@@ -293,6 +325,9 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             biomech_cpu0_profile: None,
+            groove_mem_watch: std::env::var_os("FM1_GROOVE_MEM_TRACE").is_some(),
+            groove_mem_counts: [[0; 4]; 4],
+            groove_mem_events: Vec::new(),
             biomech_coord_watch: false,
             biomech_coord_events: Vec::new(),
             biomech_coord_reads: Vec::new(),
@@ -644,6 +679,7 @@ impl Bus for Soc {
     fn read8(&mut self, addr: u32) -> u8 {
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
+            self.record_groove_mem(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 1, false);
             return self.ram.read8(o);
         }
         self.read32(addr & !3).to_le_bytes()[(addr & 3) as usize]
@@ -661,6 +697,7 @@ impl Bus for Soc {
     fn read32(&mut self, addr: u32) -> u32 {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
+            self.record_groove_mem(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, false);
             let value = self.ram.read32(o as u32);
             self.record_biomech_coord_read(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, value);
             return value;
@@ -674,6 +711,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write8(&mut self, addr: u32, value: u8) {
+        self.record_groove_mem(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 1, true);
         self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 1, value as u32);
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
@@ -684,6 +722,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write16(&mut self, addr: u32, value: u16) {
+        self.record_groove_mem(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 2, true);
         self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 2, value as u32);
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
@@ -695,6 +734,7 @@ impl Bus for Soc {
 
     #[inline(always)]
     fn write32(&mut self, addr: u32, value: u32) {
+        self.record_groove_mem(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, true);
         self.record_biomech_coord(self.biomech_coord_core, self.biomech_coord_pc[self.biomech_coord_core as usize], addr, 4, value);
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
