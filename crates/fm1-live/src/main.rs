@@ -30,6 +30,7 @@ use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window, WindowOptions};
 use panel::{Ctl, ENCS, H, W};
 
 mod panel;
+mod blackbox;
 mod panel_smk;
 use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -639,7 +640,7 @@ options: [--mhz 240] [--syx BANK.syx] [--midi all|none|NAME] [--midi-ch N] [--be
 
 fn main() {
     if std::env::args().any(|a| a == "--version" || a == "-V") {
-        println!("fm1-live {}", env!("CARGO_PKG_VERSION"));
+        println!("fm1-live {} LAB BLACKBOX {}", env!("CARGO_PKG_VERSION"), option_env!("FM1_LAB_BUILD").unwrap_or("local"));
         return;
     }
     if std::env::args().any(|a| a == "--help" || a == "-h") {
@@ -690,20 +691,32 @@ fn main() {
     let board = m.soc.board;
     let status = Arc::new(Mutex::new(String::from("booting")));
     let quit = Arc::new(AtomicBool::new(false));
+    let snapshot = Arc::new(AtomicBool::new(false));
+    let capture_dir = blackbox::directory();
+    let firmware_path = o.fwsc.as_ref().unwrap_or(&o.bin).clone();
+    eprintln!("BLACK BOX: F9 (Mac: Fn+F9); automatic on halt and exit. Folder: {}", capture_dir.display());
     let (tx, rx) = mpsc::channel::<Action>();
     let _midi = midi_inputs(&o, &tx);
 
     let audio_ok = _stream.is_some();
     let emu = {
         let (ring, lcd, leds, pads, status, quit) = (ring.clone(), lcd.clone(), leds.clone(), pads.clone(), status.clone(), quit.clone());
+        let snapshot = snapshot.clone();
         std::thread::spawn(move || {
             high_priority();
+            let mut stopped = false;
             let start = Instant::now();
             let mut offset_ms = 0.0f64; // wall-clock time given up after falling behind
             let mut last_lcd = Instant::now();
             let mut last_stat = Instant::now();
             let (mut stat_emu, mut stat_wall) = (0u64, Instant::now());
             while !quit.load(Ordering::Relaxed) {
+                if snapshot.swap(false, Ordering::Relaxed) {
+                    match blackbox::capture(&m, &firmware_path, "manual", None, ring.underruns.load(Ordering::Relaxed), &capture_dir) {
+                        Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
+                        Err(e) => eprintln!("BLACK BOX save failed: {e}"),
+                    }
+                }
                 while let Ok(a) = rx.try_recv() {
                     m.soc.periph.apply(&a);
                 }
@@ -722,6 +735,12 @@ fn main() {
                     if let Err(e) = m.run(20_000) {
                         *status.lock().unwrap() = format!("halted: {e}");
                         eprintln!("halted: {e}");
+                        lcd.lock().unwrap().copy_from_slice(&m.soc.lcd.fb);
+                        match blackbox::capture(&m, &firmware_path, "halt", Some(&e), ring.underruns.load(Ordering::Relaxed), &capture_dir) {
+                            Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
+                            Err(err) => eprintln!("BLACK BOX save failed: {err}"),
+                        }
+                        stopped = true;
                         break;
                     }
                 } else {
@@ -765,6 +784,12 @@ fn main() {
                     last_stat = Instant::now();
                 }
             }
+            if !stopped {
+                match blackbox::capture(&m, &firmware_path, "exit", None, ring.underruns.load(Ordering::Relaxed), &capture_dir) {
+                    Ok(p) => eprintln!("BLACK BOX saved: {}", p.display()),
+                    Err(e) => eprintln!("BLACK BOX save failed: {e}"),
+                }
+            }
         })
     };
 
@@ -799,6 +824,9 @@ fn main() {
     eprintln!("keys: A W S E D F T G Y H U J K O L P ; ' = C4..F5, Z/X OCT, Space PLAY, R REC, 1..0 buttons, arrows and , . for SELECT/PRESETS/ALGORITHM; Esc quits");
 
     while win.is_open() && !win.is_key_down(Key::Escape) {
+        if win.is_key_pressed(Key::F9, KeyRepeat::No) {
+            snapshot.store(true, Ordering::Relaxed);
+        }
         let turn = |i: usize, clicks: i32, enc_clicks: &mut [i32; 7], turning: &mut [u32; 8]| {
             enc_clicks[i] += clicks;
             turning[i] = 10;
