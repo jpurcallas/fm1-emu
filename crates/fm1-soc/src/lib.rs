@@ -161,6 +161,10 @@ impl BiomechCpu0Profile {
     }
 }
 
+pub struct CpuSchedulerEvent {
+    pub cycle: u64, pub phase: &'static str, pub requested: u64, pub executed: u64,
+    pub cpu0_pc: u32, pub cpu1_pc: u32, pub cpu0_paused: bool, pub cpu1_paused: bool,
+}
 pub struct Cpu0FlightEvent {
     pub cycle: u64, pub before: u32, pub after: u32,
     pub sp: u32, pub rets: u32, pub kind: &'static str,
@@ -194,6 +198,10 @@ pub struct Soc {
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
+    pub cpu_scheduler: std::collections::VecDeque<CpuSchedulerEvent>,
+    pub cpu_scheduler_total: u64,
+    pub cpu_scheduler_cpu1_requested: u64,
+    pub cpu_scheduler_cpu1_executed: u64,
     pub cpu0_flight: std::collections::VecDeque<Cpu0FlightEvent>,
     pub cpu0_flight_total: u64,
     pub groove_mem_watch: bool,
@@ -251,6 +259,19 @@ impl Soc {
     /// Addresses below are verified against BIOMECH3 v0.8 LCD rescue sdk.nm ONLY.
     /// Do not interpret results from another firmware as Groove bank accesses.
     #[inline]
+    pub fn record_cpu_scheduler(&mut self, phase:&'static str, requested:u64, executed:u64, cpu0_pc:u32, cpu1_pc:u32) {
+        if !self.groove_mem_watch { return; }
+        self.cpu_scheduler_total = self.cpu_scheduler_total.saturating_add(1);
+        if phase == "cpu1" {
+            self.cpu_scheduler_cpu1_requested = self.cpu_scheduler_cpu1_requested.saturating_add(requested);
+            self.cpu_scheduler_cpu1_executed = self.cpu_scheduler_cpu1_executed.saturating_add(executed);
+        }
+        if self.cpu_scheduler.len() == 128 { self.cpu_scheduler.pop_front(); }
+        self.cpu_scheduler.push_back(CpuSchedulerEvent {
+            cycle:self.periph.cycles, phase, requested, executed, cpu0_pc, cpu1_pc,
+            cpu0_paused:self.core_paused(0), cpu1_paused:self.core_paused(1),
+        });
+    }
     pub fn record_cpu0_flight(&mut self, before:u32, after:u32, sp:u32, rets:u32, kind:&'static str) {
         // Fixed-size ring: the final 256 transitions survive regardless of boot duration.
         self.cpu0_flight_total = self.cpu0_flight_total.saturating_add(1);
@@ -338,6 +359,10 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             biomech_cpu0_profile: None,
+            cpu_scheduler: std::collections::VecDeque::with_capacity(128),
+            cpu_scheduler_total: 0,
+            cpu_scheduler_cpu1_requested: 0,
+            cpu_scheduler_cpu1_executed: 0,
             cpu0_flight: std::collections::VecDeque::with_capacity(256),
             cpu0_flight_total: 0,
             groove_mem_watch: std::env::var_os("FM1_GROOVE_MEM_TRACE").is_some(),
