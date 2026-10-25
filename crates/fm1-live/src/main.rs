@@ -778,6 +778,10 @@ fn main() {
                                     ring.started.store(false,Ordering::Relaxed);
                                     ring.underruns.store(0,Ordering::Relaxed);
                                     m=new; session_opts=next;
+                                    if std::env::var("FM1_DIAGNOSTIC_PROFILE").as_deref() == Ok("REMINISCENT") {
+                                        m.soc.audio_dma_probe_enabled = true;
+                                        m.soc.audio_dma_probes.reserve(8192);
+                                    }
                                     firmware_path=session_opts.fwsc.as_ref().unwrap_or(&session_opts.bin).clone();
                                     halt_reason=None;
                                     lcd.lock().unwrap().copy_from_slice(&m.soc.lcd.fb);
