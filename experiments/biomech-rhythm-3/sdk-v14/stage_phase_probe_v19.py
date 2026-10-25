@@ -9,7 +9,8 @@ if len(sys.argv)!=2: raise SystemExit("usage: stage_phase_probe_v19.py STAGED_SD
 root=Path(sys.argv[1])/"app/biomech"
 engine=root/"biomech.c"
 src=engine.read_text()
-if not all(x in src for x in ("#ifdef BR3_PROFILE_PHASES", "br3_phase_ticks[6]", "br3_phase_segments")):\n    raise SystemExit("Missing original DSP phase hooks")
+if not all(x in src for x in ("#ifdef BR3_PROFILE_PHASES", "br3_phase_ticks[6]", "br3_phase_segments")):
+    raise SystemExit("Missing original DSP phase hooks")
 engine.write_text("#define BR3_PROFILE_PHASES 1 /* V19 diagnostics only */\n"+src)
 port=root/"biomech_sdk_port.c"
 src=port.read_text()
