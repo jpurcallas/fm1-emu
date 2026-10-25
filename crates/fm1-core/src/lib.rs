@@ -3786,6 +3786,51 @@ pub enum CoreError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn upstream62_block_moves_eight_forms_step_and_fast() {
+        struct Xip(FlatRam);
+        impl Bus for Xip {
+            fn read8(&mut self, a: u32) -> u8 { self.0.read8(a & 0xffff) }
+            fn read16(&mut self, a: u32) -> u16 { self.0.read16(a & 0xffff) }
+            fn read32(&mut self, a: u32) -> u32 { self.0.read32(a & 0xffff) }
+            fn write8(&mut self, a: u32, v: u8) { self.0.write8(a & 0xffff, v) }
+            fn write16(&mut self, a: u32, v: u16) { self.0.write16(a & 0xffff, v) }
+            fn write32(&mut self, a: u32, v: u32) { self.0.write32(a & 0xffff, v) }
+            fn next_tick_due(&self) -> bool { false }
+        }
+        let cases = [(0x00u8,0x1000u32,0x1000u32),(0x10,0x1000,0x1008),
+            (0x20,0x1000,0x1000),(0x30,0x1000,0x1008),
+            (0x40,0x0ff8,0x1000),(0x50,0x0ff8,0x0ff8),
+            (0x60,0x0ff8,0x1000),(0x70,0x0ff8,0x0ff8)];
+        for (op, at, base) in cases {
+            let store = op & 0x20 != 0;
+            let fresh = || {
+                let mut mem = vec![0u8;0x10000];
+                mem[..8].copy_from_slice(&[op,0xeb,0x06,0x00,0,0,0,0]);
+                for (k,w) in [0x0ff8u32,0x0ffc,0x1000,0x1004].iter().enumerate() {
+                    mem[*w as usize..*w as usize+4].copy_from_slice(&(0xa0+k as u32).to_le_bytes());
+                }
+                let mut cpu = Cpu::new(0x0200_0000);
+                (cpu.regs[0],cpu.regs[1],cpu.regs[2])=(0x1000,0x11,0x22);
+                (cpu,Xip(FlatRam::new(mem)))
+            };
+            let check = |cpu: &Cpu, bus: &mut Xip, how: &str| {
+                let (lo,hi)=(bus.read32(at),bus.read32(at+4));
+                if store { assert_eq!((lo,hi),(0x11,0x22),"{op:#04x} {how}: stored"); }
+                else {
+                    assert_eq!((cpu.regs[1],cpu.regs[2]),(lo,hi),"{op:#04x} {how}: loaded");
+                    assert_ne!(lo,0);
+                }
+                assert_eq!(cpu.regs[0],base,"{op:#04x} {how}: base");
+            };
+            let (mut cpu,mut bus)=fresh();
+            cpu.step(&mut bus).unwrap();check(&cpu,&mut bus,"step");
+            let (mut cpu,mut bus)=fresh();
+            let (k,_)=cpu.run_fast(&mut bus,1).unwrap();
+            assert_eq!(k,1);check(&cpu,&mut bus,"fast");
+        }
+    }
+
 
     struct FlatRam {
         mem: Vec<u8>,
