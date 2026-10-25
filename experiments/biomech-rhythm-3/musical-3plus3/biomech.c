@@ -597,6 +597,11 @@ void br3_set_executor(const BR3Executor *ops){
 typedef struct {
   BREngine *engine;
   BRPlayingVoice cpu1_shadow[BR_POLYPHONY];
+  /* Full 64-voice preflight state: CPU0 audio-owner persistent scratch.
+   * Previously local [64] overflowed SDK CPU0 task stack into RTOS taskq.
+   * This is distinct from cpu1_shadow, which CPU1 reads concurrently.
+   * NEVER reduce polyphony or reuse cpu1_shadow for this state. */
+  BRPlayingVoice preflight_shadow[BR_POLYPHONY];
 #ifdef BR3_ACTIVE_SLOTS_LAB
   /* Canonical ascending slot order, fully compatible with 64-voice stealing. */
   uint8_t live_slots[BR_POLYPHONY];
@@ -712,8 +717,8 @@ static void BR_RAMCODE br3_render_segmented(BREngine *e,float *out,size_t frames
     if(!span)span=1;
     s->frames=(uint32_t)span;
     BR3_PROF_START(preflight_t0);
-    BRPlayingVoice simulated[BR_POLYPHONY];
-    memcpy(simulated,e->active,sizeof(simulated));
+    BRPlayingVoice *simulated=s->preflight_shadow;
+    memcpy(simulated,e->active,sizeof(s->preflight_shadow));
 #ifdef BR3_ACTIVE_SLOTS_LAB
     /* No new note can be inserted mid-slice: event/roll/step boundaries
        were already used to limit span. Include only active slots, in their
