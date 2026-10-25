@@ -189,6 +189,9 @@ pub struct Soc {
     pub taskq_events: Vec<[u64; 9]>,
     // v28: exact intercepted memmove entry when copy range overlaps RTOS list.
     pub taskq_memmove_entries: Vec<[u64; 8]>,
+    /// BR3 v32 passive guest IRQ ingress stats (not hardware emulation changes).
+    pub br3_v32_irq_delivered: [u64; 64],
+    pub br3_v32_irq_blocked: [u64; 64],
 }
 
 fn dbg_line(addr: u32) -> &'static str {
@@ -249,6 +252,8 @@ impl Soc {
             taskq_probe_pc: 0,
             taskq_events: Vec::new(),
             taskq_memmove_entries: Vec::new(),
+            br3_v32_irq_delivered: [0; 64],
+            br3_v32_irq_blocked: [0; 64],
         }
     }
 
