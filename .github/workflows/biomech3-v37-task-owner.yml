@@ -1,0 +1,83 @@
+name: BIOMECH v37 identify missing fifth V14 service task owner
+on:
+  push:
+    branches: [diagnostic/biomech3-v37-missing-fifth-task-owner-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-boot-diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain pinned unchanged V14 and SHA256-verified PI32v2 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Build exact STOCK V14 guest baseline before staging any BIOMECH
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/v36-stock
+          /tmp/jieli/pi32v2/bin/nm -an /tmp/v36-stock/sdk.elf > /tmp/v36-stock/sdk.nm
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/v36-stock
+          mv /tmp/v36-stock/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/v36-stock/STOCK_V14_ONLY_NO_INSTALL.fwsc
+      - name: Stage 6 track BR3 source, 64 voices, genuine MIDI and V14 CPU1 hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py /tmp/fm1-v14
+      - name: Build 6-track v29 source and execute original SDK service before CPU1 worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/v36-br3
+          /tmp/jieli/pi32v2/bin/nm -an /tmp/v36-br3/sdk.elf > /tmp/v36-br3/sdk.nm
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_coop_v17.py /tmp/v36-br3/sdk.elf /tmp/jieli/pi32v2/bin/nm
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/v36-br3
+          mv /tmp/v36-br3/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/v36-br3/BR3_v29_ONLY_NO_INSTALL.fwsc
+          grep -F 'BRPlayingVoice preflight_shadow[BR_POLYPHONY]' experiments/biomech-rhythm-3/musical-3plus3/biomech.c
+      - name: Decode exact fifth native RTOS task caller and neighboring code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_v37_task_owner.py /tmp/v36-stock/sdk.elf /tmp/jieli/pi32v2/bin/nm /tmp/jieli/pi32v2/bin/objdump | tee /tmp/v37_stock_owner.log
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_v37_task_owner.py /tmp/v36-br3/sdk.elf /tmp/jieli/pi32v2/bin/nm /tmp/jieli/pi32v2/bin/objdump | tee /tmp/v37_br3_owner.log
+      - name: Build same isolated observer WASM for both stock and BR3
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup target add wasm32-unknown-unknown
+          cargo check -p fm1-web
+          bash web/build.sh /tmp/v36-web
+      - name: Compare exact PI32v2 ELF symbol entries, task creation, UART and control path
+        shell: bash
+        run: |
+          set -euo pipefail
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_v36_compare_boot.mjs /tmp/v36-web/fm1_web.wasm /tmp/v36-stock/STOCK_V14_ONLY_NO_INSTALL.fwsc /tmp/v36-stock/sdk.nm /tmp/v36-br3/BR3_v29_ONLY_NO_INSTALL.fwsc /tmp/v36-br3/sdk.nm | tee /tmp/v36_boot_comparison.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH_V37_MISSING_FIFTH_TASK_NO_INSTALL
+          path: |
+            /tmp/v36_boot_comparison.log
+            /tmp/v37_stock_owner.log
+            /tmp/v37_br3_owner.log
+            /tmp/v36-stock/sdk.nm
+            /tmp/v36-br3/sdk.nm
+            /tmp/v36-stock/build.log
+            /tmp/v36-br3/build.log
+          retention-days: 14
+          if-no-files-found: warn
