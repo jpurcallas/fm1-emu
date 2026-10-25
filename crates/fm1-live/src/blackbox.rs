@@ -50,11 +50,38 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
     let ram:Vec<u8>=(0..m.soc.ram.len()).map(|i|m.soc.ram.read8(i as u32)).collect();
     let encoded=base64(&ram);
     let c1=m.cpu1.as_ref().map(cpu).unwrap_or_else(||"null".into());
-    let json=format!("{{\"format\":\"FM1-NATIVE-BLACKBOX-v1\",\"build\":{},\"firmwarePath\":{},\"capturedUnixMs\":{},\"clockMHz\":{},\"trigger\":{},\"capturePausesEmulation\":true,\"hostAudioUnderruns\":{},\"ram_base\":\"0x01c00000\",\"ram_encoding\":\"base64\",\"ram_bytes\":{},\"ram_base64\":{},\"emulator\":{{\"halted\":{},\"reason\":{},\"ms\":{},\"cycles\":{},\"audio_halves\":{},\"cpu0\":{},\"cpu1\":{}}}}}\n",
+    let mut json=format!("{{\"format\":\"FM1-NATIVE-BLACKBOX-v1\",\"build\":{},\"firmwarePath\":{},\"capturedUnixMs\":{},\"clockMHz\":{},\"trigger\":{},\"capturePausesEmulation\":true,\"hostAudioUnderruns\":{},\"ram_base\":\"0x01c00000\",\"ram_encoding\":\"base64\",\"ram_bytes\":{},\"ram_base64\":{},\"emulator\":{{\"halted\":{},\"reason\":{},\"ms\":{},\"cycles\":{},\"audio_halves\":{},\"cpu0\":{},\"cpu1\":{}}}}}\n",
         quote(option_env!("FM1_LAB_BUILD").unwrap_or("local-build")),quote(firmware),stamp,
         m.soc.periph.hz/1_000_000,quote(trigger),underruns,ram.len(),quote(&encoded),
         reason.is_some(),quote(reason.unwrap_or("")),m.soc.periph.ms(),m.soc.periph.cycles,
         m.soc.periph.audio_halves,cpu(&m.cpu),c1);
+    // Preserve all v1 JSON fields. The WAV tap precedes the host audio queue.
+    if m.soc.audio_dma_probe_enabled {
+        use std::fmt::Write as _;
+        let mut events = String::new();
+        let mut repeated = 0u64;
+        let mut two_back = 0u64;
+        let mut max_edge = 0i32;
+        for e in &m.soc.audio_dma_probes {
+            if !events.is_empty() { events.push(','); }
+            if e.repeats_previous { repeated += 1; }
+            if e.repeats_two_back { two_back += 1; }
+            max_edge = max_edge.max(e.boundary_delta.abs());
+            write!(&mut events,
+                r#"{{"seq":{},"cycle":{},"addr":{},"words":{},"hash":"{:016x}","first":{},"last":{},"peak":{},"nonzero":{},"edge":{},"delta_cycles":{},"same_prev":{},"same_two_back":{}}}"#,
+                e.seq, e.cycle, e.address, e.words, e.hash, e.first, e.last,
+                e.peak, e.nonzero, e.boundary_delta, e.delta_cycles,
+                e.repeats_previous, e.repeats_two_back
+            ).expect("write to String cannot fail");
+        }
+        let payload = format!(
+            r#","dmaAudioTrace":{{"source":"SoC::advance guest DMA read before WAV and CPAL","capacity":8192,"total_halves":{},"retained_halves":{},"identical_adjacent_nonzero":{},"identical_two_back_nonzero":{},"max_boundary_delta":{},"halves":[{}]}}"#,
+            m.soc.audio_dma_probe_total, m.soc.audio_dma_probes.len(),
+            repeated, two_back, max_edge, events
+        );
+        let end = json.rfind('}').expect("blackbox JSON closing brace");
+        json.insert_str(end, &payload);
+    }
     let stem=format!("FM1_BLACKBOX_{stamp}_{trigger}");
     let path=dir.join(format!("{stem}.json"));
     let temp=dir.join(format!("{stem}.tmp"));
