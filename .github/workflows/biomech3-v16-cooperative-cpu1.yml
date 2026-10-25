@@ -42,6 +42,25 @@ jobs:
           BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v16
           /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v16/sdk.elf > /tmp/br3-v16/sdk.nm
           grep -E ' (br_render|biomech_sdk_init|br3_coop_mailbox|br3_coop_cpu1_service_after_sdk)$' /tmp/br3-v16/sdk.nm
+      - name: Audit linked SDK CPU1 worker symbols and call sites before any hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          NM=/tmp/jieli/pi32v2/bin/nm
+          OBJDUMP=/tmp/jieli/pi32v2/bin/objdump
+          "$NM" -an /tmp/br3-v16/sdk.elf > /tmp/br3-v16/all-symbols.nm
+          grep -E 'fm1_r_2c729ca92be9|fm1_r_e7d3da61dac2|br3_coop_cpu1_service_after_sdk|br3_coop_mailbox' /tmp/br3-v16/all-symbols.nm || true
+          "$OBJDUMP" -d /tmp/br3-v16/sdk.elf > /tmp/br3-v16/guest-disassembly.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path("/tmp/br3-v16/guest-disassembly.txt").read_text(errors="replace").splitlines()
+          for token in ("fm1_r_2c729ca92be9","fm1_r_e7d3da61dac2","br3_coop_cpu1_service_after_sdk"):
+            hits=[i for i,line in enumerate(text) if token in line]
+            print("BR3_V16_CPU1_SYMBOL_AUDIT",token,"hits",len(hits))
+            for index in hits[:6]:
+              print("\n".join(text[max(0,index-2):min(len(text),index+5)]))
+          print("BR3_V16_NO_SDK_CALLSITE_PATCHED; COOPERATIVE BRIDGE REMAINS INACTIVE")
+          PY
       - name: Package firmware for isolated emulator inspection only
         shell: bash
         run: |
