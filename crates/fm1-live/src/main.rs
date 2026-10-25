@@ -702,6 +702,11 @@ fn main() {
     let quit = Arc::new(AtomicBool::new(false));
     let snapshot = Arc::new(AtomicBool::new(false));
     let capture_dir = blackbox::directory();
+    if std::env::var("FM1_DIAGNOSTIC_PROFILE").as_deref() == Ok("REMINISCENT") {
+        // DMA capture measures guest PCM consumed by I2S; no firmware changes.
+        m.soc.audio_dma_probe_enabled = true;
+        m.soc.audio_dma_probes.reserve(8192);
+    }
     let firmware_path = o.fwsc.as_ref().unwrap_or(&o.bin).clone();
     let view = Arc::new(Mutex::new(lab::View { firmware:firmware_path.clone(), mhz:o.mhz, recording:false,
         message:"ABRIR FWSC / MHZ REINICIA / JSON / WAV PCM 44100 HZ".into(), generation:0, pot }));
