@@ -162,6 +162,12 @@ pub struct Cpu {
     pub insn_count: u64,
     /// BR3 v31 diagnostic only: block entry hits at real V14 control / MIDI / IRQ functions.
     pub br3_v31_hits: [u64; 6],
+    /// v36 RAM-safe emulator-only PC callsite probes, set by same-ELF symbol table.
+    pub br3_v36_probe_addresses: [u32; 16],
+    pub br3_v36_probe_counts: [u64; 16],
+    pub br3_v36_probe_enabled: bool,
+    pub br3_v36_probe_events: Vec<[u64; 9]>,
+
     /// Experimental crash diagnosis: only enabled on CPU0 after an encoder turn.
     /// With CPU0 JIT paused this keeps the last actual executed branches.
     pub br2_trace_on: bool,
@@ -438,6 +444,18 @@ impl Cpu {
             if n >= budget {
                 sync!();
                 return Ok((n, false));
+            }
+            if self.core_id == 0 && self.br3_v36_probe_enabled {
+                for i in 0..16 {
+                    if self.br3_v36_probe_addresses[i] != 0 && pc == self.br3_v36_probe_addresses[i] {
+                        self.br3_v36_probe_counts[i] = self.br3_v36_probe_counts[i].saturating_add(1);
+                        if self.br3_v36_probe_events.len() < 180 {
+                            self.br3_v36_probe_events.push([i as u64,self.insn_count + n as u64,
+                              self.regs[0] as u64,self.regs[1] as u64,self.regs[2] as u64,
+                              self.regs[3] as u64,self.sp as u64,self.rets as u64,self.user as u64]);
+                        }
+                    }
+                }
             }
             if self.core_id == 0 {
                 let hit = match pc {
