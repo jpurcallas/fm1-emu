@@ -40,5 +40,9 @@ jobs:
           /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep ' [bB] ' | tail -130
           echo BR3_V45_LINKER_RAM0_BSS
           grep -n -B 20 -A 34 'ram0_bss' /tmp/fm1-v14/sdk/config/linker.ld.in | head -100
+          echo BR3_V45_EXACT_FX_SECTION_AND_SYMS
+          grep -E 'fm1_fx_states|fm1_fx_parameters|\\.bss.fm1_fx' /tmp/v45/sections.txt /tmp/v45/symbols.txt /tmp/v45/relocs.txt | head -38 || true
+          echo BR3_V45_SECTION_NAMED_BREAKDOWN
+          grep -E '(^|[[:space:]])\\.bss' /tmp/v45/sections.txt | grep -E 'fx|engine' | head -40 || true
           echo BR3_V45_SECTIONS_GUEST
           /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o > /tmp/v45/sections2.txt; grep -E 'Idx|\.bss|\.ram0|\.data|\.text' /tmp/v45/sections2.txt | tail -80
