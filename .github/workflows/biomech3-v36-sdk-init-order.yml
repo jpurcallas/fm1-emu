@@ -1,0 +1,64 @@
+name: BIOMECH v36 compare real SDK init callsites stock and BIOMECH
+on:
+  push:
+    branches: [diagnostic/biomech3-v36-sdk-init-call-order-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain pinned SDK and compiler
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          cp -a /tmp/fm1-v14 /tmp/fm1-stock
+          curl -fLsS --retry 3 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Build exact stock and BIOMECH ELF without runtime tests
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-stock /tmp/jieli /tmp/br3-stock
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py /tmp/fm1-v14
+          BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-full
+      - name: Compare UART setup and control task callsite ownership
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess,re
+          nmexe="/tmp/jieli/pi32v2/bin/nm"
+          disexe="/tmp/jieli/pi32v2/bin/objdump"
+          for mode,elf in [("STOCK","/tmp/br3-stock/sdk.elf"),("BIOMECH","/tmp/br3-full/sdk.elf")]:
+            nm=subprocess.check_output([nmexe,"-an",elf],text=True)
+            dis=subprocess.check_output([disexe,"-d",elf],text=True)
+            symbols=[]
+            for line in nm.splitlines():
+              m=re.match(r"^([0-9a-fA-F]{8})\s+\w\s+(\S+)$",line)
+              if m:symbols.append((int(m[1],16),m[2]))
+            print("BR3_V36_ELF",mode,len(symbols))
+            for key in ["fm1_device_start","groove_screen_init","groove_screen_control","biomech_sdk_init","fm1_audio_start","fm1_controls_init","fm1_app_midi_received","fm1_control_request"]:
+              matches=[(hex(a),n) for a,n in symbols if n==key]
+              print("BR3_V36_SYMBOL",mode,key,matches)
+            for key in ["fm1_device_start","groove_screen_init","fm1_controls_init","biomech_sdk_init","fm1_audio_start"]:
+              refs=[l.strip() for l in dis.splitlines() if re.search(r"\b(?:call|jirl)\b",l) and re.search(r"<"+re.escape(key)+r"(?:\s|\+)",l)]
+              print("BR3_V36_CALLERS",mode,key,len(refs),refs[:25])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH_V36_ELF_INIT_COMPARISON_NO_INSTALL
+          path: |
+            /tmp/br3-stock/sdk.map
+            /tmp/br3-full/sdk.map
+          retention-days: 14
