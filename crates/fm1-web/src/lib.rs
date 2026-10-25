@@ -152,6 +152,7 @@ static mut INSNS: u64 = 0;
 // v26 guest RAM taskq writer evidence, host diagnostic only.
 static mut TASKQ_WRITES_JSON: Vec<u8> = Vec::new();
 static mut TASKQ_MEMMOVE_JSON: Vec<u8> = Vec::new();
+static mut BR3_V33_UART_JSON: Vec<u8> = Vec::new();
 
 #[allow(static_mut_refs)]
 fn machine() -> Option<&'static mut Machine> {
@@ -517,6 +518,21 @@ pub extern "C" fn fm1_biomech_taskq_memmove_json() -> *const u8 {
         TASKQ_MEMMOVE_JSON=format!("{{\"schema\":\"BR3-MEMMOVE-CALL-v28\",\"records\":[{}]}}",body).into_bytes();
         TASKQ_MEMMOVE_JSON.push(0);
         TASKQ_MEMMOVE_JSON.as_ptr()
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_br3_v33_uart_json() -> *const u8 {
+    let body=machine().map(|m| {
+        let addresses=[0x12100,0x12110,0x1211c,0x12120,0x12124,0x12128];
+        let regs=addresses.map(|a|m.soc.read32(a));
+        format!("{{\"schema\":\"BR3-UART-v33\",\"ms\":{},\"registers\":{:?},\"queue\":{},\"dropped\":{}}}",
+          m.soc.periph.ms(),regs,m.soc.periph.midi_queued(),m.soc.periph.midi_dropped())
+    }).unwrap_or_default();
+    unsafe {
+        BR3_V33_UART_JSON=body.into_bytes();
+        BR3_V33_UART_JSON.push(0);
+        BR3_V33_UART_JSON.as_ptr()
     }
 }
 #[no_mangle]
