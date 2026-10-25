@@ -1,0 +1,55 @@
+name: BIOMECH v34 authentic V14 stock guest UART baseline (NO INSTALL)
+on:
+  push:
+    branches: [diagnostic/biomech3-v34-v14-stock-uart-control-baseline-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch SHA-pinned untouched SDK V14 and verified JieLi compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Compile UNMODIFIED stock V14 SDK PI32v2 no BIOMECH adapter
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-stock
+          /tmp/jieli/pi32v2/bin/nm -an /tmp/br3-stock/sdk.elf > /tmp/br3-stock/sdk.nm
+      - name: Pack original stock V14 firmware FOR EMULATOR ONLY
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-stock
+          mv /tmp/br3-stock/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-stock/V14_STOCK_BASELINE_ONLY_NO_INSTALL.fwsc
+          sha256sum /tmp/br3-stock/*.fwsc | tee /tmp/br3-stock/SHA256SUMS.txt
+      - name: Build same WASM peripheral emulator as v33 for exact A/B
+        run: |
+          set -euo pipefail
+          rustup target add wasm32-unknown-unknown
+          bash web/build.sh /tmp/br3-v34-web
+      - name: Inspect UART/DMA OS IRQ on ORIGINAL V14 no BR3
+        run: |
+          set -euo pipefail
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_v34_stock.mjs /tmp/br3-v34-web/fm1_web.wasm /tmp/br3-stock/V14_STOCK_BASELINE_ONLY_NO_INSTALL.fwsc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH_v34_ORIGINAL_V14_BASELINE_NO_INSTALL
+          path: |
+            /tmp/br3-stock/*.fwsc
+            /tmp/br3-stock/SHA256SUMS.txt
+            /tmp/br3-stock/build.log
+          retention-days: 14
+          if-no-files-found: warn
