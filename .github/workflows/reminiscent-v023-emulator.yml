@@ -1,0 +1,28 @@
+name: REminiSCENT v0.23 emulator validation executable
+on:
+  push:
+    branches: [experiment/reminiscent-v023-author-menu-clean-20261025]
+    paths: ['.github/workflows/reminiscent-v023-emulator.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  emulator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install audio/window build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libasound2-dev libx11-dev libxkbcommon-dev libxcursor-dev libxrandr-dev libxi-dev pkg-config
+      - name: Build FM1 emulator
+        run: |
+          cargo build --locked --release -p fm1-emu
+          target/release/fm1-emu --help | head -60
+      - name: Upload CLI emulator
+        uses: actions/upload-artifact@v4
+        with:
+          name: rem23-linux-fm1-emu-validation
+          path: target/release/fm1-emu
+          retention-days: 1
