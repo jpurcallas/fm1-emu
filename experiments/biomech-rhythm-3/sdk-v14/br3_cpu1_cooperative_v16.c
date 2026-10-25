@@ -34,6 +34,7 @@ volatile uintptr_t br3_coop_hook_anchor;
 #define BR3_COOP_SDK_SENTINEL 0xB330C017u
 volatile uintptr_t br3_coop_original_sdk_worker
  __attribute__((used,section(".ram0_data"))) = BR3_COOP_SDK_SENTINEL;
+void BR_RAMCODE br3_coop_cpu1_service_after_sdk(void);
 void BR_RAMCODE br3_coop_sdk_worker_wrapper(void){
  uintptr_t original=br3_coop_original_sdk_worker;
  if(!original||original==BR3_COOP_SDK_SENTINEL){
