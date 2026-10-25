@@ -162,18 +162,32 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
                 }
             }
         }
-        match cpu.run_fast(soc, n - done) {
-            Ok((0, _)) => {
-                if let Err(e) = cpu.step(soc) {
-                    return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+        // v26 diagnostic ONLY: guest-PC-accurate interpreter observation
+        // across the already-established 140-154ms corruption window.
+        // Outside the window, use the exact existing fast path.
+        if (135..=163).contains(&soc.periph.ms()) {
+            soc.taskq_probe_core = 0;
+            soc.taskq_probe_pc = cpu.pc;
+            if let Err(e) = cpu.step(soc) {
+                return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+            }
+            soc.taskq_probe_core = u32::MAX;
+            done += 1;
+        } else {
+            soc.taskq_probe_core = u32::MAX;
+            match cpu.run_fast(soc, n - done) {
+                Ok((0, _)) => {
+                    if let Err(e) = cpu.step(soc) {
+                        return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
+                    }
+                    done += 1;
                 }
-                done += 1;
+                Ok((k, due)) => {
+                    done += k;
+                    ticked = due;
+                }
+                Err(e) => return Err(format!("{e:?} at pc {:#010x}", cpu.pc)),
             }
-            Ok((k, due)) => {
-                done += k;
-                ticked = due;
-            }
-            Err(e) => return Err(format!("{e:?} at pc {:#010x}", cpu.pc)),
         }
         if soc.cpu1_release {
             break; // core 1 starts now (run_dual)
@@ -225,15 +239,25 @@ pub fn run_cpu1(c1: &mut Cpu, soc: &mut Soc, cycles: u64) -> Result<(), String> 
         }
         let chunk = if probing > 0 { 1 } else { left.min(256) };
         let mut bus = Core1Bus { soc: &mut *soc, budget: chunk.max(64) + 1 };
-        let k = match c1.run_fast(&mut bus, chunk as u32) {
-            Ok((0, _)) => {
-                if let Err(e) = c1.step(&mut bus) {
-                    return Err(format!("cpu1: {e:?} at pc {:#010x}", c1.pc));
-                }
-                1
+        let k = if (135..=163).contains(&bus.soc.periph.ms()) {
+            bus.soc.taskq_probe_core=1;
+            bus.soc.taskq_probe_pc=c1.pc;
+            if let Err(e)=c1.step(&mut bus) {
+                return Err(format!("cpu1: {e:?} at pc {:#010x}",c1.pc));
             }
-            Ok((k, _)) => k as u64,
-            Err(e) => return Err(format!("cpu1: {e:?} at pc {:#010x}", c1.pc)),
+            bus.soc.taskq_probe_core=u32::MAX;
+            1
+        } else {
+            match c1.run_fast(&mut bus, chunk as u32) {
+                Ok((0, _)) => {
+                    if let Err(e) = c1.step(&mut bus) {
+                        return Err(format!("cpu1: {e:?} at pc {:#010x}", c1.pc));
+                    }
+                    1
+                }
+                Ok((k, _)) => k as u64,
+                Err(e) => return Err(format!("cpu1: {e:?} at pc {:#010x}", c1.pc)),
+            }
         };
         left = left.saturating_sub(k);
         probing = probing.saturating_sub(k);
