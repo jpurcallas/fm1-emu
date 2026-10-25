@@ -5,6 +5,9 @@ on:
       - experiment/biomech3-v16-cooperative-cpu1-20261025
     paths:
       - '.github/workflows/biomech3-v16-cooperative-cpu1.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/br3_cpu1_cooperative_v16.c'
+      - 'experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py'
   workflow_dispatch:
 permissions:
   contents: read
