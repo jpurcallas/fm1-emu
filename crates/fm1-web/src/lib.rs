@@ -466,8 +466,8 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
     let value = machine().map(|m| {
         fn core(c: &Cpu) -> String {
             let stuck = c.stuck_on.map(|v| format!("{v:?}")).unwrap_or_else(|| "null".to_owned());
-            format!("{{\"pc\":{},\"sp\":{},\"ssp\":{},\"usp\":{},\"core_id\":{},\"user\":{},\"insn_count\":{},\"stuck_on\":{},\"regs\":{:?}}}",
-                c.pc,c.sp,c.ssp,c.usp,c.core_id,c.user,c.insn_count,stuck,c.regs)
+            format!("{{\"pc\":{},\"sp\":{},\"ssp\":{},\"usp\":{},\"core_id\":{},\"user\":{},\"insn_count\":{},\"stuck_on\":{},\"regs\":{:?},\"br3_v31_hits\":{:?}}}",
+                c.pc,c.sp,c.ssp,c.usp,c.core_id,c.user,c.insn_count,stuck,c.regs,c.br3_v31_hits)
         }
         let cpu1 = m.cpu1.as_ref().map_or("null".to_owned(), core);
         let reason = m.halt_reason.as_deref().unwrap_or("");
