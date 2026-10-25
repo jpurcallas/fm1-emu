@@ -1273,9 +1273,10 @@ impl Cpu {
                 self.set_icfg(self.regs[(s & 15) as usize]);
                 bus.irq_window();
             }
-            Fast::BlockMove { base, mask, store, post } => {
+            Fast::BlockMove { base, mask, store, post, down } => {
                 let base = (base & 15) as usize;
-                let mut addr = self.regs[base];
+                let start = if down { self.regs[base].wrapping_sub(4 * mask.count_ones()) } else { self.regs[base] };
+                let mut addr = start;
                 for i in 0..16usize {
                     if mask >> i & 1 != 0 {
                         if store {
@@ -1287,7 +1288,7 @@ impl Cpu {
                     }
                 }
                 if post {
-                    self.regs[base] = addr;
+                    self.regs[base] = if down { start } else { addr };
                 }
             }
             Fast::PushMask { mask } => {
@@ -1694,19 +1695,14 @@ impl Cpu {
         }
 
         // ---- multi-register block moves with a register base -----------
-        // `{rA, rB, ...} = [rN+]` / `[rN+] = {...}` (00 eb / 20 eb): base =
-        // bits(0,3), 16-bit register mask at bits(16,31); the lowest register
-        // takes the lowest address (same convention as the sp block pops).
-        // `[rN++]` additionally advances the base past the block. Base
-        // update for the plain `[rN+]` form assumed absent (probe item).
-        if insn.entry.len == 4 && (insn.raw >> 8) & 0xff == 0xeb
-            && ((s.starts_with("{") && has(s, "} = [R+")) || (s.starts_with("[R+") && has(s, "] = {")))
-        {
+        // Upstream PR #62: register-block movements below the base, -R/--R,
+        // as well as upward forms; distinct from the SP-specific instructions.
+        if let (4, 0xeb, Some((store, wb, down))) = (insn.entry.len, (insn.raw >> 8) & 0xff, block_form(s)) {
             let raw = insn.raw;
             let base = (raw & 0xf) as usize;
             let regs: Vec<usize> = (0..16usize).filter(|&i| (raw >> (16 + i)) & 1 != 0).collect();
-            let mut addr = self.regs[base];
-            let store = s.starts_with("[");
+            let start = if down { self.regs[base].wrapping_sub(4 * regs.len() as u32) } else { self.regs[base] };
+            let mut addr = start;
             for &i in &regs {
                 if store {
                     bus.write32(addr, self.regs[i]);
@@ -1715,8 +1711,8 @@ impl Cpu {
                 }
                 addr = addr.wrapping_add(4);
             }
-            if has(s, "[R++]") {
-                self.regs[base] = addr;
+            if wb {
+                self.regs[base] = if down { start } else { addr };
             }
             return Ok(Some(None));
         }
@@ -4765,7 +4761,7 @@ impl Fast {
             Fast::PopPc { n } => (0, range(n)),
             Fast::PushMask { mask } => (mask, 0),
             Fast::PopMask { mask } => (0, mask),
-            Fast::BlockMove { base, mask, store, post } => {
+            Fast::BlockMove { base, mask, store, post, .. } => {
                 let pb = if post { m(base) } else { 0 };
                 if store { (mask | m(base), pb) } else { (m(base), mask | pb) }
             }
@@ -5020,7 +5016,7 @@ enum Fast {
     IcfgRd { d: u8 },
     IcfgWr { s: u8 },
     /// `{regs} = [R+]` / `[R+] = {regs}` (and `[R++]`: the base moves past the block)
-    BlockMove { base: u8, mask: u16, store: bool, post: bool },
+    BlockMove { base: u8, mask: u16, store: bool, post: bool, down: bool },
     // were slow path: the raw-decoded routes, and the hottest syntax-keyed shapes
     /// execute's routes decoded from the raw word (pair loads / stores, pre / post-increment
     /// accesses, 64-bit ops, rev8, rets pops): `exec_raw`
@@ -5041,6 +5037,25 @@ enum Fast {
     StPre { s: u8, b: u8, i: u8, w: u8, inc: u32 },
     LdPostR { d: u8, b: u8, i: u8, w: u8, signed: bool },
     StPostR { s: u8, b: u8, i: u8, w: u8 },
+}
+
+/// A register-base block move's form: (store, writeback, block below base).
+/// Taken from upstream #62, 9ff4633d; SP-specific forms are handled elsewhere.
+fn block_form(s: &str) -> Option<(bool, bool, bool)> {
+    let (store, m) = if let Some(rest) = s.strip_prefix('[') {
+        (true, rest.split_once("] = {")?.0)
+    } else if s.starts_with('{') {
+        (false, s.split_once("} = [")?.1.strip_suffix(']')?)
+    } else {
+        return None;
+    };
+    match m {
+        "R+" => Some((store, false, false)),
+        "R++" => Some((store, true, false)),
+        "-R" => Some((store, false, true)),
+        "--R" => Some((store, true, true)),
+        _ => None,
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -5534,15 +5549,12 @@ fn fast_of(insn: &Instruction, s: &'static str) -> Option<Fast> {
         "R = R >>> #i" if insn.entry.len == 4 && v(2).map_or(false, |n| (1..32).contains(&n)) => {
             return Some(Fast::SarI { d: r(0)?, s: r(1)?, n: v(2)? as u8 });
         }
-        _ if insn.entry.len == 4 && (insn.raw >> 8) & 0xff == 0xeb
-            && ((s.starts_with('{') && s.contains("} = [R+")) || (s.starts_with("[R+") && s.contains("] = {"))) =>
-        {
-            // block moves (exec_syntax's `00 eb` / `20 eb` arm): base bits 0-3, mask bits 16-31
+        _ if insn.entry.len == 4 && (insn.raw >> 8) & 0xff == 0xeb && block_form(s).is_some() => {
+            let (store, post, down) = block_form(s)?;
             return Some(Fast::BlockMove {
                 base: (insn.raw & 0xf) as u8,
                 mask: (insn.raw >> 16) as u16,
-                store: s.starts_with('['),
-                post: s.contains("[R++]"),
+                store, post, down,
             });
         }
         _ => {}
