@@ -1,0 +1,36 @@
+name: BIOMECH v30 inspect actual staged MIDI/screen wiring
+on:
+  push:
+    branches: [diagnostic/biomech3-v30-input-routing-inspect-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read overlay UI MIDI tasks, actual entrypoints and hooks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py /tmp/fm1-v14
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path("/tmp/fm1-v14")
+          targets=["app/screen.c","app/midi_router.c","app/biomech/biomech_sdk_port.c"]
+          pats=r"groove_screen_control|groove_screen_init|biomech_sdk_control|biomech_sdk_init|fm1_app_midi_received|biomech_sdk_midi_received|br3_input_|fm1_audio_start|fm1_controls_read|fm1_midi|void [a-z_]*task|task_create"
+          for name in targets:
+              lines=(root/name).read_text().splitlines()
+              print("BR3_V30_FILE",name,"lines",len(lines))
+              matches=[i for i,line in enumerate(lines) if re.search(pats,line)]
+              for i in matches[:95]:
+                  print("BR3_V30_CONTEXT",name,i+1)
+                  print("\\n".join(f"{j+1}:{lines[j]}" for j in range(max(0,i-5),min(len(lines),i+10))))
+          PY
