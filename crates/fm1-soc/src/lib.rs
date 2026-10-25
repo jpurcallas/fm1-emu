@@ -192,6 +192,13 @@ pub struct Soc {
     /// BR3 v32 passive guest IRQ ingress stats (not hardware emulation changes).
     pub br3_v32_irq_delivered: [u64; 64],
     pub br3_v32_irq_blocked: [u64; 64],
+    /// Experimental passive SDK stock FX arena read/write guard.
+    pub br3_v41_fx_begin: u32,
+    pub br3_v41_fx_end: u32,
+    pub br3_v41_fx_reads: u64,
+    pub br3_v41_fx_writes: u64,
+    pub br3_v41_fx_first_pc: u32,
+
 }
 
 fn dbg_line(addr: u32) -> &'static str {
@@ -254,6 +261,12 @@ impl Soc {
             taskq_memmove_entries: Vec::new(),
             br3_v32_irq_delivered: [0; 64],
             br3_v32_irq_blocked: [0; 64],
+            br3_v41_fx_begin: 0,
+            br3_v41_fx_end: 0,
+            br3_v41_fx_reads: 0,
+            br3_v41_fx_writes: 0,
+            br3_v41_fx_first_pc: 0,
+
         }
     }
 
@@ -534,6 +547,18 @@ impl Soc {
     }
 }
 
+impl Soc {
+    #[inline(always)]
+    fn br3_v41_watch(&mut self, addr: u32, bytes: u32, writing: bool) {
+        if self.br3_v41_fx_begin != 0 &&
+          addr < self.br3_v41_fx_end &&
+          addr.saturating_add(bytes) > self.br3_v41_fx_begin {
+            if writing { self.br3_v41_fx_writes+=1; }
+            else { self.br3_v41_fx_reads+=1; }
+            if self.br3_v41_fx_first_pc==0 { self.br3_v41_fx_first_pc=self.taskq_guest_pc; }
+        }
+    }
+}
 impl Bus for Soc {
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
@@ -607,6 +632,7 @@ impl Bus for Soc {
     fn read8(&mut self, addr: u32) -> u8 {
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
+            self.br3_v41_watch(addr,1,false);
             return self.ram.read8(o);
         }
         self.read32(addr & !3).to_le_bytes()[(addr & 3) as usize]
@@ -624,6 +650,7 @@ impl Bus for Soc {
     fn read32(&mut self, addr: u32) -> u32 {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
+            self.br3_v41_watch(addr,4,false);
             return self.ram.read32(o as u32);
         }
         let x = addr.wrapping_sub(XIP_BASE) as usize;
@@ -637,6 +664,7 @@ impl Bus for Soc {
     fn write8(&mut self, addr: u32, value: u8) {
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
+            self.br3_v41_watch(addr,1,true);
             let prior = self.taskq_before(addr, 1);
             self.ram.write8(o, value);
             self.taskq_after(addr, 1, prior);
@@ -650,6 +678,7 @@ impl Bus for Soc {
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
         if o + 2 <= self.ram.len() && addr & 1 == 0 {
+            self.br3_v41_watch(addr,2,true);
             let prior = self.taskq_before(addr, 2);
             self.ram.write16(o as u32, value);
             self.taskq_after(addr, 2, prior);
@@ -662,6 +691,7 @@ impl Bus for Soc {
     fn write32(&mut self, addr: u32, value: u32) {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
+            self.br3_v41_watch(addr,4,true);
             let prior = self.taskq_before(addr, 4);
             self.ram.write32(o as u32, value);
             self.taskq_after(addr, 4, prior);
