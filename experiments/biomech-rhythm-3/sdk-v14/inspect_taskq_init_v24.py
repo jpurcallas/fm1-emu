@@ -46,3 +46,18 @@ print("BR3_V24_RELEVANT_NM_SYMBOLS")
 for line in names:
  if re.search(r"taskq|task_create|task_init|os_init|os_start|queue_create|list_init|head\.792",line,re.I):
   print(line)
+
+
+print("BR3_V24_OS_INIT_CALLSITE_AUDIT")
+for i,line in enumerate(dis):
+    if re.search(r"<os_init\s*:\s*202cc92>",line,re.I) and "call" in line:
+        print("BR3_V24_OS_INIT_DIRECT_CALL",func_label(i),line)
+        print("\n".join(dis[max(0,i-8):i+9]))
+print("BR3_V24_OS_INIT_FLAG_REFERENCES")
+for i,line in enumerate(dis):
+    if "os_init_flag" in line:
+        print("BR3_V24_FLAG_REF",func_label(i),line)
+print("BR3_V24_OS_START_CALLERS")
+for i,line in enumerate(dis):
+    if re.search(r"<os_start\s*:\s*202cd96>",line,re.I) and "call" in line:
+        print("BR3_V24_OS_START_DIRECT_CALL",func_label(i),line)
