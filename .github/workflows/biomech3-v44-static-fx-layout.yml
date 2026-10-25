@@ -1,0 +1,63 @@
+name: BIOMECH v44 locate 48K inherited FX BSS object and linker refs
+on:
+  push:
+    branches: [diagnostic/biomech3-v44-sdk-fx-section-relocations-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain exact SDK and native PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage BR3 unchanged six tracks and native V14 CPU1 wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py /tmp/fm1-v14
+      - name: Link REAL BR3 SDK with original physical heap for static map
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/v44-br3
+      - name: Find original precompiled FX BSS section and every read/write code reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN=/tmp/jieli/pi32v2/bin
+          echo BR3_V44_FINAL_SYMBOL
+          "$BIN/nm" -S /tmp/v44-br3/sdk.elf | grep -E '(fm1_fx_states|_MALLOC_SIZE|effects$|br3_seg$)'
+          echo BR3_V44_LIB_SYMBOL_OWNER
+          "$BIN/nm" -A -S /tmp/fm1-v14/sdk/lib/libfm1_engine.a | grep -E '(fm1_fx_states|fm1_fx_)' | head -80 || true
+          echo BR3_V44_SECTION_MAP
+          grep -B 7 -A 9 'fm1_fx_states' /tmp/v44-br3/sdk.map | head -110 || true
+          echo BR3_V44_OBJECT_LAYOUT
+          "$BIN/objdump" -h /tmp/fm1-v14/sdk/lib/libfm1_engine.a 2>&1 | grep -B 5 -A 3 -E '(fm1_fx_states|\.bss\.fm1_fx)' | head -90 || true
+          echo BR3_V44_RELOCATIONS
+          "$BIN/objdump" -r /tmp/fm1-v14/sdk/lib/libfm1_engine.a 2>&1 | grep -B 3 -A 3 'fm1_fx_states' | head -100 || true
+          echo BR3_V44_LIBTOOL_AVAILABLE
+          ls "$BIN/" | grep -E 'llvm-ar|^ar$|objdump|readelf|nm'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH_V44_STATIC_SECTION_AUDIT_NO_FIRMWARE
+          path: |
+            /tmp/v44-br3/sdk.map
+            /tmp/v44-br3/build.log
+          retention-days: 10
