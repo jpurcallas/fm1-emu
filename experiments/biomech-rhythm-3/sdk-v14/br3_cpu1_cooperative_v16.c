@@ -72,6 +72,11 @@ static void BR_RAMCODE br3_cpu1_dispatch_coop(void *arg){
 /* Called ONLY by a future audited wrapper AFTER stock SDK CPU1 service.
  * Source is deliberately NOT wired to arbitrary SDK addresses yet. */
 void BR_RAMCODE br3_coop_cpu1_service_after_sdk(void){
+ /* The SDK CPU1 worker starts before the BIOMECH CPU0 musical init.
+  * Never treat a pre-init mailbox as corruption. SDK service has already
+  * run first; postpone cooperative advertising until CPU0 sets MAGIC. */
+ BR3_COOP_BARRIER();
+ if(br3_coop_mailbox.magic!=BR3_COOP_MAGIC)return;
  br3_coop_mailbox.alive=BR3_COOP_ALIVE;
  BR3_COOP_BARRIER();
  br3_cpu1_dispatch_coop(0);
