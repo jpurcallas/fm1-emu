@@ -99,6 +99,11 @@ jobs:
               refs=[ln.strip() for ln in dis.splitlines() if "call" in ln and re.search(r"<"+re.escape(name)+r"(?:\s|\+)",ln)]
               print("BR3_V30_CALLS",name,len(refs),refs[:35])
           PY
+      - name: Resolve actual caller function symbols and disassembly
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_v30_callers.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/nm /tmp/jieli/pi32v2/bin/objdump
       - name: Test that SDK taskq survives 4.6 guest seconds; measure MIDI panel CPU1 and real PCM
         shell: bash
         run: |
