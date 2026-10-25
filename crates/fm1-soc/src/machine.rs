@@ -184,16 +184,32 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
                     let handler = soc.read32(VEC_BASE + 4 * irq as u32);
                     let old_pc = cpu.pc;
                     cpu.interrupt(handler, prio);
-                    if soc.groove_mem_watch { soc.record_cpu0_flight(old_pc, cpu.pc, cpu.sp, cpu.rets, "irq"); }
+                    if soc.groove_mem_watch {
+                        soc.record_cpu0_flight(old_pc, cpu.pc, cpu.sp, cpu.rets, "irq");
+                        soc.record_cpu_flow(old_pc, cpu.pc, cpu.sp, cpu.rets, "irq", 0);
+                    }
                 }
             }
         }
         if soc.groove_mem_watch {
             // No run_fast for this diagnostic: record every decoded instruction and all control transfers.
             let before = cpu.pc;
+            // Read the opcode window only from executable RAM/XIP; never probe MMIO merely for a trace.
+            let opcode = if (0x01c00000..0x01d00000).contains(&before) || (0x02000000..0x03000000).contains(&before) {
+                let lo=soc.read32(before) as u64;
+                let hi=soc.read32(before.wrapping_add(4)) as u64;
+                lo | (hi << 32)
+            } else { 0 };
             let outcome = cpu.step(soc);
-            let kind = if outcome.is_err() { "fault" } else if cpu.pc != before.wrapping_add(2) { "step" } else { "sequential" };
+            let delta=cpu.pc.wrapping_sub(before);
+            let transfer=outcome.is_err() || !matches!(delta,2|4|6);
+            let entered_low=(0x00010000..0x00020000).contains(&cpu.pc)
+                && !(0x00010000..0x00020000).contains(&before);
+            let kind=if outcome.is_err(){"fault"} else if entered_low {"enter_low_mmio"} else if transfer {"transfer"} else {"sequential"};
             soc.record_cpu0_flight(before, cpu.pc, cpu.sp, cpu.rets, kind);
+            if transfer || entered_low {
+                soc.record_cpu_flow(before, cpu.pc, cpu.sp, cpu.rets, kind, opcode);
+            }
             if let Err(e) = outcome { return Err(format!("{e:?} at pc {:#010x}", cpu.pc)); }
             done += 1;
         } else if soc.biomech_cpu0_profile.as_ref().is_some_and(|p| p.enabled) {
