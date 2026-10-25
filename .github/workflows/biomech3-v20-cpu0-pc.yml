@@ -10,6 +10,7 @@ on:
       - 'experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py'
       - 'experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py'
       - 'experiments/biomech-rhythm-3/sdk-v14/smoke_pc_v20.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/inspect_cpu0_pc_v20.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -60,6 +61,11 @@ jobs:
           mv /tmp/br3-v19/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v19/BR3_v19_PHASE_BUDGET_NO_INSTALL.fwsc
           sha256sum /tmp/br3-v19/*.fwsc | tee /tmp/br3-v19/SHA256SUMS.txt
           echo 'e00e45f875fbefa24984c0e4aae15e9ecf6b612b3801d2fbdf72c98446357442  /tmp/br3-v19/BR3_v19_PHASE_BUDGET_NO_INSTALL.fwsc' | sha256sum -c
+      - name: Disassemble stable CPU0 spin PC 0x0202B378 in this exact linked ELF
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_cpu0_pc_v20.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/objdump /tmp/jieli/pi32v2/bin/nm
       - name: Sample CPU0 execution PCs without touching the byte-identical v19 firmware, input path or DSP
         shell: bash
         run: |
