@@ -520,6 +520,30 @@ pub extern "C" fn fm1_biomech_taskq_memmove_json() -> *const u8 {
         TASKQ_MEMMOVE_JSON.as_ptr()
     }
 }
+static mut BR3_V36_BOOT_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_br3_v36_add_probe(index: u32, addr: u32) {
+    if let Some(m)=machine(){
+        if index < 16 {
+            m.cpu.br3_v36_probe_addresses[index as usize]=addr;
+            m.cpu.br3_v36_probe_enabled=true;
+        }
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_br3_v36_boot_json() -> *const u8 {
+    let body=machine().map(|m| {
+        format!("{{\"schema\":\"BR3-V36-BOOT\",\"ms\":{},\"addresses\":{:?},\"counts\":{:?},\"events\":{:?},\"pc\":{},\"user\":{}}}",
+         m.soc.periph.ms(),m.cpu.br3_v36_probe_addresses,m.cpu.br3_v36_probe_counts,m.cpu.br3_v36_probe_events,
+         m.cpu.pc,m.cpu.user)
+    }).unwrap_or_default();
+    unsafe {
+        BR3_V36_BOOT_JSON=body.into_bytes();
+        BR3_V36_BOOT_JSON.push(0);
+        BR3_V36_BOOT_JSON.as_ptr()
+    }
+}
 #[no_mangle]
 #[allow(static_mut_refs)]
 pub extern "C" fn fm1_br3_v33_uart_json() -> *const u8 {
