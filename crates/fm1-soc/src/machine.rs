@@ -157,8 +157,11 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
         if soc.periph.any_pending() {
             if let Some((irq, prio)) = soc.pending_irq() {
                 if cpu.irq_ready(prio) {
+                    if (irq as usize) < 64 { soc.br3_v32_irq_delivered[irq as usize]+=1; }
                     let handler = soc.read32(VEC_BASE + 4 * irq as u32);
                     cpu.interrupt(handler, prio);
+                } else if (irq as usize) < 64 {
+                    soc.br3_v32_irq_blocked[irq as usize]+=1;
                 }
             }
         }
