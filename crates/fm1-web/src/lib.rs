@@ -520,6 +520,24 @@ pub extern "C" fn fm1_biomech_taskq_memmove_json() -> *const u8 {
         TASKQ_MEMMOVE_JSON.as_ptr()
     }
 }
+static mut BR3_V41_FX_JSON: Vec<u8> = Vec::new();
+#[no_mangle]
+pub extern "C" fn fm1_br3_v41_fx_probe(start: u32, length: u32) {
+    if let Some(m)=machine() {
+        m.soc.br3_v41_fx_begin=start;
+        m.soc.br3_v41_fx_end=start.saturating_add(length);
+    }
+}
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_br3_v41_fx_json() -> *const u8 {
+    let body=machine().map(|m|
+        format!("{{\"schema\":\"BR3-FX-v41\",\"ms\":{},\"start\":{},\"end\":{},\"reads\":{},\"writes\":{},\"first_pc\":{}}}",
+          m.soc.periph.ms(),m.soc.br3_v41_fx_begin,m.soc.br3_v41_fx_end,
+          m.soc.br3_v41_fx_reads,m.soc.br3_v41_fx_writes,m.soc.br3_v41_fx_first_pc)
+    ).unwrap_or_default();
+    unsafe { BR3_V41_FX_JSON=body.into_bytes();BR3_V41_FX_JSON.push(0);BR3_V41_FX_JSON.as_ptr() }
+}
 static mut BR3_V39_ALLOC_JSON: Vec<u8> = Vec::new();
 #[no_mangle]
 pub extern "C" fn fm1_br3_v39_malloc_address(address: u32) {
