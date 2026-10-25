@@ -92,11 +92,11 @@ identitycode+='const unsigned char fm1_update_identity[27]="'+product.group(1)+'
 run([BIN/"clang",*flags,"-c",GEN/"build_identity.c","-o",OBJ/"build_identity.o"])
 objs.append(OBJ/"build_identity.o")
 if BR3_FULL:
- diag=pathlib.Path(__file__).resolve().parent/"br3_cpu1_no_owner.c"
+ diag=pathlib.Path(__file__).resolve().parent/("br3_cpu1_cooperative_v16.c" if os.getenv("BR3_V16_COOP_LAB")=="1" else "br3_cpu1_no_owner.c")
  out=OBJ/"br3_cpu1_no_owner.o"
  run([BIN/"clang",*flags,"-c",diag,"-o",out])
  objs.append(out)
- note("BR3_DIAG_CPU1_LEASE absent by design: verified safe serial probe only")
+ note("BR3_V16_COOP_LAB source built but SDK hook NOT ACTIVE" if os.getenv("BR3_V16_COOP_LAB")=="1" else "BR3_DIAG_CPU1_LEASE absent by design: verified safe serial probe only")
 if BR3_LINK:
  note("LINK EXPERIMENT: COMPILE REAL BR3 SIX-TRACK DSP + PRIVATE CPU1, NO UI OR DMA YET")
  for name in ("biomech.c","br3_blackbox.c","br3_cpu1_runtime.c","br3_cpu1_entry.S"):
