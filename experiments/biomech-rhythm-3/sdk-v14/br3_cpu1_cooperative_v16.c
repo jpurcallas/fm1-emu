@@ -6,6 +6,7 @@
  */
 #include <stdint.h>
 #include "biomech.h"
+#include "ram_attr.h"
 #include "br3_blackbox.h"
 #ifndef BR3_EMULATOR_LAB
 #error "SDK cooperative CPU1 bridge is EMULATOR LAB ONLY"
