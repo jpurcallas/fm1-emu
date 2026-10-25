@@ -40,7 +40,7 @@ for fn in ("os_init","os_start","os_task_create","os_task_create_static","get_ta
                                and not re.match(r"^[0-9a-fA-F]+:",dis[j].strip())):
         j+=1
     print("BR3_V24_FUNCTION_BEGIN",fn,"lines",j-i)
-    print("\\n".join(dis[i:min(j,i+110)]))
+    print("\n".join(dis[i:min(j,i+110)]))
     print("BR3_V24_FUNCTION_END",fn)
 print("BR3_V24_RELEVANT_NM_SYMBOLS")
 for line in names:
