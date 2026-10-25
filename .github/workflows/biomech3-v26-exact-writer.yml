@@ -1,0 +1,101 @@
+name: BIOMECH3 v26 exact taskq RAM writes in isolated emulator (NO INSTALL) (NO INSTALL)
+on:
+  push:
+    branches: [diagnostic/biomech3-v26-taskq-exact-writer-20261025]
+    paths:
+      - '.github/workflows/biomech3-v26-exact-writer.yml'
+      - 'experiments/biomech-rhythm-3/sdk-v14/br3_cpu1_cooperative_v16.c'
+      - 'experiments/biomech-rhythm-3/sdk-v14/patch_coop_v17.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_coop_v17.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/inspect_taskq_init_v24.py'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_taskq_writer_v26.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/inspect_cpu0_pc_v20.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-cooperative:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain pinned V14 and SHA256-verified JieLi PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage original 6-track engine and v16 mailbox, no artificial notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py /tmp/fm1-v14
+          python3 experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py /tmp/fm1-v14
+      - name: Compile unchanged six-track DSP plus SDK-first v17 wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v19
+          /tmp/jieli/pi32v2/bin/nm -an /tmp/br3-v19/sdk.elf > /tmp/br3-v19/sdk.nm
+          grep -E ' (fm1_r_e7d3da61dac2|fm1_r_2c729ca92be9|br3_coop_original_sdk_worker|br3_coop_sdk_worker_wrapper|br3_coop_mailbox)$' /tmp/br3-v19/sdk.nm
+      - name: Verify exact SDK call and post-link patch TWO sites only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/patch_coop_v17.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/nm
+          /tmp/jieli/pi32v2/bin/objdump -d /tmp/br3-v19/sdk.elf | grep -F -m 1 'br3_coop_sdk_worker_wrapper' || true
+      - name: Package one v18 instrumented ELF after exact guarded SDK-first call hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v19
+          mv /tmp/br3-v19/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v19/BR3_v19_PHASE_BUDGET_NO_INSTALL.fwsc
+          sha256sum /tmp/br3-v19/*.fwsc | tee /tmp/br3-v19/SHA256SUMS.txt
+          echo 'e00e45f875fbefa24984c0e4aae15e9ecf6b612b3801d2fbdf72c98446357442  /tmp/br3-v19/BR3_v19_PHASE_BUDGET_NO_INSTALL.fwsc' | sha256sum -c
+      - name: Disassemble stable CPU0 spin PC 0x0202B378 in this exact linked ELF
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_cpu0_pc_v20.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/objdump /tmp/jieli/pi32v2/bin/nm
+      - name: Audit linked SDK task-queue head writers and initializer references (no guest changes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_taskq_init_v24.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/objdump /tmp/jieli/pi32v2/bin/nm
+      - name: Build isolated WASM emulator from this branch with write tracing
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup target add wasm32-unknown-unknown
+          cargo check -p fm1-web
+          bash web/build.sh /tmp/br3-v26-web
+          test -s /tmp/br3-v26-web/fm1_web.wasm
+      - name: Identify exact CPU and PC responsible for SDK taskq head clearing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/br3-v26-web/fm1_web.wasm /tmp/fm1_web.wasm
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_taskq_writer_v26.mjs /tmp/fm1_web.wasm /tmp/br3-v19/BR3_v19_PHASE_BUDGET_NO_INSTALL.fwsc /tmp/br3-v19/sdk.nm /tmp/br3-v19
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_v26_EXACT_WRITER_NO_INSTALL
+          path: |
+            /tmp/br3-v19/*.json
+            /tmp/br3-v19/*.fwsc
+            /tmp/br3-v19/SHA256SUMS.txt
+            /tmp/br3-v19/sdk.nm
+            /tmp/br3-v19/build.log
+          retention-days: 14
+          if-no-files-found: warn
