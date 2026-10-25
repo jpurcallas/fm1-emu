@@ -1,0 +1,65 @@
+name: BIOMECH3 v12 genuine SRAM reclaim (EMULATOR ONLY)
+on:
+  push:
+    branches: [experiment/biomech3-v12-memory-reclaim-safe-20261025]
+    paths: ['.github/workflows/biomech3-v12-reclaim.yml','experiments/biomech-rhythm-3/sdk-v14/reclaim_snapshot_cache_v12.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact pinned SDK/compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage full musical engine and relocate only UI snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/reclaim_snapshot_cache_v12.py /tmp/fm1-v14
+      - name: Compile original C99 motor and validate real heap/cache linker sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v12
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v12/sdk.elf > /tmp/br3-v12/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path("/tmp/br3-v12/sdk.nm").read_text()
+          m=re.search(r'(?m)^([0-9A-Fa-f]+) [A-Za-z] _MALLOC_SIZE$',s)
+          if not m: raise SystemExit("MISSING MALLOC SIZE")
+          heap=int(m.group(1),16)
+          print("BR3_V12_REAL_HEAP",heap,"RECLAIM_V11_BASELINE",heap-62188)
+          if heap<=62188: raise SystemExit("SRAM NOT RECOVERED")
+          if heap<116300: print("NOT YET SUFFICIENT TO RESTORE FULL SDK CALLBACKS")
+          PY
+      - name: Pack emulator firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v12
+          mv /tmp/br3-v12/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v12/BIOMECH3_v12_CACHE_SNAPSHOT_LAB_SOLO_EMULADOR_NO_INSTALAR.fwsc
+          (cd /tmp/br3-v12 && sha256sum *.fwsc > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BIOMECH3_v12_CACHE_SNAPSHOT_LAB_NO_INSTALL
+          path: |
+            /tmp/br3-v12/*.fwsc
+            /tmp/br3-v12/SHA256SUMS.txt
+            /tmp/br3-v12/sdk.nm
+            /tmp/br3-v12/build.log
+          retention-days: 14
+          if-no-files-found: warn
