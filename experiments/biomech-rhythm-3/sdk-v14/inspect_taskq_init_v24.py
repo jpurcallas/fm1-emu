@@ -27,6 +27,21 @@ for ix in matches[:95]:
  print("BR3_V24_REFERENCE",repr(dis[ix]),"IN",func_label(ix))
  for line in dis[max(0,ix-4):min(len(dis),ix+6)]:
   print("  ",line)
+print("BR3_V24_FUNCTION_DISASSEMBLY_FOCUSED")
+for fn in ("os_init","os_start","os_task_create","os_task_create_static","get_taskq",
+           "put_taskq","__os_taskq_post","os_taskq_post_type"):
+    candidates=[i for i,ln in enumerate(dis) if ln.strip()==fn+":"]
+    if len(candidates)!=1:
+        print("BR3_V24_FUNCTION_MISSING_OR_AMBIGUOUS",fn,candidates)
+        continue
+    i=candidates[0]
+    j=i+1
+    while j<len(dis) and not (dis[j].strip().endswith(":")
+                               and not re.match(r"^[0-9a-fA-F]+:",dis[j].strip())):
+        j+=1
+    print("BR3_V24_FUNCTION_BEGIN",fn,"lines",j-i)
+    print("\\n".join(dis[i:min(j,i+110)]))
+    print("BR3_V24_FUNCTION_END",fn)
 print("BR3_V24_RELEVANT_NM_SYMBOLS")
 for line in names:
  if re.search(r"taskq|task_create|task_init|os_init|os_start|queue_create|list_init|head\.792",line,re.I):
