@@ -1,0 +1,68 @@
+name: BIOMECH3 memory symbol ownership audit (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-v13-dead-memory-audit-20261025]
+    paths: ['.github/workflows/biomech3-v13-memory-ownership.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pinned V14 and compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Build full original BIOMECH3 with 7K cache recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/reclaim_snapshot_cache_v12.py /tmp/fm1-v14
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v13
+      - name: Identify exact owners of large buffers and cache placement
+        shell: bash
+        run: |
+          set -euo pipefail
+          NM=/tmp/jieli/pi32v2/bin/nm
+          "$NM" -n -S /tmp/br3-v13/sdk.elf > /tmp/br3-v13/sizes.nm
+          "$NM" -S -A /tmp/fm1-v14/sdk/lib/libfm1_engine.a > /tmp/br3-v13/sdk-library.nm || true
+          for target in effects fm1_fx_states runtime br3_seg factory_raw shadow_engine snapshot pixels br3_blackbox _MALLOC_SIZE _HEAP_BEGIN _HEAP_END; do
+            echo "BR3_MEMORY_OWNER $target"
+            grep -E "[[:space:]]$target$" /tmp/br3-v13/sizes.nm | tail -n 5 || true
+            grep -E "[[:space:]]$target$" /tmp/br3-v13/sdk-library.nm | tail -n 5 || true
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path("/tmp/br3-v13")
+          nm=root/"sizes.nm"
+          bins=[]
+          for line in nm.read_text().splitlines():
+              m=re.match(r"([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+([bBdD])\s+(.+)",line)
+              if m:
+                  addr=int(m[1],16);size=int(m[2],16)
+                  if size>=4096: bins.append((size,addr,m[4]))
+          for size,addr,name in sorted(bins,reverse=True)[:35]:
+              print("BR3_RAM_HEAVY",name,"size",size,"at",hex(addr))
+          Path("/tmp/br3-v13/RAM_OWNERSHIP_REPORT.txt").write_text("\n".join(f"{name}: {size} at {hex(addr)}" for size,addr,name in sorted(bins,reverse=True)))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BR3_V13_MEMORY_OWNERSHIP_NO_FWSC
+          path: |
+            /tmp/br3-v13/sizes.nm
+            /tmp/br3-v13/sdk-library.nm
+            /tmp/br3-v13/sdk.map
+            /tmp/br3-v13/RAM_OWNERSHIP_REPORT.txt
+            /tmp/br3-v13/build.log
+          retention-days: 14
+          if-no-files-found: warn
