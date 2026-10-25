@@ -60,6 +60,17 @@ pub struct UnknownAccess {
     pub value: u32,
 }
 
+/// Data captured when the emulated I2S DMA consumes guest RAM.
+/// Host-only diagnostics: no writes to guest memory or firmware.
+#[derive(Clone, Copy, Debug)]
+pub struct AudioDmaHalfProbe {
+    pub seq: u64, pub cycle: u64, pub address: u32, pub words: u32,
+    pub hash: u64, pub first: i16, pub last: i16, pub peak: i32,
+    pub nonzero: u32, pub boundary_delta: i32, pub delta_cycles: u64,
+    pub repeats_previous: bool, pub repeats_two_back: bool,
+}
+const AUDIO_DMA_PROBE_CAP: usize = 8192;
+
 enum Region {
     Xip,
     Ram,
@@ -230,6 +241,9 @@ pub struct Soc {
     cpu1_released_once: bool,
     /// FM1_AUDIO_TRACE: log each audio half-buffer (debugging the DMA's pace).
     audio_trace: bool,
+    pub audio_dma_probe_enabled: bool,
+    pub audio_dma_probes: std::collections::VecDeque<AudioDmaHalfProbe>,
+    pub audio_dma_probe_total: u64,
     /// The CRC-16 unit's register (0x13504).
     crc: u16,
     /// The random number generator's state (JL_RAND, 0x13B00: R64L / R64H).
@@ -359,6 +373,9 @@ impl Soc {
             ticks: 0,
             periph: Periph::default(),
             biomech_cpu0_profile: None,
+            audio_dma_probe_enabled: false,
+            audio_dma_probes: std::collections::VecDeque::new(),
+            audio_dma_probe_total: 0,
             cpu_scheduler: std::collections::VecDeque::with_capacity(128),
             cpu_scheduler_total: 0,
             cpu_scheduler_cpu1_requested: 0,
@@ -436,9 +453,42 @@ impl Soc {
             if self.audio_trace {
                 eprintln!("half {} ms {}", self.periph.ms(), self.periph.cycles);
             }
+            let enabled = self.audio_dma_probe_enabled;
+            let mut hash: u64 = 0xcbf29ce484222325;
+            let mut first = 0i16;
+            let mut last = 0i16;
+            let mut peak = 0i32;
+            let mut nonzero = 0u32;
             for i in 0..words {
                 let w = self.read32(adr.wrapping_add(i * 4)) as i32;
-                self.periph.audio.push((w >> 8).clamp(-32768, 32767) as i16);
+                let sample = (w >> 8).clamp(-32768, 32767) as i16;
+                self.periph.audio.push(sample);
+                if enabled {
+                    // FNV1a on the PCM i16 bytes, little-endian for stable hashes.
+                    for byte in sample.to_le_bytes() {
+                        hash = (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3);
+                    }
+                    if i == 0 { first = sample; }
+                    last = sample;
+                    peak = peak.max((sample as i32).abs());
+                    if sample != 0 { nonzero += 1; }
+                }
+            }
+            if enabled {
+                let previous = self.audio_dma_probes.back();
+                let two_back = self.audio_dma_probes.iter().rev().nth(1);
+                let same = |p: &AudioDmaHalfProbe| nonzero != 0 && p.nonzero != 0 && p.words == words && p.hash == hash;
+                let e = AudioDmaHalfProbe {
+                    seq: self.periph.audio_halves, cycle: self.periph.cycles,
+                    address: adr, words, hash, first, last, peak, nonzero,
+                    boundary_delta: previous.map_or(0, |p| first as i32 - p.last as i32),
+                    delta_cycles: previous.map_or(0, |p| self.periph.cycles.saturating_sub(p.cycle)),
+                    repeats_previous: previous.is_some_and(same),
+                    repeats_two_back: two_back.is_some_and(same),
+                };
+                self.audio_dma_probe_total += 1;
+                if self.audio_dma_probes.len() == AUDIO_DMA_PROBE_CAP { self.audio_dma_probes.pop_front(); }
+                self.audio_dma_probes.push_back(e);
             }
         }
     }
