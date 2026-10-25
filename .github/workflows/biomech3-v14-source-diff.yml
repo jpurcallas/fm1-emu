@@ -1,0 +1,40 @@
+name: BIOMECH3 V14 scheduler and audio integration source diff (NO FWSC)
+on:
+  push:
+    branches: [experiment/biomech3-v14-heap-threshold-input-20261025]
+    paths: ['.github/workflows/biomech3-v14-source-diff.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Original V14 and exact adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-stock
+          cp -a /tmp/fm1-stock /tmp/fm1-v14
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+      - name: Diff all SDK platform substitutions and trace controls/audio
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import difflib,re
+          base=Path("/tmp/fm1-stock");br=Path("/tmp/fm1-v14")
+          for name in ("app/screen.c","app/midi_router.c","app/audio_output.c","app/board/audio.c","app/board/fm1_audio.h"):
+            a=(base/name).read_text(errors="replace").splitlines()
+            b=(br/name).read_text(errors="replace").splitlines()
+            print("BR3_REPLACED_PLATFORM",name)
+            print("\n".join(list(difflib.unified_diff(a,b,fromfile="STOCK/"+name,tofile="BR3/"+name,n=3))[:450]))
+          p=br/"app/biomech/biomech_sdk_port.c"
+          src=p.read_text(errors="replace").splitlines()
+          print("BR3_REAL_PORT_SOURCE_START")
+          for i,line in enumerate(src):
+            print("BR3_SRC",i+1,line[:240])
+          print("BR3_REAL_PORT_SOURCE_END")
+          PY
