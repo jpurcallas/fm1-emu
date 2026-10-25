@@ -1,0 +1,82 @@
+name: BIOMECH3 V15 schedule vs audio CPU isolation (NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-v15-scheduler-isolation-20261025]
+    paths: ['.github/workflows/biomech3-v15-scheduler-isolation.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve pinned SDK and toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Stage original six-track engine, instrument natural MIDI/control, disable DSP only in LAB copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/reclaim_snapshot_cache_v12.py /tmp/fm1-v14
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("/tmp/fm1-v14/app/biomech/biomech_sdk_profile.h"); t=p.read_text()
+          assert t.count("#define BR_COMPACT_DELAY_DIV 2")==1 and t.count("#define BR_COMPACT_REVERB_DIV 4")==1
+          p.write_text(t.replace("#define BR_COMPACT_DELAY_DIV 2","#define BR_COMPACT_DELAY_DIV 4").replace("#define BR_COMPACT_REVERB_DIV 4","#define BR_COMPACT_REVERB_DIV 8"))
+          root=Path("/tmp/fm1-v14/app")
+          for filename,needle,counter in [
+            ("screen.c","    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */","br3_screen_call_count"),
+            ("midi_router.c","    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */","br3_midi_callback_count")]:
+            p=root/filename; t=p.read_text();h='#include "biomech/biomech_sdk_port.h"'
+            assert t.count(needle)==t.count(h)==1
+            p.write_text(t.replace(h,h+"\nvolatile unsigned "+counter+";",1).replace(needle,"    ++"+counter+";\n"+needle,1))
+          p=root/"board/audio.c";t=p.read_text()
+          target="if (biomech_sdk_audio(rendered, FM1_BLOCK_FRAMES) != 0) {"
+          assert t.count(target)==1
+          t=t.replace(target,"memset(rendered,0,sizeof(rendered)); /* V15 LAB: disable BR3 DSP only to expose RTOS scheduler */\n    if (0) {",1)
+          p.write_text(t)
+          print("BR3_V15_LAB_AUDIO_DSP_BYPASS; 6 track sources fully linked; NO musical firmware generated")
+          PY
+      - name: Build/package actual ELF with CPU0 freed
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v15
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v15/sdk.elf > /tmp/br3-v15/sdk.nm
+          grep ' _MALLOC_SIZE$' /tmp/br3-v15/sdk.nm
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v15
+      - name: Stimulate real MIDI and physical keys with diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          mkdir -p /tmp/br3-v15/musical
+          FW=/tmp/br3-v15/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs /tmp/fm1_web.wasm "$FW" "$FW" /tmp/br3-v15/musical /tmp/br3-v15/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          for f in Path("/tmp/br3-v15/musical").glob("*.json"):
+            d=json.loads(f.read_text());sy=d.get("guest_state",{}).get("symbols",{})
+            def value(n):
+                return sy.get(n,{}).get("u32",[None])[0]
+            print("BR3_V15_SCHEDULER_AB",f.stem,"cpu0",d.get("cpu0_insn"),"cpu1",d.get("cpu1_insn"),"screen_callbacks",value("br3_screen_call_count"),"midi_callbacks",value("br3_midi_callback_count"),"halt",d.get("halted"))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BR3_V15_SCHEDULER_DIAGNOSTIC_ONLY
+          path: |
+            /tmp/br3-v15/musical/*.json
+            /tmp/br3-v15/sdk.nm
+            /tmp/br3-v15/build.log
+          retention-days: 14
+          if-no-files-found: warn
