@@ -76,10 +76,10 @@ def patch(elf: Path,nm: str) -> None:
     worker,original,wrapper=(syms[x] for x in (WORKER,ORIGINAL,WRAPPER))
     for x in (worker, original, wrapper):
         if x & 1:raise RuntimeError("unaligned PI32 code symbol")
-        at(sections,x,2,(".text",))
+        at(sections,x,2,(".ram0_data",))
     matches=[]
     for pc in range(worker, worker+0x40,2):
-        try:offset,_=at(sections,pc,8,(".text",))
+        try:offset,_=at(sections,pc,8,(".ram0_data",))
         except RuntimeError:continue
         if before[offset:offset+2] != b"\x80\xff":continue
         relative=struct.unpack_from("<i",before,offset+2)[0]
