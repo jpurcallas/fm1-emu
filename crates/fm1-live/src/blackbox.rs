@@ -77,6 +77,17 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
             m.soc.cpu0_flight_total, m.soc.cpu0_flight.len(), flight_events
         ));
     }
+    let scheduler_events = m.soc.cpu_scheduler.iter().map(|e| format!(
+        r#"{{"cycle":{},"phase":{},"requested":{},"executed":{},"cpu0Pc":{},"cpu1Pc":{},"cpu0Paused":{},"cpu1Paused":{}}}"#,
+        e.cycle,quote(e.phase),e.requested,e.executed,e.cpu0_pc,e.cpu1_pc,e.cpu0_paused,e.cpu1_paused
+    )).collect::<Vec<_>>().join(",");
+    if let Some(end) = json.rfind('}') {
+        json.insert_str(end, &format!(
+            r#","cpuScheduler":{{"capacity":128,"total":{},"cpu1Requested":{},"cpu1Executed":{},"events":[{}]}}"#,
+            m.soc.cpu_scheduler_total, m.soc.cpu_scheduler_cpu1_requested,
+            m.soc.cpu_scheduler_cpu1_executed, scheduler_events
+        ));
+    }
     let stem=format!("FM1_BLACKBOX_{stamp}_{trigger}");
     let path=dir.join(format!("{stem}.json"));
     let temp=dir.join(format!("{stem}.tmp"));
