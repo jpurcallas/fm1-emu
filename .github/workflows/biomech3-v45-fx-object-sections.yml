@@ -1,0 +1,44 @@
+name: BIOMECH v45 inspect precompiled stock FX object section boundaries
+on:
+  push:
+    branches: [diagnostic/biomech3-v45-fx-object-sections-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  object-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download PINNED FM1 V14 archive + verified PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14
+          unzip -q /tmp/v14.zip -d /tmp/v14
+          mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Disassemble exact original FX storage member to establish alias safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v45
+          cd /tmp/v45
+          /tmp/jieli/pi32v2/bin/ar p /tmp/fm1-v14/sdk/lib/libfm1_engine.a engine_startup.S.o > engine_startup.S.o
+          test -s engine_startup.S.o
+          echo BR3_V45_OBJECT_SECTIONS
+          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o | head -180
+          echo BR3_V45_OBJECT_SYMBOLS
+          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep -E '(fm1_fx| [bBdD] | [aA] )' | head -105
+          echo BR3_V45_OBJECT_RELOCATIONS_TO_FX
+          /tmp/jieli/pi32v2/bin/objdump -r engine_startup.S.o | grep -B 5 -A 5 -E 'fm1_fx_states|\.bss' | head -180 || true
+          echo BR3_V45_ALL_BSS_SYMBOLS
+          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep ' [bB] ' | head -130
+          echo BR3_V45_LINKER_RAM0_BSS
+          grep -n -B 20 -A 34 'ram0_bss' /tmp/fm1-v14/sdk/config/linker.ld.in | head -100
+          echo BR3_V45_SECTIONS_GUEST
+          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o | grep -E 'Idx|\.bss|\.ram0|\.data|\.text'
