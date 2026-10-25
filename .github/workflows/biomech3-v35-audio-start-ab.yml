@@ -10,7 +10,7 @@ on:
       - 'experiments/biomech-rhythm-3/sdk-v14/stage_input_probe_v18.py'
       - 'experiments/biomech-rhythm-3/sdk-v14/stage_phase_probe_v19.py'
       - 'experiments/biomech-rhythm-3/sdk-v14/inspect_taskq_init_v24.py'
-      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_v33_uart.mjs'
+      - 'experiments/biomech-rhythm-3/sdk-v14/smoke_v35_no_early_audio.mjs'
       - 'crates/fm1-soc/src/lib.rs'
       - 'crates/fm1-soc/src/machine.rs'
       - 'crates/fm1-core/src/lib.rs'
@@ -113,7 +113,7 @@ jobs:
         run: |
           set -euo pipefail
           cp /tmp/br3-v26-web/fm1_web.wasm /tmp/fm1_web.wasm
-          node experiments/biomech-rhythm-3/sdk-v14/smoke_v33_uart.mjs /tmp/fm1_web.wasm /tmp/br3-v19/BR3_v29_STATIC_PREFLIGHT_NO_INSTALL.fwsc /tmp/br3-v19/sdk.nm /tmp/br3-v19
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_v35_no_early_audio.mjs /tmp/fm1_web.wasm /tmp/br3-v19/BR3_v29_STATIC_PREFLIGHT_NO_INSTALL.fwsc /tmp/br3-v19/sdk.nm /tmp/br3-v19
 
       - uses: actions/upload-artifact@v4
         if: always()
