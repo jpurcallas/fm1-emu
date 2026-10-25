@@ -149,6 +149,8 @@ static mut OUT_R: [f32; 1024] = [0.0; 1024];
 static mut LEDS: [f32; 41] = [0.0; 41];
 static mut PADS: [u32; 16] = [0; 16];
 static mut INSNS: u64 = 0;
+// v26 guest RAM taskq writer evidence, host diagnostic only.
+static mut TASKQ_WRITES_JSON: Vec<u8> = Vec::new();
 
 #[allow(static_mut_refs)]
 fn machine() -> Option<&'static mut Machine> {
@@ -485,6 +487,22 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
         BLACKBOX_JSON.as_ptr()
     }
 }
+#[no_mangle]
+#[allow(static_mut_refs)]
+pub extern "C" fn fm1_biomech_taskq_writes_json() -> *const u8 {
+    let body = machine().map(|m| {
+        m.soc.taskq_events.iter()
+            .map(|r| format!("[{},{},{},{},{},{},{},{},{}]",
+                r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]))
+            .collect::<Vec<_>>().join(",")
+    }).unwrap_or_default();
+    unsafe {
+        TASKQ_WRITES_JSON = format!("{{\"schema\":\"BR3-TASKQ-WRITES-v26\",\"records\":[{}]}}",body).into_bytes();
+        TASKQ_WRITES_JSON.push(0);
+        TASKQ_WRITES_JSON.as_ptr()
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn fm1_blackbox_ram_ptr() -> *mut u8 {
     machine().map_or(std::ptr::null_mut(), |m| m.soc.ram.as_mut_ptr())
