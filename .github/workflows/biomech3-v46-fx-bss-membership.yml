@@ -1,0 +1,38 @@
+name: BIOMECH v46 verify inherited FX bss section isolation
+on:
+  push:
+    branches: [diagnostic/biomech3-v46-exact-bss-membership-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  section:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract pinned V14 archive and check FX shared section symbols
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 180 -o /tmp/sdk.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/fmv14 /tmp/v46
+          unzip -q /tmp/sdk.zip -d /tmp/fmv14
+          cd /tmp/v46
+          ar p /tmp/fmv14/fm1_open-*/sdk/lib/libfm1_engine.a engine_startup.S.o > engine.o
+          readelf -W -S engine.o > sections.txt
+          readelf -W -s engine.o > symbols.txt
+          python3 - <<'PY'
+          import re
+          s=open('symbols.txt').read().splitlines()
+          fx=[x for x in s if re.search(r'\bfm1_fx_states$',x)]
+          if len(fx)!=1:raise Exception('FX symbol not unique '+str(fx))
+          m=re.search(r'\s(\d+)\s+fm1_fx_states$',fx[0])
+          if not m:raise Exception('Cannot parse section index: '+fx[0])
+          ndx=m.group(1)
+          members=[x for x in s if re.search(r'\s'+ndx+r'\s+\S+$',x)]
+          print('BR3_V46_TARGET_FX_SYMBOL',fx[0])
+          print('BR3_V46_FX_BSS_SECTION_INDEX',ndx)
+          print('BR3_V46_SECTION_METADATA',[x for x in open('sections.txt') if re.search(r'\[\s*'+ndx+r'\]',x)])
+          print('BR3_V46_MEMBERS_IN_SAME_SECTION',len(members),*members[:75],sep='\n')
+          print('BR3_V46_FX_PARAMETERS',[x for x in s if 'fm1_fx_parameters' in x])
+          if len(members)>2:print('BR3_V46_SHARED_SECTION_REQUIRES_SPECIAL_GUARD')
+          PY
