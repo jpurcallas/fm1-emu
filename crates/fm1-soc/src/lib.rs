@@ -187,6 +187,8 @@ pub struct Soc {
     pub taskq_probe_core: u32,
     pub taskq_probe_pc: u32,
     pub taskq_events: Vec<[u64; 9]>,
+    // v28: exact intercepted memmove entry when copy range overlaps RTOS list.
+    pub taskq_memmove_entries: Vec<[u64; 8]>,
 }
 
 fn dbg_line(addr: u32) -> &'static str {
@@ -246,6 +248,7 @@ impl Soc {
             taskq_probe_core: u32::MAX,
             taskq_probe_pc: 0,
             taskq_events: Vec::new(),
+            taskq_memmove_entries: Vec::new(),
         }
     }
 
