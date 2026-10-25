@@ -20,6 +20,7 @@ jobs:
         env:
           FM1_LAB_BUILD: ${{ github.sha }}
         run: |
+          set -o pipefail
           cargo test --locked -p fm1-core -p fm1-isa -p fm1-soc 2>&1 | tee core-tests.txt
           FM1_WAV_TEST_OUTPUT="$RUNNER_TEMP/recorder-test.wav" FM1_BLACKBOX_TEST_OUTPUT="$RUNNER_TEMP/blackbox-test.json" cargo test --locked -p fm1-live > live-tests.txt 2>&1
           python3 - "$RUNNER_TEMP/blackbox-test.json" "$RUNNER_TEMP/recorder-test.wav" <<'PY'
