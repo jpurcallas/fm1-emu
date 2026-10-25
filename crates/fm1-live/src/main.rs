@@ -684,6 +684,9 @@ fn main() {
             std::process::exit(1);
         }
     };
+    // Host-only DMA provenance: reserve once, never touch guest firmware.
+    m.soc.audio_dma_probe_enabled = true;
+    m.soc.audio_dma_probes.reserve(8192);
     let mut pot = m.soc.periph.adc_value[4];
 
     let ring = Arc::new(AudioRing { q: Mutex::new(VecDeque::new()), started: AtomicBool::new(false), underruns: AtomicU64::new(0) });
@@ -764,7 +767,9 @@ fn main() {
                                 view.lock().unwrap().message="RELOJ FUERA DE RANGO".into(); continue;
                             }
                             match Machine::new(&next) {
-                                Ok(new) if new.soc.board==m.soc.board => {
+                                Ok(mut new) if new.soc.board==m.soc.board => {
+                                    new.soc.audio_dma_probe_enabled = true;
+                                    new.soc.audio_dma_probes.reserve(8192);
                                     lab::stop_recording(&mut recorder,&view);
                                     let _=blackbox::capture(&m,&firmware_path,"reload",halt_reason.as_deref(),ring.underruns.load(Ordering::Relaxed),&capture_dir);
                                     // Old input/audio cannot leak into the new firmware.
