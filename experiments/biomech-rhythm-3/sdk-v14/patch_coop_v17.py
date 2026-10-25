@@ -27,7 +27,7 @@ def u32(buf: bytes, offset: int) -> int:
     return struct.unpack_from("<I", buf, offset)[0]
 
 def read_sections(buf: bytes) -> list[dict]:
-    if buf[:4] != b"\\x7fELF" or buf[4] != 1 or buf[5] != 1:
+    if buf[:4] != b"\x7fELF" or buf[4] != 1 or buf[5] != 1:
         raise RuntimeError("expected ELF32 little endian")
     shoff, entsize, count, names_idx = u32(buf, 32), u16(buf, 46), u16(buf, 48), u16(buf, 50)
     if entsize != 40 or count < 3 or names_idx >= count or shoff+count*entsize > len(buf):
@@ -45,7 +45,7 @@ def read_sections(buf: bytes) -> list[dict]:
         pos=s["name_idx"]
         if pos >= len(name_bytes):
             raise RuntimeError("invalid ELF section name offset")
-        s["name"] = name_bytes[pos:name_bytes.find(b"\\0",pos)].decode("ascii")
+        s["name"] = name_bytes[pos:name_bytes.find(b"\0",pos)].decode("ascii")
     return sections
 
 def at(sections: list[dict], addr: int, length: int, allowed: tuple[str,...]):
@@ -59,7 +59,7 @@ def symbol_table(nm: str, elf: Path) -> dict[str,int]:
     out=subprocess.check_output([nm,"-n",str(elf)],text=True)
     names={}
     for line in out.splitlines():
-        m=re.fullmatch(r"([0-9a-fA-F]{8})\\s+([A-Za-z])\\s+(\\S+)",line.strip())
+        m=re.fullmatch(r"([0-9a-fA-F]{8})\s+([A-Za-z])\s+(\S+)",line.strip())
         if m:
             name=m.group(3)
             names.setdefault(name,[]).append(int(m.group(1),16))
@@ -81,7 +81,7 @@ def patch(elf: Path,nm: str) -> None:
     for pc in range(worker, worker+0x40,2):
         try:offset,_=at(sections,pc,8,(".text",))
         except RuntimeError:continue
-        if before[offset:offset+2] != b"\\x80\\xff":continue
+        if before[offset:offset+2] != b"\x80\xff":continue
         relative=struct.unpack_from("<i",before,offset+2)[0]
         target=(pc+6+relative)&0xffffffff
         if target==original:
@@ -89,7 +89,7 @@ def patch(elf: Path,nm: str) -> None:
     if len(matches)!=1:
         raise RuntimeError(f"expected ONE SDK-worker direct CALL; found {len(matches)}")
     pc,loc=matches[0]
-    if before[loc+6:loc+8] != b"\\xf7\\x9c":
+    if before[loc+6:loc+8] != b"\xf7\x9c":
         raise RuntimeError("SDK worker CALL not followed by original goto -8")
     ptrloc,section=at(sections,syms[ORIGINAL_PTR],4,(".ram0_data",))
     if u32(before,ptrloc)!=SENTINEL:
@@ -100,9 +100,9 @@ def patch(elf: Path,nm: str) -> None:
     if not -(1<<31)<=displacement < (1<<31):
         raise RuntimeError("wrapper outside 32-bit relative CALL")
     changed=bytearray(before)
-    changed[loc:loc+6]=b"\\x80\\xff"+struct.pack("<i",displacement)
+    changed[loc:loc+6]=b"\x80\xff"+struct.pack("<i",displacement)
     changed[ptrloc:ptrloc+4]=struct.pack("<I",original)
-    assert changed[loc+6:loc+8]==b"\\xf7\\x9c"
+    assert changed[loc+6:loc+8]==b"\xf7\x9c"
     assert changed[loc+2:loc+6]!=before[loc+2:loc+6]
     # PROOF: all bytes outside exact 6-byte CALL and 4-byte RAM pointer identical.
     changed_offsets=[i for i,(a,b) in enumerate(zip(before,changed)) if a!=b]
