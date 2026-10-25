@@ -160,6 +160,8 @@ pub struct Cpu {
     pub rets: u32,
     /// Total instructions retired (for traces and tests).
     pub insn_count: u64,
+    /// BR3 v31 diagnostic only: block entry hits at real V14 control / MIDI / IRQ functions.
+    pub br3_v31_hits: [u64; 6],
     /// Experimental crash diagnosis: only enabled on CPU0 after an encoder turn.
     /// With CPU0 JIT paused this keeps the last actual executed branches.
     pub br2_trace_on: bool,
@@ -436,6 +438,20 @@ impl Cpu {
             if n >= budget {
                 sync!();
                 return Ok((n, false));
+            }
+            if self.core_id == 0 {
+                let hit = match pc {
+                    0x02018bb2 => Some(0), // FM1 control message owner
+                    0x0200744a => Some(1), // groove_screen_control
+                    0x0201eafa => Some(2), // MIDI short route
+                    0x0200741c => Some(3), // fm1_app_midi_received
+                    0x01c05006 => Some(4), // ALNK audio IRQ
+                    0x02018c2e => Some(5), // fm1_control_request
+                    _ => None
+                };
+                if let Some(i) = hit {
+                    self.br3_v31_hits[i] = self.br3_v31_hits[i].saturating_add(1);
+                }
             }
             let blk = match self.block_at(bus, pc) {
                 Ok(b) => b,
