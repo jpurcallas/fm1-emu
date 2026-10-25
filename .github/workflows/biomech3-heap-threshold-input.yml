@@ -1,0 +1,107 @@
+name: BIOMECH3 heap threshold musical callbacks isolation (LAB NO INSTALL)
+on:
+  push:
+    branches: [experiment/biomech3-v14-heap-threshold-input-20261025]
+    paths: ['.github/workflows/biomech3-heap-threshold-input.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  input_ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve V14 and verified PI32v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 180 -o /tmp/v14.zip https://github.com/m-vave/fm1_open/archive/4d266850f8a46bd5154a0d495c1f60317156c9f7.zip
+          mkdir -p /tmp/v14; unzip -q /tmp/v14.zip -d /tmp/v14; mv /tmp/v14/fm1_open-* /tmp/fm1-v14
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 240 -o /tmp/jieli.tar.xz https://pkgman.jieliapp.com/s/linux-toolchain
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli; tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
+      - name: Compile/pack exact V14 stock positive control
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-control-stock
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-control-stock
+      - name: Stage full BIOMECH3 unchanged voices, lab reduced RAM FX (NOT final sonic build)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
+          python3 experiments/biomech-rhythm-3/sdk-v14/reclaim_snapshot_cache_v12.py /tmp/fm1-v14
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("/tmp/fm1-v14/app/biomech/biomech_sdk_profile.h")
+          t=p.read_text()
+          old_d="#define BR_COMPACT_DELAY_DIV 2"
+          old_r="#define BR_COMPACT_REVERB_DIV 4"
+          assert t.count(old_d)==t.count(old_r)==1
+          t=t.replace(old_d,"#define BR_COMPACT_DELAY_DIV 4",1).replace(old_r,"#define BR_COMPACT_REVERB_DIV 8",1)
+          p.write_text(t)
+          print("BR3_LAB_ONLY_REDUCED_FX_BANDWIDTH: delay 22050 -> 11025 Hz, reverb 11025 -> 5512.5 Hz; REAL SIX TRACKS and FX topology retained; original approved profile untouched")
+          root=Path("/tmp/fm1-v14/app")
+          for filename,needle,counter in [
+            ("screen.c","    biomech_sdk_control(); return; /* BIOMECH owns user input + LCD */","br3_screen_call_count"),
+            ("midi_router.c","    biomech_sdk_midi_received(source,m,n); return; /* Defer MIDI to audio owner */","br3_midi_callback_count")]:
+            p=root/filename; t=p.read_text()
+            assert t.count(needle)==1,(filename,"missing callback hook")
+            header='#include "biomech/biomech_sdk_port.h"'
+            assert t.count(header)==1
+            t=t.replace(header,header+"\nvolatile unsigned "+counter+";",1)
+            t=t.replace(needle,"    ++"+counter+";\n"+needle,1)
+            p.write_text(t)
+          PY
+      - name: Compile and guard REAL heap greater than V14 service threshold
+        shell: bash
+        run: |
+          set -euo pipefail
+          BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v14-threshold
+          /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v14-threshold/sdk.elf > /tmp/br3-v14-threshold/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          n=Path("/tmp/br3-v14-threshold/sdk.nm").read_text()
+          m=re.search(r"(?m)^([0-9a-fA-F]+) [A-Za-z] _MALLOC_SIZE$",n)
+          assert m
+          heap=int(m[1],16)
+          print("BR3_LAB_REAL_HEAP_BYTES",heap)
+          assert heap>=116300, "RAM reduction not enough to isolate SDK callback threshold"
+          for name in ("br_render","br_fm1_render_q23","biomech_sdk_init","br3_screen_call_count","br3_midi_callback_count"):
+            assert re.search(r"(?m)^.* [A-Za-z] "+name+r"$",n),name
+          PY
+      - name: Pack real experimental FWSC
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v14-threshold
+          mv /tmp/br3-v14-threshold/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v14-threshold/BIOMECH3_HEAP_THRESHOLD_LAB_ONLY_REDUCED_FX_NO_INSTALAR.fwsc
+      - name: Actual SDK input callbacks plus PCM guest A/B
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 15 --max-time 90 https://jpurcallas.github.io/fm1-emu/biomech-blackbox/fm1_web.wasm -o /tmp/fm1_web.wasm
+          mkdir -p /tmp/br3-v14-threshold/musical
+          node experiments/biomech-rhythm-3/sdk-v14/smoke_fwsc_musical.mjs /tmp/fm1_web.wasm /tmp/br3-control-stock/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v14-threshold/BIOMECH3_HEAP_THRESHOLD_LAB_ONLY_REDUCED_FX_NO_INSTALAR.fwsc /tmp/br3-v14-threshold/musical /tmp/br3-v14-threshold/sdk.nm
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path("/tmp/br3-v14-threshold/musical")
+          for f in root.glob("*.json"):
+            d=json.loads(f.read_text())
+            print("BR3_HEAP_AB",f.stem,"halt",d.get("halted"),"nonzero_frames",d.get("nonzero_stereo_frames"),"symbols",d.get("guest_state",{}).get("symbols",{}))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BR3_HEAP_THRESHOLD_CAUSALITY_ONLY_NO_INSTALL
+          path: |
+            /tmp/br3-v14-threshold/sdk.nm
+            /tmp/br3-v14-threshold/sdk.map
+            /tmp/br3-v14-threshold/build.log
+            /tmp/br3-v14-threshold/musical/*.json
+            /tmp/br3-v14-threshold/musical/*.wav
+          retention-days: 14
+          if-no-files-found: warn
