@@ -327,7 +327,16 @@ pub fn run_dual(
         }
         done += k;
         let dt = soc.periph.cycles - c0;
-        run_cpu1(c1, soc, dt)?;
+        let prev_cpu1_instructions = c1.insn_count;
+        let c1_before_pc = c1.pc;
+        if let Err(e) = run_cpu1(c1, soc, dt) {
+            soc.record_cpu_scheduler("cpu1_error", dt, c1.insn_count.saturating_sub(prev_cpu1_instructions), 0, c1.pc);
+            return Err(e);
+        }
+        soc.record_cpu_scheduler("cpu1", dt, c1.insn_count.saturating_sub(prev_cpu1_instructions), 0, c1.pc);
+        if c1_before_pc == c1.pc && c1.insn_count == prev_cpu1_instructions {
+            soc.record_cpu_scheduler("cpu1_no_progress", dt, 0, 0, c1.pc);
+        }
     }
     Ok(())
 }
