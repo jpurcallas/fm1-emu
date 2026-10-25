@@ -1,0 +1,28 @@
+name: REminiSCENT v0.23 native guest audio validator
+on:
+  push:
+    branches: [experiment/reminiscent-v023-author-menu-clean-20261025]
+    paths: ['.github/workflows/reminiscent-v023-audio.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linux dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libasound2-dev libx11-dev libxkbcommon-dev libxcursor-dev libxrandr-dev libxi-dev pkg-config
+      - name: Compile guest bench executable
+        run: |
+          cargo build --locked --release -p fm1-live
+          target/release/fm1-live --version
+          target/release/fm1-live --fwsc fm1-sid/web/sidplayer.fwsc --bench 1000 | tail -25
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem23-linux-fm1-live-native-validator
+          path: target/release/fm1-live
+          retention-days: 1
