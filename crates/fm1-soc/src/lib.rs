@@ -555,7 +555,7 @@ impl Soc {
           addr.saturating_add(bytes) > self.br3_v41_fx_begin {
             if writing { self.br3_v41_fx_writes+=1; }
             else { self.br3_v41_fx_reads+=1; }
-            if self.br3_v41_fx_first_pc==0 { self.br3_v41_fx_first_pc=self.taskq_guest_pc; }
+            if self.br3_v41_fx_first_pc==0 { self.br3_v41_fx_first_pc=self.taskq_probe_pc; }
         }
     }
 }
