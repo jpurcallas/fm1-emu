@@ -31,14 +31,14 @@ jobs:
           /tmp/jieli/pi32v2/bin/ar p /tmp/fm1-v14/sdk/lib/libfm1_engine.a engine_startup.S.o > engine_startup.S.o
           test -s engine_startup.S.o
           echo BR3_V45_OBJECT_SECTIONS
-          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o | head -180
+          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o > /tmp/v45/sections.txt; grep -E 'Idx|\.bss|\.text|\.volatile|\.data' /tmp/v45/sections.txt | tail -80
           echo BR3_V45_OBJECT_SYMBOLS
-          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep -E '(fm1_fx| [bBdD] | [aA] )' | head -105
+          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep -E '(fm1_fx| [bBdD] | [aA] )' | tail -105
           echo BR3_V45_OBJECT_RELOCATIONS_TO_FX
-          /tmp/jieli/pi32v2/bin/objdump -r engine_startup.S.o | grep -B 5 -A 5 -E 'fm1_fx_states|\.bss' | head -180 || true
+          /tmp/jieli/pi32v2/bin/objdump -r engine_startup.S.o > /tmp/v45/relocs.txt; grep -B 5 -A 5 -E 'fm1_fx_states|\.bss' /tmp/v45/relocs.txt | tail -80 || true
           echo BR3_V45_ALL_BSS_SYMBOLS
-          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep ' [bB] ' | head -130
+          /tmp/jieli/pi32v2/bin/nm -S -n engine_startup.S.o | grep ' [bB] ' | tail -130
           echo BR3_V45_LINKER_RAM0_BSS
           grep -n -B 20 -A 34 'ram0_bss' /tmp/fm1-v14/sdk/config/linker.ld.in | head -100
           echo BR3_V45_SECTIONS_GUEST
-          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o | grep -E 'Idx|\.bss|\.ram0|\.data|\.text'
+          /tmp/jieli/pi32v2/bin/objdump -h engine_startup.S.o > /tmp/v45/sections2.txt; grep -E 'Idx|\.bss|\.ram0|\.data|\.text' /tmp/v45/sections2.txt | tail -80
