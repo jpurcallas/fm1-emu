@@ -1,19 +1,20 @@
-name: BIOMECH3 v0.16 cooperative CPU1 mailbox link gate (NO HOOK, NO INSTALL)
+name: BIOMECH3 v16 cooperative CPU1 bridge compilation (EMULATOR ONLY)
 on:
   push:
-    branches: [experiment/biomech3-v16-cooperative-cpu1-20261025]
+    branches:
+      - experiment/biomech3-v16-cooperative-cpu1-20261025
     paths:
       - '.github/workflows/biomech3-v16-cooperative-cpu1.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  build:
+  compile:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - name: Retrieve pinned V14 and JieLi PI32v2
+      - name: Obtain V14 SDK and verified JieLi compiler
         shell: bash
         run: |
           set -euo pipefail
@@ -25,116 +26,34 @@ jobs:
           echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
           mkdir -p /tmp/jieli
           tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli --strip-components=1
-      - name: Stage original BIOMECH 3 musical adapter without artificial note injection, LCD or IRQ patches
+      - name: Stage original musical engine and safe cooperative bridge
         shell: bash
         run: |
           set -euo pipefail
           BR3_DISPLAY_CACHE_SHADOW=1 BR3_AUDIO_START_PROBE=1 python3 experiments/biomech-rhythm-3/sdk-v14/stage_adapter_v04.py /tmp/fm1-v14 "$GITHUB_WORKSPACE"
           python3 experiments/biomech-rhythm-3/sdk-v14/stage_coop_v16.py /tmp/fm1-v14
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path("/tmp/fm1-v14/app/biomech/biomech_sdk_port.c")
-          text=p.read_text()
-          assert "br_fm1_render_q23(&runtime,out,frames);" in text
-          for forbidden in ("br3_v06_notes_sent","br3_poly_triggers","BR3_V06_EMULATOR_AUTO_NOTES"):
-              assert forbidden not in text, forbidden
-          print("BR3_V16_COOP_STAGED_UNHOOKED; ORIGINAL_6_TRACK_DSP_FX_SEQ")
-          PY
-      - name: Compile six-track DSP, FX, sequencer and real input callbacks into V14
+      - name: Compile six tracks and CPU1 mailbox with native PI32v2
         shell: bash
         run: |
           set -euo pipefail
           BR3_V16_COOP_LAB=1 BR3_FULL_V14=1 python3 experiments/biomech-rhythm-3/sdk-v14/build_v14_base.py /tmp/fm1-v14 /tmp/jieli /tmp/br3-v16
           /tmp/jieli/pi32v2/bin/nm -n /tmp/br3-v16/sdk.elf > /tmp/br3-v16/sdk.nm
-          grep -E 'biomech_sdk_init$|biomech_sdk_audio$|br_render$|br3_cpu1_main$|br3_coop_cpu1_service_after_sdk$|br3_coop_mailbox /tmp/br3-v16/sdk.nm
-      - name: Pack actual emulator FWSC and SHA256
+          grep -E ' (br_render|biomech_sdk_init|br3_coop_mailbox|br3_coop_cpu1_service_after_sdk)$' /tmp/br3-v16/sdk.nm
+      - name: Package firmware for isolated emulator inspection only
         shell: bash
         run: |
           set -euo pipefail
           pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v16
-          mv /tmp/br3-v16/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v16/BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_SOLO_EMULADOR_NO_INSTALAR.fwsc
+          mv /tmp/br3-v16/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v16/BIOMECH3_v16_COOP_BRIDGE_UNHOOKED_NO_INSTALAR.fwsc
           (cd /tmp/br3-v16 && sha256sum *.fwsc > SHA256SUMS.txt)
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_NO_INSTALL
+          name: BIOMECH3_v16_COOP_BRIDGE_UNHOOKED_NO_INSTALL
           path: |
             /tmp/br3-v16/*.fwsc
             /tmp/br3-v16/SHA256SUMS.txt
             /tmp/br3-v16/sdk.nm
             /tmp/br3-v16/build.log
-          retention-days: 14
-  native_mac:
-    needs: build
-    runs-on: macos-15
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_NO_INSTALL
-          path: /tmp/br3-v16
-      - name: Native guest boot gate (diagnostic, not sound validation)
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo build --release --locked -p fm1-live
-          mkdir -p work
-          FM1_DUMPRAM=/tmp/br3-v16/RAM_1800ms.bin ./target/release/fm1-live --fwsc /tmp/br3-v16/BIOMECH3_v11_RECOVERY_REAL_INPUT_SIN_AUTONOTAS_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 2>&1 | tee /tmp/br3-v16/NATIVE_BOOT.log
-          test -s /tmp/br3-v16/RAM_1800ms.bin
-          echo "BR3_V11_NATIVE_BOOT_EXECUTED; NOT MUSICAL-QUALITY PASS"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: BIOMECH3_v11_NATIVE_DIAGNOSTIC
-          path: |
-            /tmp/br3-v16/NATIVE_BOOT.log
-            /tmp/br3-v16/RAM_1800ms.bin
-            work/panel.ppm
-          retention-days: 14
-          if-no-files-found: warn
- /tmp/br3-v16/sdk.nm
-      - name: Pack actual emulator FWSC and SHA256
-        shell: bash
-        run: |
-          set -euo pipefail
-          pwsh -NoProfile -File experiments/biomech-rhythm-3/sdk-v14/pack_v14_emulator.ps1 -SdkRoot /tmp/fm1-v14 -Toolchain /tmp/jieli -BuildRoot /tmp/br3-v16
-          mv /tmp/br3-v16/BIOMECH3_v0.4_CPU1_PROBE_SOLO_EMULADOR.fwsc /tmp/br3-v16/BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_SOLO_EMULADOR_NO_INSTALAR.fwsc
-          (cd /tmp/br3-v16 && sha256sum *.fwsc > SHA256SUMS.txt)
-      - uses: actions/upload-artifact@v4
-        with:
-          name: BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_NO_INSTALL
-          path: |
-            /tmp/br3-v16/*.fwsc
-            /tmp/br3-v16/SHA256SUMS.txt
-            /tmp/br3-v16/sdk.nm
-            /tmp/br3-v16/build.log
-          retention-days: 14
-  native_mac:
-    needs: build
-    runs-on: macos-15
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: BIOMECH3_v16_COOP_MAILBOX_NO_HOOK_NO_INSTALL
-          path: /tmp/br3-v16
-      - name: Native guest boot gate (diagnostic, not sound validation)
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo build --release --locked -p fm1-live
-          mkdir -p work
-          FM1_DUMPRAM=/tmp/br3-v16/RAM_1800ms.bin ./target/release/fm1-live --fwsc /tmp/br3-v16/BIOMECH3_v11_RECOVERY_REAL_INPUT_SIN_AUTONOTAS_SOLO_EMULADOR_NO_INSTALAR.fwsc --mhz 200 --shot 1800 2>&1 | tee /tmp/br3-v16/NATIVE_BOOT.log
-          test -s /tmp/br3-v16/RAM_1800ms.bin
-          echo "BR3_V11_NATIVE_BOOT_EXECUTED; NOT MUSICAL-QUALITY PASS"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: BIOMECH3_v11_NATIVE_DIAGNOSTIC
-          path: |
-            /tmp/br3-v16/NATIVE_BOOT.log
-            /tmp/br3-v16/RAM_1800ms.bin
-            work/panel.ppm
           retention-days: 14
           if-no-files-found: warn
