@@ -72,6 +72,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 experiments/biomech-rhythm-3/sdk-v14/inspect_taskq_init_v24.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/objdump /tmp/jieli/pi32v2/bin/nm
+      - name: Disassemble confirmed CPU0 zeroing writer at PC 0x0201EE7E
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 experiments/biomech-rhythm-3/sdk-v14/inspect_zero_pc_v26.py /tmp/br3-v19/sdk.elf /tmp/jieli/pi32v2/bin/objdump /tmp/jieli/pi32v2/bin/nm
       - name: Build isolated WASM emulator from this branch with write tracing
         shell: bash
         run: |
