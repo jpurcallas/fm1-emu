@@ -11,7 +11,7 @@ s=p.read_text()
 lines=s.splitlines(keepends=True)
 found=[]
 for i,line in enumerate(lines):
- if re.search(r'\bstatic\b.*\bsnapshot\b',line) and re.search(r'\bBRSDK_STATIC\b',line) and ';' in line:
+ if re.search(r'}\s*snapshot\s+BRSDK_STATIC\s*;',line):
   found.append(i)
 if len(found)!=1:
  print("SNAPSHOT_DECLARATIONS",[(n+1,line.strip()) for n,line in enumerate(lines) if "snapshot" in line and ("static" in line or "BRSDK_STATIC" in line)][:20])
