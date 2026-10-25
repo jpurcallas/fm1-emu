@@ -1,7 +1,7 @@
 name: FM1 Live Mac LAB Controls + Groove Memory Trace
 on:
   push:
-    branches: ['experiment/fm1-live-biomech-flow-origin-20261024']
+    branches: ['experiment/fm1-live-upstream-icfg-irq74-20261024']
   workflow_dispatch:
 permissions:
   contents: write
@@ -76,19 +76,19 @@ jobs:
           git rev-parse HEAD > dist/FM1-LIVE-LAB-MAC/BUILD.txt
           cat core-tests.txt live-tests.txt bench.txt lab-smoke.txt > dist/FM1-LIVE-LAB-MAC/CHECKS.txt
           (cd dist/FM1-LIVE-LAB-MAC && shasum -a 256 fm1-live fm1-emu ABRIR_FIRMWARE.command ABRIR_DIAGNOSTICO.command ELEGIR_PROYECTO.command > SHA256SUMS.txt)
-          tar -czf FM1-LIVE-LAB-v3-BIOMECH-FLOW-ORIGIN-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
+          tar -czf FM1-LIVE-LAB-v4-UPSTREAM-ICFG74-MAC-ARM64.tar.gz -C dist FM1-LIVE-LAB-MAC
       - uses: actions/upload-artifact@v4
         with:
-          name: FM1-LIVE-LAB-v3-BIOMECH-FLOW-ORIGIN-MAC-ARM64
-          path: FM1-LIVE-LAB-v3-BIOMECH-FLOW-ORIGIN-MAC-ARM64.tar.gz
+          name: FM1-LIVE-LAB-v4-UPSTREAM-ICFG74-MAC-ARM64
+          path: FM1-LIVE-LAB-v4-UPSTREAM-ICFG74-MAC-ARM64.tar.gz
       - name: Publish persistent GitHub Release download (diagnostic, Mac only)
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          tag="fm1-live-lab-v3-biomech-flow-origin-20261024"
-          file="FM1-LIVE-LAB-v3-BIOMECH-FLOW-ORIGIN-MAC-ARM64.tar.gz"
+          tag="fm1-live-lab-v4-upstream-icfg74-20261024"
+          file="FM1-LIVE-LAB-v4-UPSTREAM-ICFG74-MAC-ARM64.tar.gz"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" "$file" --clobber --repo "$GITHUB_REPOSITORY"
           else
