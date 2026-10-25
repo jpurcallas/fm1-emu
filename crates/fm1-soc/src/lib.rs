@@ -183,6 +183,10 @@ pub struct Soc {
     pub flaky_core1: Option<flaky::FlakyCore1>,
     /// The power domain's analog registers.
     pub p33: p33::P33,
+    // v26 disposable taskq watch; no state changes or guest-memory writes.
+    pub taskq_probe_core: u32,
+    pub taskq_probe_pc: u32,
+    pub taskq_events: Vec<[u64; 9]>,
 }
 
 fn dbg_line(addr: u32) -> &'static str {
@@ -239,6 +243,9 @@ impl Soc {
             unknown_log: Vec::new(),
             flaky_core1: None,
             p33: Default::default(),
+            taskq_probe_core: u32::MAX,
+            taskq_probe_pc: 0,
+            taskq_events: Vec::new(),
         }
     }
 
@@ -489,6 +496,36 @@ impl Soc {
     }
 }
 
+impl Soc {
+    // Only writes intersecting the two known SDK task-queue head words matter.
+    // Record exact pre/post RAM values, CPU/core from interpreter at write time.
+    // This is a passive emulator diagnostic, never firmware production logic.
+    #[inline(always)]
+    fn taskq_before(&self, addr: u32, width: u32) -> Option<[u32; 2]> {
+        const HEAD: u32 = 0x01c6_d21c;
+        if addr < HEAD + 8 && addr.saturating_add(width) > HEAD
+            && self.taskq_events.len() < 128
+        {
+            let off=HEAD-RAM_BASE;
+            Some([self.ram.read32(off), self.ram.read32(off+4)])
+        } else { None }
+    }
+
+    #[inline(always)]
+    fn taskq_after(&mut self, addr: u32, width: u32, before: Option<[u32;2]>) {
+        if let Some(before) = before {
+            const HEAD: u32 = 0x01c6_d21c;
+            let off=HEAD-RAM_BASE;
+            self.taskq_events.push([
+                self.periph.ms(),self.taskq_probe_core as u64,
+                self.taskq_probe_pc as u64,addr as u64,width as u64,
+                before[0] as u64,before[1] as u64,
+                self.ram.read32(off) as u64,self.ram.read32(off+4) as u64
+            ]);
+        }
+    }
+}
+
 impl Bus for Soc {
     fn irq_window(&mut self) {
         if self.periph.any_pending() {
@@ -592,7 +629,10 @@ impl Bus for Soc {
     fn write8(&mut self, addr: u32, value: u8) {
         let o = addr.wrapping_sub(RAM_BASE);
         if (o as usize) < self.ram.len() {
-            return self.ram.write8(o, value);
+            let prior = self.taskq_before(addr, 1);
+            self.ram.write8(o, value);
+            self.taskq_after(addr, 1, prior);
+            return;
         }
         self.write8_slow(addr, value)
     }
@@ -602,7 +642,10 @@ impl Bus for Soc {
         // merged at (addr & 2) within the aligned word, as the slow path does
         let o = (addr & !1).wrapping_sub(RAM_BASE) as usize;
         if o + 2 <= self.ram.len() && addr & 1 == 0 {
-            return self.ram.write16(o as u32, value);
+            let prior = self.taskq_before(addr, 2);
+            self.ram.write16(o as u32, value);
+            self.taskq_after(addr, 2, prior);
+            return;
         }
         self.write16_slow(addr, value)
     }
@@ -611,7 +654,10 @@ impl Bus for Soc {
     fn write32(&mut self, addr: u32, value: u32) {
         let o = addr.wrapping_sub(RAM_BASE) as usize;
         if o + 4 <= self.ram.len() {
-            return self.ram.write32(o as u32, value);
+            let prior = self.taskq_before(addr, 4);
+            self.ram.write32(o as u32, value);
+            self.taskq_after(addr, 4, prior);
+            return;
         }
         self.write32_slow(addr, value)
     }
