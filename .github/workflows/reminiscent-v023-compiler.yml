@@ -1,0 +1,42 @@
+name: REminiSCENT v0.23 isolated compiler recovery
+on:
+  push:
+    branches:
+      - experiment/reminiscent-v023-author-menu-clean-20261025
+    paths:
+      - .github/workflows/reminiscent-v023-compiler.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover pinned JieLi PI32v2 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 20 --max-time 300 'https://pkgman.jieliapp.com/s/linux-toolchain' -o /tmp/jieli.tar.xz
+          echo 'a1545cddbc451a06bac43eb5cd96d831470c42a97c5c0b1f98879a20fc7647bd  /tmp/jieli.tar.xz' | sha256sum -c
+          mkdir -p /tmp/jieli
+          tar -xJf /tmp/jieli.tar.xz -C /tmp/jieli
+          find /tmp/jieli -name clang -type f | head -5
+      - name: Recover official SDK V14
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --connect-timeout 20 --max-time 300 'https://open.m-vave.com/releases/V14/6324230590b8e332bc544128abd7b919a2efd5982db60ea9a11663d4ea820344/FM1-Open-V14-Development-Kit-copy-update.zip' -o /tmp/fm1_v14.zip
+          unzip -tq /tmp/fm1_v14.zip | tail -2
+          echo "SDK bytes $(stat -c%s /tmp/fm1_v14.zip)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem23-pi32v2-compiler
+          path: /tmp/jieli.tar.xz
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rem23-sdk-v14
+          path: /tmp/fm1_v14.zip
+          retention-days: 1
