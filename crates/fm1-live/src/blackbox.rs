@@ -77,6 +77,18 @@ pub fn capture(m: &Machine, firmware: &str, trigger: &str, reason: Option<&str>,
             m.soc.cpu0_flight_total, m.soc.cpu0_flight.len(), flight_events
         ));
     }
+    let flow_event = |e:&fm1_soc::CpuFlowEvent| format!(
+        r#"{{"cycle":{},"from":{},"to":{},"sp":{},"rets":{},"kind":{},"instruction":{}}}"#,
+        e.cycle,e.before,e.after,e.sp,e.rets,quote(e.kind),e.instruction
+    );
+    let flow_events=m.soc.cpu_flow.iter().map(flow_event).collect::<Vec<_>>().join(",");
+    let first_low=m.soc.cpu_flow_first_low.as_ref().map(flow_event).unwrap_or_else(||"null".into());
+    if let Some(end)=json.rfind('}') {
+        json.insert_str(end,&format!(
+            r#","cpu0ControlFlow":{{"capacity":256,"total":{},"firstLowMmio":{},"events":[{}]}}"#,
+            m.soc.cpu_flow_total,first_low,flow_events
+        ));
+    }
     let scheduler_events = m.soc.cpu_scheduler.iter().map(|e| format!(
         r#"{{"cycle":{},"phase":{},"requested":{},"executed":{},"cpu0Pc":{},"cpu1Pc":{},"cpu0Paused":{},"cpu1Paused":{}}}"#,
         e.cycle,quote(e.phase),e.requested,e.executed,e.cpu0_pc,e.cpu1_pc,e.cpu0_paused,e.cpu1_paused
