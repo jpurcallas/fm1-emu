@@ -1003,9 +1003,17 @@ impl Cpu {
             self.sreg_store[Self::sreg_index(n)]
         }
     }
+    #[inline]
+    fn set_icfg(&mut self, v: u32) {
+        self.sreg_store[0] = v;
+        self.ie = v & 0x200 != 0;
+    }
     fn set_sreg(&mut self, n: &str, v: u32) {
         if n == "psr" {
             self.flags = v & 0xf;
+        }
+        if n == "icfg" {
+            return self.set_icfg(v);
         }
         self.sreg_store[Self::sreg_index(n)] = v;
     }
@@ -1262,7 +1270,7 @@ impl Cpu {
             }
             Fast::IcfgRd { d } => self.regs[(d & 15) as usize] = self.sregs("icfg"),
             Fast::IcfgWr { s } => {
-                self.sreg_store[0] = self.regs[(s & 15) as usize];
+                self.set_icfg(self.regs[(s & 15) as usize]);
                 bus.irq_window();
             }
             Fast::BlockMove { base, mask, store, post } => {
