@@ -168,6 +168,21 @@ pub fn run_blocks(cpu: &mut Cpu, soc: &mut Soc, n: u32, pending_tick: &mut bool)
         if (135..=163).contains(&soc.periph.ms()) {
             soc.taskq_probe_core = 0;
             soc.taskq_probe_pc = cpu.pc;
+            if cpu.pc == 0x0201_ee4c {
+                const HEAD: u32 = 0x01c6_d21c;
+                let dst = cpu.regs[0];
+                let src = cpu.regs[1];
+                let bytes = cpu.regs[2];
+                if dst < HEAD + 8 && dst.saturating_add(bytes) > HEAD
+                    && soc.taskq_memmove_entries.len() < 20
+                {
+                    soc.taskq_memmove_entries.push([
+                        soc.periph.ms(),cpu.pc as u64,cpu.rets as u64,
+                        cpu.sp as u64,dst as u64,src as u64,
+                        bytes as u64,cpu.regs[3] as u64
+                    ]);
+                }
+            }
             if let Err(e) = cpu.step(soc) {
                 return Err(format!("{e:?} at pc {:#010x}", cpu.pc));
             }
