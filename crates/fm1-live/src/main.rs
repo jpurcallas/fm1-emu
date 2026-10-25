@@ -1273,6 +1273,9 @@ fn window_smk(o: &Opts, tx: &mpsc::Sender<Action>, lcd: &Mutex<Vec<u16>>, leds: 
 fn lab_smoke(o: &Opts, dir: &std::path::Path) {
     std::fs::create_dir_all(dir).unwrap();
     let mut m=Machine::new(o).expect("smoke firmware");
+    // Same host-only DMA trace as the interactive live emulator.
+    m.soc.audio_dma_probe_enabled = true;
+    m.soc.audio_dma_probes.reserve(8192);
     let rec=lab::Recorder::start(dir).expect("start WAV");
     let mut expected=Vec::new();
     m.soc.periph.script.push_back((m.soc.periph.cycle_of_ms(800),Action::Key{id:21,down:true}));
