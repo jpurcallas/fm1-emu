@@ -113,29 +113,3 @@ jobs:
             /tmp/v36-br3/build.log
           retention-days: 14
           if-no-files-found: warn
-
-        shell: bash
-        run: |
-          set -euo pipefail
-          rustup target add wasm32-unknown-unknown
-          cargo check -p fm1-web
-          bash web/build.sh /tmp/v36-web
-      - name: Compare exact PI32v2 ELF symbol entries, task creation, UART and control path
-        shell: bash
-        run: |
-          set -euo pipefail
-          node experiments/biomech-rhythm-3/sdk-v14/smoke_v39_malloc.mjs /tmp/v36-web/fm1_web.wasm /tmp/v36-stock/STOCK_V14_ONLY_NO_INSTALL.fwsc /tmp/v36-stock/sdk.nm /tmp/v36-br3/BR3_v29_ONLY_NO_INSTALL.fwsc /tmp/v36-br3/sdk.nm | tee /tmp/v36_boot_comparison.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: BIOMECH_V42_VIRTUAL_HEAP_NEVER_INSTALL
-          path: |
-            /tmp/v36_boot_comparison.log
-            /tmp/v37_stock_owner.log
-            /tmp/v37_br3_owner.log
-            /tmp/v36-stock/sdk.nm
-            /tmp/v36-br3/sdk.nm
-            /tmp/v36-stock/build.log
-            /tmp/v36-br3/build.log
-          retention-days: 14
-          if-no-files-found: warn
