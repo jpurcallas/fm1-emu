@@ -108,6 +108,16 @@ if BR3_LINK:
   objs.append(out)
 
 ld=(SDK/"config/linker.ld.in").read_text()
+# Strict v42 emulator-only falsification experiment: fake extra RAM that physical
+# FM-1 does not have. NEVER flash, NEVER merge or use as a real firmware.
+if os.getenv("BR3_V42_EMULATOR_VIRTUAL_HEAP","0")=="1":
+ if not BR3_FULL:raise SystemExit("VIRTUAL HEAP ONLY allowed for BR3 full experimental build")
+ if "_HEAP_BEGIN = ALIGN(., 32);" not in ld or "_HEAP_END = 0x1c00000 + RAM0_SIZE - 32;" not in ld:
+  raise SystemExit("V42 unexpected V14 linker heap symbols; refuse")
+ ld=ld.replace("_HEAP_BEGIN = ALIGN(., 32);","_HEAP_BEGIN = 0x01c80000;")
+ ld=ld.replace("_HEAP_END = 0x1c00000 + RAM0_SIZE - 32;","_HEAP_END = 0x01ca0000;")
+ note("V42 EMULATOR-ONLY HEAP 0x01C80000..0x01CA0000 (128KiB), OUTSIDE PHYSICAL FM1 RAM: NEVER INSTALL")
+
 ld=ld.replace("@SBC_DECODER@","sbc_decoder\n").replace("@ACL_TX_EXTRA@"," + 1024").replace("@ACL_RX_EXTRA@"," + 4096")
 (GEN/"linker").write_text(ld)
 link=[BIN/"ld","--plugin",BIN/"LLVMgold.so","-o","sdk.elf",*objs,"-flto",
