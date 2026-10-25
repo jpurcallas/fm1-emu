@@ -26,6 +26,27 @@ typedef struct __attribute__((aligned(64))) {
 } BR3CoopMailbox;
 BR3CoopMailbox br3_coop_mailbox;
 volatile uintptr_t br3_coop_hook_anchor;
+/* v17: audited, opt-in SDK worker interposition, binary-patched ONLY after
+ * post-link verification. The original SDK service runs first on CPU1.
+ * The sentinel forces a fail-closed result if the data relocation is missing.
+ * This wrapper never starts, resets, holds, or steals CPU1.
+ */
+#define BR3_COOP_SDK_SENTINEL 0xB330C017u
+volatile uintptr_t br3_coop_original_sdk_worker
+ __attribute__((used,section(".ram0_data"))) = BR3_COOP_SDK_SENTINEL;
+void BR_RAMCODE br3_coop_sdk_worker_wrapper(void){
+ uintptr_t original=br3_coop_original_sdk_worker;
+ if(!original||original==BR3_COOP_SDK_SENTINEL){
+  br3_coop_mailbox.fault=4u;
+  BR3_COOP_BARRIER();
+  return;
+ }
+ ((void (*)(void))original)(); /* REQUIRED: SDK service first */
+ br3_coop_cpu1_service_after_sdk();
+}
+volatile uintptr_t br3_coop_worker_anchor
+ __attribute__((used,section(".ram0_data")))=(uintptr_t)&br3_coop_sdk_worker_wrapper;
+
 volatile uint32_t br3_coop_ready_seen;
 static uint32_t br3_coop_waiting;
 static void BR_RAMCODE br3_cpu1_dispatch_coop(void *arg);
