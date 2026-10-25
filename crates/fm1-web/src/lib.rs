@@ -477,10 +477,12 @@ pub extern "C" fn fm1_blackbox_json() -> *const u8 {
         let inputs = m.control_events.iter().map(|(kind,id,amount,ms,pc)| format!("[{kind},{id},{amount},{ms},{pc}]")).collect::<Vec<_>>().join(",");
         let cpu1_counters = m.cpu1.as_ref().map_or("null".to_owned(),
             |c| format!("{{\"pc\":{},\"insn_count\":{}}}", c.pc, c.insn_count));
+        let irq_delivery=format!("{:?}",m.soc.br3_v32_irq_delivered);
+        let irq_blocked=format!("{:?}",m.soc.br3_v32_irq_blocked);
         // Reason is an emulator-generated diagnostic string, not untrusted guest text.
-        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{},\"cpu0_branches\":[{}],\"control_events\":[{}],\"branch_trace_armed\":{},\"cpu0_jit_enabled\":{},\"trace_until_ms\":{}}}",
+        format!("{{\"schema\":\"BR2-WEB-BB1\",\"halted\":{},\"reason\":{:?},\"ms\":{},\"cpu0\":{},\"cpu1\":{},\"ram_base\":{},\"ram_len\":{},\"cpu0_slices\":[{}],\"cpu1_last\":{},\"cpu0_branches\":[{}],\"control_events\":[{}],\"branch_trace_armed\":{},\"cpu0_jit_enabled\":{},\"trace_until_ms\":{},\"br3_v32_irq_delivered\":{},\"br3_v32_irq_blocked\":{}}}",
             m.halted,reason,m.soc.periph.ms(),core(&m.cpu),cpu1,RAM_BASE,m.soc.ram.len(),trace,cpu1_counters,branches,inputs,m.cpu.br2_trace_on,m.cpu.jit_on,
-            m.trace_until_ms.map_or("null".to_owned(),|v|v.to_string()))
+            m.trace_until_ms.map_or("null".to_owned(),|v|v.to_string()),irq_delivery,irq_blocked)
     }).unwrap_or_else(|| "{\"schema\":\"BR2-WEB-BB1\",\"error\":\"no machine\"}".to_owned());
     unsafe {
         BLACKBOX_JSON = value.into_bytes();
