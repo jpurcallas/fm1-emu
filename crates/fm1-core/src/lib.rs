@@ -167,6 +167,15 @@ pub struct Cpu {
     pub br3_v36_probe_counts: [u64; 16],
     pub br3_v36_probe_enabled: bool,
     pub br3_v36_probe_events: Vec<[u64; 9]>,
+    /// v39 read-only allocation return tracer: genuine SDK malloc, not artificial allocation.
+    pub br3_v39_malloc_addr: u32,
+    pub br3_v39_malloc_return: u32,
+    pub br3_v39_malloc_bytes: u32,
+    pub br3_v39_malloc_calls: u64,
+    pub br3_v39_malloc_returns: u64,
+    pub br3_v39_malloc_failures: u64,
+    pub br3_v39_malloc_events: Vec<[u64; 5]>,
+
 
     /// Experimental crash diagnosis: only enabled on CPU0 after an encoder turn.
     /// With CPU0 JIT paused this keeps the last actual executed branches.
@@ -444,6 +453,28 @@ impl Cpu {
             if n >= budget {
                 sync!();
                 return Ok((n, false));
+            }
+            if self.core_id == 0 && self.br3_v39_malloc_addr != 0 {
+                if self.br3_v39_malloc_return != 0 && pc == self.br3_v39_malloc_return {
+                    self.br3_v39_malloc_returns += 1;
+                    if self.br3_v39_malloc_bytes > 0 && self.regs[0] == 0 {
+                        self.br3_v39_malloc_failures += 1;
+                    }
+                    if self.br3_v39_malloc_events.len() < 128 {
+                        self.br3_v39_malloc_events.push([1, self.insn_count + n as u64,
+                          self.br3_v39_malloc_bytes as u64, self.regs[0] as u64,pc as u64]);
+                    }
+                    self.br3_v39_malloc_return = 0;
+                }
+                if pc == self.br3_v39_malloc_addr {
+                    self.br3_v39_malloc_calls += 1;
+                    self.br3_v39_malloc_return = self.rets;
+                    self.br3_v39_malloc_bytes = self.regs[0];
+                    if self.br3_v39_malloc_events.len() < 128 {
+                        self.br3_v39_malloc_events.push([0,self.insn_count + n as u64,
+                          self.regs[0] as u64,self.rets as u64,pc as u64]);
+                    }
+                }
             }
             if self.core_id == 0 && self.br3_v36_probe_enabled {
                 for i in 0..16 {
