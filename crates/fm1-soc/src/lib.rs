@@ -172,6 +172,10 @@ impl BiomechCpu0Profile {
     }
 }
 
+pub struct CpuFlowEvent {
+    pub cycle:u64, pub before:u32, pub after:u32, pub sp:u32, pub rets:u32,
+    pub kind:&'static str, pub instruction:u64,
+}
 pub struct CpuSchedulerEvent {
     pub cycle: u64, pub phase: &'static str, pub requested: u64, pub executed: u64,
     pub cpu0_pc: u32, pub cpu1_pc: u32, pub cpu0_paused: bool, pub cpu1_paused: bool,
@@ -209,6 +213,9 @@ pub struct Soc {
     /// Timers, audio DMA, ADC, interrupt controller and the front panel.
     pub periph: Periph,
     pub biomech_cpu0_profile: Option<BiomechCpu0Profile>,
+    pub cpu_flow: std::collections::VecDeque<CpuFlowEvent>,
+    pub cpu_flow_total:u64,
+    pub cpu_flow_first_low:Option<CpuFlowEvent>,
     pub cpu_scheduler: std::collections::VecDeque<CpuSchedulerEvent>,
     pub cpu_scheduler_total: u64,
     pub cpu_scheduler_cpu1_requested: u64,
@@ -273,6 +280,16 @@ impl Soc {
     /// Addresses below are verified against BIOMECH3 v0.8 LCD rescue sdk.nm ONLY.
     /// Do not interpret results from another firmware as Groove bank accesses.
     #[inline]
+    pub fn record_cpu_flow(&mut self, before:u32, after:u32, sp:u32, rets:u32, kind:&'static str, instruction:u64) {
+        if !self.groove_mem_watch {return;}
+        let event=CpuFlowEvent{cycle:self.periph.cycles,before,after,sp,rets,kind,instruction};
+        self.cpu_flow_total=self.cpu_flow_total.saturating_add(1);
+        if (0x00010000..0x00020000).contains(&after) && self.cpu_flow_first_low.is_none() {
+            self.cpu_flow_first_low=Some(CpuFlowEvent{..event});
+        }
+        if self.cpu_flow.len()==256 {self.cpu_flow.pop_front();}
+        self.cpu_flow.push_back(event);
+    }
     pub fn record_cpu_scheduler(&mut self, phase:&'static str, requested:u64, executed:u64, cpu0_pc:u32, cpu1_pc:u32) {
         if !self.groove_mem_watch { return; }
         self.cpu_scheduler_total = self.cpu_scheduler_total.saturating_add(1);
@@ -376,6 +393,9 @@ impl Soc {
             audio_dma_probe_enabled: false,
             audio_dma_probes: std::collections::VecDeque::new(),
             audio_dma_probe_total: 0,
+            cpu_flow: std::collections::VecDeque::with_capacity(256),
+            cpu_flow_total:0,
+            cpu_flow_first_low:None,
             cpu_scheduler: std::collections::VecDeque::with_capacity(128),
             cpu_scheduler_total: 0,
             cpu_scheduler_cpu1_requested: 0,
