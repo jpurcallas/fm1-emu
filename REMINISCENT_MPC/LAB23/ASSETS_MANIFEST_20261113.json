@@ -1,0 +1,292 @@
+{
+  "project": "REminiSCENT LAB23",
+  "date": "2026-11-13",
+  "source": "LAB22+UI LAB10 HTML, build LAB23",
+  "asset_count": 40,
+  "backgrounds": 11,
+  "native_tabs": 1,
+  "touch_navigation": "internal selector/parameter 112, hardware unverified",
+  "pcm_count": "254 in separate private bank, NOT in this backup",
+  "assets": [
+    {
+      "path": "skins/edit_0.png",
+      "bytes": 833,
+      "sha256": "45182237fcdc7249773f078c6cf5d93dc34be8b1fd39db5cb474f6bbe628b882",
+      "width": 120,
+      "height": 28
+    },
+    {
+      "path": "skins/edit_1.png",
+      "bytes": 782,
+      "sha256": "c3696c9ab35010f06d5523bc42f9c44df580f22765d73df93ddbeb895b859dc4",
+      "width": 120,
+      "height": 28
+    },
+    {
+      "path": "skins/fondos/00.png",
+      "bytes": 399051,
+      "sha256": "a67dd5075a258e849697bcb39894c7fa3ba82d0c3b541064bf1c6195fe4c02be",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/01.png",
+      "bytes": 333241,
+      "sha256": "6c08e7a6975261324b8b82275c4acbe8435596bcb0f2a22a60f90f7fe1894797",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/02.png",
+      "bytes": 527969,
+      "sha256": "f175243f27cb69d4c026de674e581f95dcb508e2ebc2cc6b10731c19bb225ae0",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/03.png",
+      "bytes": 414363,
+      "sha256": "0369c44d9b1b7d16ea9d01ed59768d588eb195ef682710c8be86c4372bcb7e96",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/04.png",
+      "bytes": 341815,
+      "sha256": "ddbfc84dcb1c8a37c3b8058ceed75986c5f886fa5b29c684d9899d0f4a923211",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/05.png",
+      "bytes": 440034,
+      "sha256": "4836496309669a2faff51817c8efe4247bd21501ce45770cf971cbb8a06668b2",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/06.png",
+      "bytes": 368491,
+      "sha256": "905e8c83d2ae96461d5a8a3e2621e0312fb7f513a0ba1120d661668ee6896f54",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/07.png",
+      "bytes": 384677,
+      "sha256": "459fbb07895188b30fcef369ee648812d2b98fd3e81e040cba0163136a04bb13",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/08.png",
+      "bytes": 377551,
+      "sha256": "e17d82e7a8c9c43fa77715396021670e046dbf1db1d713cbd2bbc44c2aa34e5b",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/09.png",
+      "bytes": 342724,
+      "sha256": "204c9e36ab04557874e76e51d7152b78ed72e834c27424a86029e19c5195b139",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/10.png",
+      "bytes": 371057,
+      "sha256": "d3f19d65ed021149598297c8a6188b17acacf5662ee14ab3e0016308b3d0fe30",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/nav_00_off.png",
+      "bytes": 1299,
+      "sha256": "fd6e0317b5a4dab6a8d0009260c75751635604a3cbb834a154cc93befc8812aa",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_00_on.png",
+      "bytes": 1307,
+      "sha256": "a3f8926b7ade7cffb30b4f6d9a2a835f5808731ef3af5bc20e6fc2574333cb2a",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_01_off.png",
+      "bytes": 877,
+      "sha256": "383509e7f02ba1e50431d7ed523a24c9a4048cb94926a6e0d2a05e73a0e2dce9",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_01_on.png",
+      "bytes": 896,
+      "sha256": "03957febb0a80f466ded7e38e7e1e89c74e3c85b6478326c5b45534f0e54c8d7",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_02_off.png",
+      "bytes": 845,
+      "sha256": "56db102bea1a1d4ec7507b5683c4ff28b9b18c803a26252ce3a57efb6e7fec89",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_02_on.png",
+      "bytes": 848,
+      "sha256": "aa800f26152fb9a5a4b2584f4e109a6791c7b8f567ed0acc10127a31aff9b82b",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_03_off.png",
+      "bytes": 1087,
+      "sha256": "184eb113651f8e198019020746fd56fbf65a0f6a25bcbc53fd162fe1aa1ab990",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_03_on.png",
+      "bytes": 1098,
+      "sha256": "01bc07eee2e0a71a8d1078b6c3ea9fbffc8688c366a40c661e8ae339900e1f5a",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_04_off.png",
+      "bytes": 1068,
+      "sha256": "f2e9eaf05a78a514f14753f1e224ec80e1dcf6275080a49715154f24fbc14d06",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_04_on.png",
+      "bytes": 1082,
+      "sha256": "89a0d9cd6e65c3004778f0ae64097973d3021957522790b9fcc42e8143480b14",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_05_off.png",
+      "bytes": 1511,
+      "sha256": "9dbf8ab63ec4d61967b48ae8e20f91b5d76747cfcf2eaa455c6f4ace415c1ad8",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_05_on.png",
+      "bytes": 1501,
+      "sha256": "cdf334d37de9052f9af684609a30d25b9a55dac431dd6818a856d07afbdf0822",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_06_off.png",
+      "bytes": 676,
+      "sha256": "9f40a5c98b947798b1dbb900ab3362834afb9871437e71074b6979c01638b4da",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_06_on.png",
+      "bytes": 686,
+      "sha256": "04bc6f001d182c6d026bcf292064505ac501c5670d2d150d6fed74681917032b",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_07_off.png",
+      "bytes": 1161,
+      "sha256": "49ca8681c791d48a0c497ed7381695440c16da71add0930d05b85f8d4f6f6d07",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_07_on.png",
+      "bytes": 1161,
+      "sha256": "5d942c32841a4e3c1f5be6cd8b35ee2025aa1ab003803b65877c3fbf4741db00",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_08_off.png",
+      "bytes": 1181,
+      "sha256": "e575b07e1d0c13dbb458e6bdcfba702c9467ab07b442d1ee73b947cdbea2d4c2",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_08_on.png",
+      "bytes": 1179,
+      "sha256": "cb361bdd6f4b5b5be7c73d05031e331b5430c3da8d372e24432abdb4e70d0e3d",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_09_off.png",
+      "bytes": 783,
+      "sha256": "7581e31a7cbc672ef219540849a5fe54a1331eb30e7b18221b709b79dd9cc8f6",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_09_on.png",
+      "bytes": 794,
+      "sha256": "c8a29e4e2010c50e50e00e57ae0a58b04479424c47ac3f369fccb11716cef665",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_10_off.png",
+      "bytes": 1156,
+      "sha256": "6d83e51337eff210800cb49e1e0cb32b8317690aed9bcdb345b1e90ccf804543",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/nav_10_on.png",
+      "bytes": 1154,
+      "sha256": "9930f51d4db14ac73e1c80ce1fdc28f3652c2669ff477049c35669cf39c130d6",
+      "width": 110,
+      "height": 40
+    },
+    {
+      "path": "skins/power_0.png",
+      "bytes": 1486,
+      "sha256": "8424f54e9f4eae2b66fcd32a5282bd345854bac39f275f5b4318e4024a0eb4a8",
+      "width": 112,
+      "height": 25
+    },
+    {
+      "path": "skins/power_1.png",
+      "bytes": 1256,
+      "sha256": "16afb33e734d3a1d61fac6c27bcb48afe8957313914c2e09fd12c8106fcf0317",
+      "width": 112,
+      "height": 25
+    },
+    {
+      "path": "skins/q_body.png",
+      "bytes": 1403,
+      "sha256": "a254ce3d79cced965861a6832b428b6b897fc370745fd08fc475b8fc5d56cd34",
+      "width": 74,
+      "height": 74
+    },
+    {
+      "path": "skins/q_pointer.png",
+      "bytes": 233,
+      "sha256": "55ee2dd03cece0a2e47fea88cc7ac94eb9b745b2c2c9fd2224a16625ba6a4eda",
+      "width": 74,
+      "height": 74
+    },
+    {
+      "path": "skins/touch_blank.png",
+      "bytes": 69,
+      "sha256": "6fa466e21df6bf014ed03517399a711777f572b1f0be6a561b947790cda9f634",
+      "width": 4,
+      "height": 4
+    }
+  ]
+}
