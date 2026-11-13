@@ -18,7 +18,7 @@ def check(root,manifest=None):
     for i,name in enumerate(PAGES):
         bg=entries['original_art_'+name]
         assert bg['componentData']['type']=='Image'
-        assert bg['componentData']['data']['image']==f'fondos/{i:02}.png'
+        assert bg['componentData']['data']['image']==(f'fondos/03_adsr_no_static_curve.png' if i==3 else f'fondos/{i:02}.png')
         assert bg['bounds']['bounds']=='0 0 1280 628'
         assert bg['bounds']['additionalInvalidatingHandles']==[f'IndexedEnabling/{i}/11/Parameter 112']
         btn=entries['TAB_'+name]
@@ -46,6 +46,13 @@ def check(root,manifest=None):
         assert e['componentData']['data']['numFrames']==frames
         assert e['handle remapping']['map']==[{'key':'Data','value':f'Parameter {index}'}]
         assert e['bounds']['additionalInvalidatingHandles']==[f'IndexedEnabling/{page}/11/Parameter 112']
+    adsr=entries['LIVE_ADSR_NATIVE_LAB10']
+    assert adsr['componentData']['type']=='Envelope'
+    env=adsr['componentData']['data']
+    assert env['envelopeType']=='ADSR' and env['envelopeStyle']=='WithoutHeader'
+    assert [env[key+'Handle'] for key in ('attack','decay','sustain','release')]==[
+        'Parameter 29','Parameter 30','Parameter 31','Parameter 32']
+    assert adsr['bounds']['additionalInvalidatingHandles']==['IndexedEnabling/3/11/Parameter 112']
     for file,(w,h,n) in FILMS.items():
         blob=(root/'skins'/file).read_bytes()
         assert blob[:8]==b'\x89PNG\r\n\x1a\n',file
@@ -58,7 +65,7 @@ def check(root,manifest=None):
             asset=root/item['path']
             assert asset.is_file(),item['path']
             assert hashlib.sha256(asset.read_bytes()).hexdigest()==item['sha256'],item['path']
-    print('PASS 11 original backgrounds + 11 touch nav controls + 4 Q-Link proxies + 3 live art strips')
+    print('PASS 11 original page layouts + 11 touch nav controls + 4 Q-Link proxies + 3 live art strips + editable ADSR')
     print('PASS images, frame dimensions'+(' and SHA256 manifest' if manifest else ''))
     print('NOT TESTED: MPC hardware, render, touch focus, Data Wheel, DSP or ARM32')
 
