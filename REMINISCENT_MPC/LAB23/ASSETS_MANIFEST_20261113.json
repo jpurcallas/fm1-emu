@@ -2,7 +2,7 @@
   "project": "REminiSCENT LAB23",
   "date": "2026-11-13",
   "source": "LAB22+UI LAB10 HTML, build LAB23",
-  "asset_count": 42,
+  "asset_count": 43,
   "backgrounds": 11,
   "native_tabs": 1,
   "touch_navigation": "internal selector/parameter 112, hardware unverified",
@@ -47,6 +47,13 @@
       "path": "skins/fondos/02.png",
       "bytes": 527969,
       "sha256": "f175243f27cb69d4c026de674e581f95dcb508e2ebc2cc6b10731c19bb225ae0",
+      "width": 1280,
+      "height": 628
+    },
+    {
+      "path": "skins/fondos/03_adsr_no_static_curve.png",
+      "bytes": 403727,
+      "sha256": "cf795e2abfbf1757aa11606d0fd028e16e17f7f0f69600e1b012edf8cedcf3a7",
       "width": 1280,
       "height": 628
     },
@@ -303,5 +310,6 @@
       "height": 4
     }
   ],
-  "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested."
+  "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested.",
+  "note_adsr": "LAB23 native ADSR Envelope overlay uses original LAB10 image with ONLY static curve removed. Stage handles mapped to host params 29..32. Unverified on MPC hardware; original fondos/03.png retained for reference and rollback. New PNG remains private, no public binaries."
 }
