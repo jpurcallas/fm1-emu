@@ -103,7 +103,13 @@ public:
    for(int k=0;k<4;k++){
     int t=qLinkTarget(k);
     if(index==qLinkProxy_[k]&&t>=0){
-     setNormalised(t,std::clamp(plain/127.f,0.f,1.f));
+     // A displayed Q-Link integer can round-trip through a project chunk
+     // without the original continuous normalised value. In that case the
+     // proxy is already showing the target's exact plain value: DO NOT
+     // overwrite the saved target normalised value while loading the chunk.
+     // A real Q-Link move that crosses a target step still updates its DSP.
+     const float next=std::clamp(plain/127.f,0.f,1.f);
+     if(std::lround(param(t).toPlain(next))!=getInt(t))setNormalised(t,next);
     }else if(index==t){
      set(qLinkProxy_[k],std::round(127.f*getNormalised(t)));
     }
