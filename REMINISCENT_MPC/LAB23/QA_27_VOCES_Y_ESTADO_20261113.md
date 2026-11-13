@@ -27,3 +27,7 @@ El `parameterChanged()` original actualizaba el parámetro musical a partir del 
 - **No entregar ni pedir al autor pruebas de versiones incompletas**. `master` permanece intacta; ninguna fusión autorizada.
 
 Estado: **implementado/parcialmente validado en host**, NO completado, NO probado en MPC física, NO aprobado.
+
+## Comprobación de plataforma (sin intervención del autor)
+- SDK local recuperado y fuente LAB23 disponibles, pero **no hay Zig ni cross GCC ARM instalado en el contenedor de trabajo**. Se intentó instalar `ziglang`; la descarga falló por DNS/red del entorno. También falló la descarga de la distribución Linux oficial. **No se generó ARM32 LAB23 y no hay prueba física.** El autor ya tiene Zig funcional en su Mac por la compilación LAB20; no repetir diagnóstico de ese entorno ni pedirle recompilar una versión parcial.
+- Para ADSR se comprobó en `docs/ui-reference.md` del SDK que existe un componente nativo `Envelope` con handles `attack/decay/sustain/release`, pero **no está demostrada su fidelidad exacta** a los satélites, curva y disposición gráfica LAB10 aprobados. No se ha reemplazado la skin de GitHub por una visualización genérica. Prueba local de composición visual sin adopción en rama: el gráfico fijo puede retirarse dentro de su marco sin alterar otros píxeles de `fondos/03.png`; el render de Envelope nativo en MPC sigue sin comprobarse.
