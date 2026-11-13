@@ -1,0 +1,27 @@
+name: REminiSCENT source recovery - bowed psaltery WAVs
+on:
+  push:
+    branches: [assets/reminiscent-13-cc0-20261112]
+    paths: [.github/workflows/reminiscent-13-psaltery-recovery.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  psaltery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover original WAVs from VCSL master branch (SFZ mapping is on sfz branch)
+        run: |
+          sed -i 's/"12_salterio_arco": ("sgossner\/VCSL", "sfz", \[/"12_salterio_arco": ("sgossner\/VCSL", "master", [/' tools/reminiscent_13_sources_download.py
+          grep -F '"12_salterio_arco": ("sgossner/VCSL", "master",' tools/reminiscent_13_sources_download.py
+          python3 tools/reminiscent_13_sources_download.py 12_salterio_arco
+      - uses: actions/upload-artifact@v4
+        with:
+          name: REM13-12_salterio_arco
+          path: dist/12_salterio_arco.zip
+          retention-days: 30
+          if-no-files-found: error
