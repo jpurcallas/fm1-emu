@@ -2,7 +2,7 @@
   "project": "REminiSCENT LAB23",
   "date": "2026-11-13",
   "source": "LAB22+UI LAB10 HTML, build LAB23",
-  "asset_count": 43,
+  "asset_count": 46,
   "backgrounds": 11,
   "native_tabs": 1,
   "touch_navigation": "internal selector/parameter 112, hardware unverified",
@@ -112,6 +112,27 @@
       "sha256": "d3f19d65ed021149598297c8a6188b17acacf5662ee14ab3e0016308b3d0fe30",
       "width": 1280,
       "height": 628
+    },
+    {
+      "path": "skins/memory_position_32.png",
+      "bytes": 309341,
+      "sha256": "0d392dd3d8a6e0ef2edca2bb20d5c6ff9ca0dfa0cf195ca1729865b69e8adc71",
+      "width": 750,
+      "height": 2816
+    },
+    {
+      "path": "skins/mod_env2_graph_blank.png",
+      "bytes": 3295,
+      "sha256": "fcd4241076773447aa4277286e313db83171a4986b01ad93f12aed95c7c38a45",
+      "width": 607,
+      "height": 86
+    },
+    {
+      "path": "skins/mod_lfo_shape_engine_5.png",
+      "bytes": 17971,
+      "sha256": "f870580c5a78ff6217888d09a40f296cc25cd5a5797e2cc7b6cb5e07a6a90790",
+      "width": 607,
+      "height": 430
     },
     {
       "path": "skins/nav_00_off.png",
@@ -311,5 +332,6 @@
     }
   ],
   "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested.",
-  "note_adsr": "LAB23 native ADSR Envelope overlay uses original LAB10 image with ONLY static curve removed. Stage handles mapped to host params 29..32. Unverified on MPC hardware; original fondos/03.png retained for reference and rollback. New PNG remains private, no public binaries."
+  "note_adsr": "LAB23 native ADSR Envelope overlay uses original LAB10 image with ONLY static curve removed. Stage handles mapped to host params 29..32. Unverified on MPC hardware; original fondos/03.png retained for reference and rollback. New PNG remains private, no public binaries.",
+  "note_mod_memory": "Current LAB23 MOD page has exactly LFO1/LFO2/ENV2; no Mod Wheel. Shape-driven strips reflect existing DSP shape choices, Env2 Envelope binds four exact host parameters. MEMORY simulated buffer's selection position reflects a real parameter; visualisation is NOT a captured PCM waveform and not full time-domain animation. No DSP change."
 }
