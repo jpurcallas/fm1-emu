@@ -3740,7 +3740,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "fondos/03.png"
+                  "image": "fondos/03_adsr_no_static_curve.png"
                 }
               },
               "handle remapping": {
@@ -3754,6 +3754,64 @@
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_ADSR_NATIVE_LAB10",
+                "type": "Envelope",
+                "data": {
+                  "version": 1,
+                  "envelopeType": "ADSR",
+                  "envelopeStyle": "WithoutHeader",
+                  "envelopeName": "",
+                  "backgroundColour": "00000000",
+                  "scaleColour": "00000000",
+                  "lineColour": "ffe9d1a8",
+                  "fillColour": "0fe8caa0",
+                  "highlightColour": "fff5cfa1",
+                  "lineWidth": 3,
+                  "handleWidth": 17,
+                  "handleHeight": 11,
+                  "handleShape": "Circle",
+                  "handleLineWidth": 2,
+                  "handleLineColour": "fff5cfa1",
+                  "handleFillColour": "ff263638",
+                  "handleTextColour": "ffe3c8a4",
+                  "handleLineWidthOnPressed": 2,
+                  "handleLineColourOnPressed": "fff5cfa1",
+                  "handleFillColourOnPressed": "ffdf9970",
+                  "handleTextColourOnPressed": "ffe3c8a4",
+                  "handleArrowLineColourOnPressed": "ffe3c8a4",
+                  "handleArrowFillColourOnPressed": "ffe3c8a4",
+                  "attackHandle": "Parameter 29",
+                  "decayHandle": "Parameter 30",
+                  "sustainHandle": "Parameter 31",
+                  "releaseHandle": "Parameter 32",
+                  "attackShapeHandle": "Invalid",
+                  "decayShapeHandle": "Invalid",
+                  "releaseShapeHandle": "Invalid",
+                  "forceHideShapeHandles": true,
+                  "forceCurveShape": 0.5,
+                  "curveType": "Quadratic"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "65 249 555 185",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/3/11/Parameter 112"
                 ]
