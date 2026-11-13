@@ -24,6 +24,9 @@ Fecha: 2026-11-13. Proyecto prioritario: plugin externo nativo para **MPC One+**
 - MOD1/MOD2 seleccionan algoritmo independientemente (chorus, flanger, phaser, tremolo, auto-pan) y los 4 Q-Links cambian según algoritmo.
 - BLEND: identificar visualmente ACOUSTIC y OSC en eclipse o master dial; eliminar leyenda de laboratorio PRESENCE A/B / monitor +12dB.
 - Mantener UI aprobada; no rediseñarla unilateralmente.
+- **NAVEGACIÓN MPC ONE+ — ACUERDO EXPRESO 2026-11-13:** la MPC One+ tiene una única **pantalla táctil**. Las **11 pantallas/módulos aprobados** de REminiSCENT se navegan con **pestañas táctiles dentro de esa pantalla**, como en los plugins de MPC; los seis botones físicos NO limitan el número de pantallas y NO obligan a reducirlas ni rediseñarlas.
+- **INTERACCIÓN TÁCTIL Y HARDWARE:** tocar un parámetro selecciona ese parámetro para el Data Wheel; los cuatro Q-Links controlan sus parámetros correspondientes en la pantalla actual. Conservar tabs, fondos, ilustraciones, eclipse, franjas verticales, selectores y ubicación de controles aprobados. No sustituir por skin genérica ni entregar paquete experimental con diseño simplificado.
+- **VALIDACIÓN ANTES DE MOSTRAR:** cotejar las 11 pantallas aprobadas contra el plugin MPC, comprobar selección de cada pestaña, cambio de parámetros por touch, Data Wheel y Q-Links. Diferenciar capacidad de SDK demostrada y comportamiento todavía no probado en MPC. Ningún control aprobado se descarta por falta de conexión; se implementa o queda expresamente identificado como pendiente, nunca se oculta.
 - El autor **no quiere entregas parciales de 2-3 voces**: siguiente revisión de voces en conjunto; prioridad llegar a plugin MPC real.
 
 ## Componentes que NO deben confundirse
