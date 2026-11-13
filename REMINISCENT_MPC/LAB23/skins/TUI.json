@@ -3850,6 +3850,42 @@
               "version": 2,
               "componentData": {
                 "version": 1,
+                "name": "LIVE_MEMORY_POSITION",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "memory_position_32.png",
+                  "numFrames": 32,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 35"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "67 446 750 88",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
                 "name": "original_art_RESONANCE",
                 "type": "Image",
                 "data": {
@@ -3988,6 +4024,169 @@
                 "bounds": "0 0 1280 628",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_LFO1_SHAPE",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "mod_lfo_shape_engine_5.png",
+                  "numFrames": 5,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 82"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "55 395 607 86",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_LFO2_SHAPE",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "mod_lfo_shape_engine_5.png",
+                  "numFrames": 5,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 86"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "55 395 607 86",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2_BLANK",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "mod_env2_graph_blank.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "55 395 607 86",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2",
+                "type": "Envelope",
+                "data": {
+                  "version": 1,
+                  "envelopeType": "ADSR",
+                  "envelopeStyle": "WithoutHeader",
+                  "envelopeName": "",
+                  "backgroundColour": "00000000",
+                  "scaleColour": "00000000",
+                  "lineColour": "ffe9d1a8",
+                  "fillColour": "0fe8caa0",
+                  "highlightColour": "fff5cfa1",
+                  "lineWidth": 3,
+                  "handleWidth": 17,
+                  "handleHeight": 11,
+                  "handleShape": "Circle",
+                  "handleLineWidth": 2,
+                  "handleLineColour": "fff5cfa1",
+                  "handleFillColour": "ff263638",
+                  "handleTextColour": "ffe3c8a4",
+                  "handleLineWidthOnPressed": 2,
+                  "handleLineColourOnPressed": "fff5cfa1",
+                  "handleFillColourOnPressed": "ffdf9970",
+                  "handleTextColourOnPressed": "ffe3c8a4",
+                  "handleArrowLineColourOnPressed": "ffe3c8a4",
+                  "handleArrowFillColourOnPressed": "ffe3c8a4",
+                  "attackHandle": "Parameter 88",
+                  "decayHandle": "Parameter 89",
+                  "sustainHandle": "Parameter 90",
+                  "releaseHandle": "Parameter 91",
+                  "attackShapeHandle": "Invalid",
+                  "decayShapeHandle": "Invalid",
+                  "releaseShapeHandle": "Invalid",
+                  "forceHideShapeHandles": true,
+                  "forceCurveShape": 0.5,
+                  "curveType": "Quadratic"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "70 403 575 70",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
                 ]
               }
             },
