@@ -2,12 +2,19 @@
   "project": "REminiSCENT LAB23",
   "date": "2026-11-13",
   "source": "LAB22+UI LAB10 HTML, build LAB23",
-  "asset_count": 40,
+  "asset_count": 42,
   "backgrounds": 11,
   "native_tabs": 1,
   "touch_navigation": "internal selector/parameter 112, hardware unverified",
   "pcm_count": "254 in separate private bank, NOT in this backup",
   "assets": [
+    {
+      "path": "skins/acoustic_source_lab10_27.png",
+      "bytes": 234924,
+      "sha256": "cc30dd1dbc4a4eabe03ae2bc7a44d4aad53d418dbee3e683acbc64d551e9283e",
+      "width": 435,
+      "height": 1296
+    },
     {
       "path": "skins/edit_0.png",
       "bytes": 833,
@@ -254,6 +261,13 @@
       "height": 40
     },
     {
+      "path": "skins/osc_lab10_eight_waves.png",
+      "bytes": 1084900,
+      "sha256": "f9f9684407a8de71920ff68df4531f0bb9ccebf4fcf3f5175027fa021012401a",
+      "width": 780,
+      "height": 2712
+    },
+    {
       "path": "skins/power_0.png",
       "bytes": 1486,
       "sha256": "8424f54e9f4eae2b66fcd32a5282bd345854bac39f275f5b4318e4024a0eb4a8",
@@ -288,5 +302,6 @@
       "width": 4,
       "height": 4
     }
-  ]
+  ],
+  "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested."
 }
