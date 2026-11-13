@@ -1,0 +1,45 @@
+name: REminiSCENT 13 CC0 acoustic sample sources (NOT firmware)
+on:
+  push:
+    branches: [assets/reminiscent-13-cc0-20261112]
+    paths:
+      - 'tools/reminiscent_13_sources_download.py'
+      - '.github/workflows/reminiscent-13-source-download.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-sources:
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        source:
+          - 01_violonchelo
+          - 02_flauta
+          - 03_clarinete
+          - 04_saxo_tenor
+          - 05_guitarra_acero
+          - 06_guitarra_archtop
+          - 07_vibrafono
+          - 08_armonica_cromatica
+          - 09_trombon
+          - 10_corno_frances
+          - 11_clavecin
+          - 12_salterio_arco
+          - 13_vasos_musicales
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify original CC0 samples (no conversion)
+        run: python3 tools/reminiscent_13_sources_download.py ${{ matrix.source }}
+      - name: Archive verified sample source selection
+        uses: actions/upload-artifact@v4
+        with:
+          name: REM13-${{ matrix.source }}
+          path: dist/${{ matrix.source }}.zip
+          retention-days: 30
+          if-no-files-found: error
