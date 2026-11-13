@@ -1,0 +1,7 @@
+REminiSCENT — LAB23, interfaz y motor en SDK, 2026-11-13
+
+BASE: código LAB22 + artwork de UI LAB10/Bridge16, sin alterar sonido aprobado.
+INTEGRADO: 11 fondos originales, once tabs táctiles, selector de fuente A/B, ON/OFF acústicas, MEMORY, selectores y ON/OFF de CHARACTER/MOD/SEND FX, cuatro Q-Links variables por página, eje de Blend central táctil que selecciona MASTER BLEND para el Data Wheel, 27 voces / 254 muestras PCM sin pérdida.
+PRUEBAS DE HOST: compilación Linux nativa; 18 PASS, 1 advertencia de chunk re-guardado, 0 fallos. WAV de G1 1s idéntico bit a bit a LAB22 (SHA256 aae5256c5612c816abd84fa7ee864bbc1ee43ea6c08effe9298963044c199588). Validación estática skin del SDK: 0 errores y 0 advertencias.
+PENDIENTE: compilación ARM32 definitiva de ESTA versión en Zig del Mac, render de skin en MPC física, prueba táctil/rueda/Q-Link y respuesta musical de las 27 voces en dispositivo. Gráficos dinámicos ADSR/LFO y splash glitch todavía no reproducen la animación interactiva aprobada en el hardware MPC; en el entorno SDK actual se conservan imágenes originales estáticas. 4 controles DSP (noise, spread, filter envelope, key track) siguen como parámetros de UI sin efecto sobre audio; contrato original clasificaba noise como propuesto. NO DECLARAR VERSION FINAL.
+NO ENTREGAR COMO 'LO APROBADO LISTO' SIN PRUEBAS; NO HACER BAJAR AL AUTOR OTRO EXPERIMENTO.
