@@ -11137,8 +11137,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "lab10_acoustic_a_on.png",
+                  "offImage": "lab10_acoustic_a_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -11206,8 +11206,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "lab10_acoustic_b_on.png",
+                  "offImage": "lab10_acoustic_b_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
