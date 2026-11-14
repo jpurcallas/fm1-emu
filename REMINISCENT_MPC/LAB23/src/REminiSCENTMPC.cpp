@@ -132,15 +132,28 @@ public:
   const float env=get(missingUi_[2]), track=get(missingUi_[3]);
   const float effective=std::clamp(cutoff+(env-64.f)*37.f/127.f+(track-64.f)*15.f/127.f,0.f,127.f);
   const int v=int(std::lround(effective));
-  if(getInt(visualFilterEffectiveCutoff_)!=v)set(visualFilterEffectiveCutoff_,float(v));
+  if(getInt(visualFilterEffectiveCutoff_)!=v){
+   set(visualFilterEffectiveCutoff_,float(v));
+   notifyHostParameterChanged(visualFilterEffectiveCutoff_);
+  }
   const int step=std::clamp(int(std::lround(effective*63.f/127.f)),0,63);
-  if(getInt(visualFilterFrame_)!=step%32)set(visualFilterFrame_,float(step%32));
-  if(getInt(visualFilterGroup_)!=step/32)set(visualFilterGroup_,float(step/32));
+  if(getInt(visualFilterFrame_)!=step%32){
+   set(visualFilterFrame_,float(step%32));
+   notifyHostParameterChanged(visualFilterFrame_);
+  }
+  if(getInt(visualFilterGroup_)!=step/32){
+   set(visualFilterGroup_,float(step/32));
+   notifyHostParameterChanged(visualFilterGroup_);
+  }
  }
  void syncQLinks(){
   for(int k=0;k<4;k++){
    const int target=qLinkTarget(k);if(target<0||qLinkProxy_[k]<0)continue;
-   set(qLinkProxy_[k],std::round(127.f*getNormalised(target)));
+   const float scaled=std::round(127.f*getNormalised(target));
+   if(getInt(qLinkProxy_[k])!=int(scaled)){
+    set(qLinkProxy_[k],scaled);
+    notifyHostParameterChanged(qLinkProxy_[k]);
+   }
   }
  }
  void parameterChanged(int index,float plain)override{
@@ -158,6 +171,12 @@ public:
      const float next=std::clamp(plain/127.f,0.f,1.f);
      if(std::lround(param(t).toPlain(next))!=getInt(t)){
       setNormalised(t,next);
+      // setNormalised() only updates the plugin's internal atomic value.
+      // Official MPC SDK requires a separate audioMasterAutomate notification
+      // for host/UI observers of the REAL target (not just the Q-Link proxy).
+      // Otherwise filmstrips/envelopes bound to t can stay at their old frame.
+      // parameterChanged() is invoked from the UI edit path, not process().
+      notifyHostParameterChanged(t);
       if(t==hostIndices_[48] || t==missingUi_[2] || t==missingUi_[3])syncFilterVisual();
      }
     }else if(index==t){
@@ -172,15 +191,12 @@ public:
   for(int k=0;k<4;k++)if(index==qLinkProxy_[k]){
    const int target=qLinkTarget(k);
    if(target>=0){
-    if(target==hostIndices_[30]){
-      int v=getInt(target);out=(v>0?"+":"")+std::to_string(v)+" OCT";
-    }else{
-      const int pctFields[]={23,24,25,26,28,29,31};
-      bool pct=false;
-      for(int f:pctFields)if(target==hostIndices_[f])pct=true;
-      if(pct)out=std::to_string(int(std::lround(getNormalised(target)*100)))+" %";
-      else out=param(target).display(get(target));
-    }
+    // All four visible Q-Link positions display a consistent 0..100%,
+    // regardless of whether the real DSP parameter is 0..127, signed,
+    // an on/off choice, or a categorical parameter. Never change the real
+    // parameter's scaling; only the front-panel proxy display is formatted.
+    const int pct=std::clamp(int(std::lround(getNormalised(target)*100.f)),0,100);
+    out=std::to_string(pct)+" %";
     return true;
    }
   }
