@@ -1,0 +1,52 @@
+name: REminiSCENT — FLAC253 bit-exact synthetic PCM regression
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - 'REMINISCENT_MPC/LAB23/tests/test_flac253_decode.cpp'
+      - '.github/workflows/test-reminiscent-flac253.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  flac-precision:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install upstream FLAC encoder for synthetic fixtures
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq flac
+      - name: Generate 16/24-bit signed test PCM and encode losslessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/flac_fixture
+          python3 - <<'PY'
+          import pathlib,math,struct,wave
+          d=pathlib.Path('/tmp/flac_fixture')
+          for bits,ch,rate,frames in [(16,1,44100,2048),(24,2,48000,4096),(24,1,44100,3000),(16,2,44100,2053)]:
+            rng=(1<<(bits-1))-1
+            data=bytearray()
+            for f in range(frames):
+              for c in range(ch):
+                v=((f*16389+c*3511)*1973)%(2*rng+1)-rng
+                if f%997==0:v=(-rng if c else rng)
+                data.extend(int(v).to_bytes(bits//8,'little',signed=True))
+            stem=f'pcm_{bits}b_{ch}ch_{rate}hz'
+            (d/(stem+'.raw')).write_bytes(data)
+            with wave.open(str(d/(stem+'.wav')),'wb') as w:
+              w.setnchannels(ch);w.setsampwidth(bits//8);w.setframerate(rate);w.writeframes(data)
+          PY
+          for wav in /tmp/flac_fixture/*.wav;do
+            flac --silent --verify --best --force -o "\${wav%.wav}.flac" "$wav"
+          done
+      - name: Compile host dr_flac reader and compare every original PCM byte
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=REMINISCENT_MPC/LAB23
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror -I"$P/src" \
+            "$P/src/flac_loader.cpp" "$P/tests/test_flac253_decode.cpp" -o /tmp/test_flac253
+          /tmp/test_flac253 /tmp/flac_fixture/pcm_16b_1ch_44100hz.flac /tmp/flac_fixture/pcm_16b_1ch_44100hz.raw 1 44100 16 2048
+          /tmp/test_flac253 /tmp/flac_fixture/pcm_24b_2ch_48000hz.flac /tmp/flac_fixture/pcm_24b_2ch_48000hz.raw 2 48000 24 4096
+          /tmp/test_flac253 /tmp/flac_fixture/pcm_24b_1ch_44100hz.flac /tmp/flac_fixture/pcm_24b_1ch_44100hz.raw 1 44100 24 3000
+          /tmp/test_flac253 /tmp/flac_fixture/pcm_16b_2ch_44100hz.flac /tmp/flac_fixture/pcm_16b_2ch_44100hz.raw 2 44100 16 2053
