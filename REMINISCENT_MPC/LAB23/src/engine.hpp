@@ -45,8 +45,8 @@ const ParameterSpec& parameterSpec(ParameterId id);
 int parameterCount();
 
 struct Params {
- float acousticBlend=.5f, masterBlend=.30f, oscLevel=.30f;
- bool acousticA=true,acousticB=true,oscOn=true;
+ float acousticBlend=0.f, masterBlend=0.f, oscLevel=0.f;
+ bool acousticA=true,acousticB=false,oscOn=false;
  int sourceA=0,sourceB=1; // indices 0..27 from LAB19 bank.tsv
  float levelA=1.f,levelB=1.f,masterLevel=1.f;
  float masterPresence=64.f/127.f; // LAB10 wide +/-12dB presence shelf, 64 neutral

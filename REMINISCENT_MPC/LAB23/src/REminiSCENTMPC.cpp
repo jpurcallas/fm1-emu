@@ -285,7 +285,8 @@ private:
   e.setParameter(rem::ParameterId::AcousticAOn,(v[7]>=0.5f)?1.f:0.f);
   e.setParameter(rem::ParameterId::AcousticBOn,(v[8]>=0.5f)?1.f:0.f);
   e.setParameter(rem::ParameterId::AcousticBlend,(v[23]/127.f));
-  e.setParameter(rem::ParameterId::OscOn,1.f);
+  // No dedicated OSC power host parameter: level=0 is OFF. Raising OSC level enables it.
+  e.setParameter(rem::ParameterId::OscOn,(v[28]>0.f)?1.f:0.f);
   e.setParameter(rem::ParameterId::OscWave,v[2]/7.f);
   e.setParameter(rem::ParameterId::OscLevel,(v[28]/127.f));
   e.setParameter(rem::ParameterId::OscOctave,(v[32]+3.f)/6.f);
