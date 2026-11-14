@@ -861,6 +861,37 @@
               "version": 2,
               "componentData": {
                 "version": 1,
+                "name": "LIVE_OSC_SELECTOR_LAB10",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "lab10_osc_selection_live_8.png",
+                  "numFrames": 8,
+                  "handleName": "Parameter 2"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 368 779 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
                 "name": "LIVE_BLENDECLIPSE_LAB10",
                 "type": "Image",
                 "data": {
@@ -1175,6 +1206,95 @@
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112",
                   "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2_CLEAN_PANEL",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_mod_env2_clean_panel.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "94 511 534 112",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2_ADSR_4_PARAMS_UI31",
+                "type": "Envelope",
+                "data": {
+                  "version": 1,
+                  "envelopeType": "ADSR",
+                  "envelopeStyle": "WithoutHeader",
+                  "envelopeName": "",
+                  "backgroundColour": "00000000",
+                  "scaleColour": "00000000",
+                  "lineColour": "ffe9d1a8",
+                  "fillColour": "0fe8caa0",
+                  "highlightColour": "fff5cfa1",
+                  "lineWidth": 3,
+                  "handleWidth": 17,
+                  "handleHeight": 11,
+                  "handleShape": "Circle",
+                  "handleLineWidth": 2,
+                  "handleLineColour": "fff5cfa1",
+                  "handleFillColour": "ff263638",
+                  "handleTextColour": "ffe3c8a4",
+                  "handleLineWidthOnPressed": 2,
+                  "handleLineColourOnPressed": "fff5cfa1",
+                  "handleFillColourOnPressed": "ffdf9970",
+                  "handleTextColourOnPressed": "ffe3c8a4",
+                  "handleArrowLineColourOnPressed": "ffe3c8a4",
+                  "handleArrowFillColourOnPressed": "ffe3c8a4",
+                  "attackHandle": "Parameter 88",
+                  "decayHandle": "Parameter 89",
+                  "sustainHandle": "Parameter 90",
+                  "releaseHandle": "Parameter 91",
+                  "attackShapeHandle": "Invalid",
+                  "decayShapeHandle": "Invalid",
+                  "releaseShapeHandle": "Invalid",
+                  "forceHideShapeHandles": true,
+                  "forceCurveShape": 0.5,
+                  "curveType": "Quadratic"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "101 515 520 101",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
                 ]
               }
             },
