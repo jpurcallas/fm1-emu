@@ -213,7 +213,14 @@ public:
       if(t==hostIndices_[48] || t==missingUi_[2] || t==missingUi_[3])syncFilterVisual();
      }
     }else if(index==t){
-     set(qLinkProxy_[k],std::round(127.f*getNormalised(t)));
+     // Direct touch / Data Wheel must update the on-screen Q-Link proxy too.
+     // set() changes plugin storage but does NOT notify host widgets;
+     // skipping audioMasterAutomate leaves pointers/graphics visually stale.
+     const int nextProxy=int(std::lround(127.f*getNormalised(t)));
+     if(getInt(qLinkProxy_[k])!=nextProxy){
+      set(qLinkProxy_[k],float(nextProxy));
+      notifyHostParameterChanged(qLinkProxy_[k]);
+     }
     }
    }
   }
