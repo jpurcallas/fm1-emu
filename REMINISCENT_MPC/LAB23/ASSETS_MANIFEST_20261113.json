@@ -2,7 +2,7 @@
   "project": "REminiSCENT LAB23",
   "date": "2026-11-13",
   "source": "LAB22+UI LAB10 HTML, build LAB23",
-  "asset_count": 46,
+  "asset_count": 54,
   "backgrounds": 11,
   "native_tabs": 1,
   "touch_navigation": "internal selector/parameter 112, hardware unverified",
@@ -112,6 +112,13 @@
       "sha256": "d3f19d65ed021149598297c8a6188b17acacf5662ee14ab3e0016308b3d0fe30",
       "width": 1280,
       "height": 628
+    },
+    {
+      "path": "skins/memory_playhead_live_32.png",
+      "bytes": 13232,
+      "width": 750,
+      "height": 2816,
+      "sha256": "efe0667c66c0e7334a108585b823a1bc4d4ace27bc61f874064ef8b7ba9d5670"
     },
     {
       "path": "skins/memory_position_32.png",
@@ -324,6 +331,55 @@
       "height": 74
     },
     {
+      "path": "skins/solaris_v09_00.png",
+      "bytes": 1080398,
+      "width": 240,
+      "height": 6000,
+      "sha256": "25ba63273adddbeae57147b24bc17db4167a89ee7acaca96ff328ab7900cab30"
+    },
+    {
+      "path": "skins/solaris_v09_01.png",
+      "bytes": 1080994,
+      "width": 240,
+      "height": 6000,
+      "sha256": "ea2b7b57b2048e212280405919e2a5a38635eec7445d7058ccd47a053cfcc39b"
+    },
+    {
+      "path": "skins/solaris_v09_02.png",
+      "bytes": 818855,
+      "width": 240,
+      "height": 6000,
+      "sha256": "763c962be3d540ebfa8d455727df8f36f230032d5cb6c09fc2c9ab5be922ac30"
+    },
+    {
+      "path": "skins/solaris_v09_03.png",
+      "bytes": 421273,
+      "width": 240,
+      "height": 6000,
+      "sha256": "029f9321ec62cfb4ec52890dd5eab0ffc453741b9174f117dc106b4caa939c1f"
+    },
+    {
+      "path": "skins/solaris_v09_04.png",
+      "bytes": 631310,
+      "width": 240,
+      "height": 6000,
+      "sha256": "fe4ebd214bc854ea4ddbf3c85fa8c275053338357e9f13fe8c140019873a7d9f"
+    },
+    {
+      "path": "skins/solaris_v09_05.png",
+      "bytes": 634849,
+      "width": 240,
+      "height": 6000,
+      "sha256": "f571ad1e9cdba26996b3e1ce4936217c02e155dcbdc062ba89ff5933ee1f8539"
+    },
+    {
+      "path": "skins/solaris_v09_plate.png",
+      "bytes": 3292,
+      "width": 1280,
+      "height": 628,
+      "sha256": "6b772a3c52307bea07a5700d3a9dff7736510ab73c7ab9fc89149448681655b4"
+    },
+    {
       "path": "skins/touch_blank.png",
       "bytes": 69,
       "sha256": "6fa466e21df6bf014ed03517399a711777f572b1f0be6a561b947790cda9f634",
@@ -333,5 +389,6 @@
   ],
   "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested.",
   "note_adsr": "LAB23 native ADSR Envelope overlay uses original LAB10 image with ONLY static curve removed. Stage handles mapped to host params 29..32. Unverified on MPC hardware; original fondos/03.png retained for reference and rollback. New PNG remains private, no public binaries.",
-  "note_mod_memory": "Current LAB23 MOD page has exactly LFO1/LFO2/ENV2; no Mod Wheel. Shape-driven strips reflect existing DSP shape choices, Env2 Envelope binds four exact host parameters. MEMORY simulated buffer's selection position reflects a real parameter; visualisation is NOT a captured PCM waveform and not full time-domain animation. No DSP change."
+  "note_mod_memory": "Current LAB23 MOD page has exactly LFO1/LFO2/ENV2; no Mod Wheel. Shape-driven strips reflect existing DSP shape choices, Env2 Envelope binds four exact host parameters. MEMORY simulated buffer's selection position reflects a real parameter; visualisation is NOT a captured PCM waveform and not full time-domain animation. No DSP change.",
+  "note_live_runtime": "LAB23: 6 filmstrips of 25 exact decoded MP4 frames for author-approved Solaris v09 6sec/25fps at 240x240; background matte and live playhead. LFO1/2 & MEMORY now render real engine telemetry using SDK Plotter; host parameters appended 118..123. No Mod Wheel. Hardware UI not yet verified."
 }
