@@ -35,7 +35,10 @@ void Engine::setPolyphony(int n){limit=std::max(1,std::min(MAX_VOICES,n));for(in
 void Engine::noteOn(int note,float velocity){ if(note<0||note>127) return; velocity=clamp(velocity,0.f,1.f); if(velocity<=0.f){noteOff(note);return;} int idx=-1;for(int i=0;i<limit;i++)if(!voices[i].active){idx=i;break;}
  if(idx<0){for(int i=0;i<limit;i++)if(!voices[i].held){if(idx<0||voices[i].born<voices[idx].born)idx=i;}}
  if(idx<0){idx=0;for(int i=1;i<limit;i++)if(voices[i].born<voices[idx].born)idx=i;}
- Voice v;v.active=true;v.held=true;v.velocity=velocity;v.note=note;v.noiseSeed=0xa341316cu^(uint32_t(note)*0x9e3779b9u);if(!v.noiseSeed)v.noiseSeed=1;v.born=++clock;// LAB19: loaded source A and source B are held in their dedicated banks.
+ Voice v;v.active=true;v.held=true;v.velocity=velocity;v.note=note;v.noiseSeed=0xa341316cu^(uint32_t(note)*0x9e3779b9u);if(!v.noiseSeed)v.noiseSeed=1;
+ v.acousticNoiseSeed=0x6e624eb7u^(uint32_t(note)*0x85ebca6bu)^uint32_t(clock);
+ if(!v.acousticNoiseSeed)v.acousticNoiseSeed=1;
+ v.born=++clock;// LAB19: loaded source A and source B are held in their dedicated banks.
  v.a=(params.sourceA>=0 && params.sourceA<28 && !sourceBanks[params.sourceA].layers.empty())?sourceBanks[params.sourceA].nearest(note):bankA.nearest(note);
  v.b=(params.sourceB==10 && !didgeridooB.layers.empty())?didgeridooB.nearest(note):((params.sourceB>=0 && params.sourceB<28 && !sourceBanks[params.sourceB].layers.empty())?sourceBanks[params.sourceB].nearest(note):bankB.nearest(note));v.stage=Voice::Stage::Attack;
  if(v.a)v.rateA=std::pow(2.,double(note-v.a->root)/12.-double(v.a->tuneCents)/1200.)*v.a->rate/sr;
@@ -169,6 +172,20 @@ float Engine::oscillator(Voice& v,float pitchSemitone,float pulseWidth){
  case Wave::Bright:return float(.5*std::sin(2*PI*p)+.3*std::sin(6*PI*p)+.2*std::sin(10*PI*p));
  case Wave::Hollow:return float(.7*std::sin(2*PI*p)+.3*std::sin(6*PI*p));}
  return 0;}
+// Acoustic WHITE/PINK, independent of the existing OSC noise and sample PCM.
+// PINK is a 16-row Voss-McCartney octave noise source (no loops or sample edits).
+static float acousticNoiseNext(Voice &v,int type){
+ auto white=[&](){uint32_t x=v.acousticNoiseSeed;x^=x<<13;x^=x>>17;x^=x<<5;
+  v.acousticNoiseSeed=x;return (float(int32_t(x>>16))-32768.f)/32768.f;};
+ const float w=white();
+ if(type==0)return w;
+ const uint32_t count=++v.acousticPinkCounter;
+ int row=0;while(row<15&&(count&(1u<<row))==0)++row;
+ const float next=white();
+ v.acousticPinkSum+=next-v.acousticPinkRows[row];
+ v.acousticPinkRows[row]=next;
+ return clamp((v.acousticPinkSum+w)*(2.6f/17.f),-1.f,1.f);
+}
 void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const double masterPitchRatio=std::ldexp(1.,std::max(-2,std::min(2,params.masterOctave)));params.acousticBlend=clamp(params.acousticBlend,0,1);params.masterBlend=clamp(params.masterBlend,0,1);params.sustain=clamp(params.sustain,0,1);resonance.configure(params,sr);
  for(int i=0;i<frames;i++){
  const auto lfo=modulation.tick(params,sr);
@@ -183,8 +200,15 @@ void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const doub
  }
  double L=0,R=0;
  float maxEnvCutoff=0.f;
+ // Bridge16 has one shared post-voice LPF. Track a velocity-weighted
+ // keyboard centroid and envelope level without replacing that filter.
+ float filterWeight=0.f,filterEnvelopeWeighted=0.f,filterNoteWeighted=0.f;
  // Independent ENV2 ticks once per voice per frame, separate from AMP ADSR.
  for(int j=0;j<limit;j++){auto& v=voices[j];if(!v.active)continue;float gain=envelope(v);if(!v.active)continue;
+ const float filterVoiceWeight=gain*v.velocity;
+ filterWeight+=filterVoiceWeight;
+ filterEnvelopeWeighted+=gain*filterVoiceWeight;
+ filterNoteWeighted+=float(v.note-60)*filterVoiceWeight;
  float env=env2Tick(v); // unipolar independent envelope
  const bool envActive=params.env2On&&env>0.f;
  const int envDest=params.modDestination[2];
@@ -200,12 +224,29 @@ void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const doub
  float gb=params.acousticB?(params.acousticA?ab:1):0;
  float pw=clamp(params.pulseWidth+.40f*lane[5],.05f,.95f);
  float s=params.oscOn?oscillator(v,pitchSemitone,pw)*params.oscLevel:0;
+ // OSC SPREAD: phase decorrelation of left/right without modifying the
+ // original oscillator state. At 64/127 the output is unchanged.
+ float oscSide=0.f;
+ const float spread=clamp(params.oscSpread,0.f,1.f)-64.f/127.f;
+ if(params.oscOn&&std::abs(spread)>1e-7f){
+  Voice shifted=v; shifted.phaseQ32+=0x20000000u;
+  shifted.phase+=.125;shifted.phase-=std::floor(shifted.phase);
+  const float shiftedSample=oscillator(shifted,pitchSemitone,pw)*params.oscLevel;
+  oscSide=(shiftedSample-s)*(.8f*spread);
+ }
  // Calibrated from PCM sample RMS (piano ~ -35dBFS, mbira ~ -34dBFS).
  // Preview Bridge02 OSC was masking the physical instruments by >10dB.
  // A/B remain individually controllable; headroom checked for eight MIDI voices.
  constexpr float ACOUSTIC_GAIN=3.4f;
  float acL=ACOUSTIC_GAIN*(a.l*ga*params.levelA+b.l*gb*params.levelB);
  float acR=ACOUSTIC_GAIN*(a.r*ga*params.levelA+b.r*gb*params.levelB);
+ // Independent ACOUSTIC noise under the existing ADSR/velocity. Muted at
+ // its saved default (0), preserving the exact original acoustic samples.
+ if((params.acousticA||params.acousticB)&&params.acousticNoiseLevel>0.f){
+  const float noise=.12f*clamp(params.acousticNoiseLevel,0.f,1.f)*
+   acousticNoiseNext(v,params.acousticNoiseType);
+  acL+=noise;acR+=noise;
+ }
  float masterBlend=clamp(params.masterBlend+.5f*lane[4],0.f,1.f);
  float am=(params.acousticA||params.acousticB)?(params.oscOn?1-masterBlend:1):0;
  float sm=params.oscOn?((params.acousticA||params.acousticB)?masterBlend:1):0;
@@ -213,8 +254,8 @@ void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const doub
  float amp=clamp(1.f-.5f*(ampLfoDepth-routed[2]),0.f,1.f);
  if(envActive&&envDest==2)amp*=clamp((1.f-params.env2Amount)+env,0.f,1.f);
  float pan=clamp(lane[3],-1.f,1.f);
- const float vl=(acL*am+s*sm)*gain*v.velocity*amp;
- const float vr=(acR*am+s*sm)*gain*v.velocity*amp;
+ const float vl=(acL*am+(s+oscSide)*sm)*gain*v.velocity*amp;
+ const float vr=(acR*am+(s-oscSide)*sm)*gain*v.velocity*amp;
  L+=vl*(1.f-pan);R+=vr*(1.f+pan);
  }
  Stereo dry{float(L),float(R)};
@@ -231,7 +272,14 @@ void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const doub
  mix=character.process(mix,params,sr);
  if(params.lowPassOn){
    // LFO2 sweeps cutoff up/down, up to 3 octaves in conventional filter modulation.
-   const float cutoffOctaves=3.f*(routed[1]+maxEnvCutoff);
+   const float envDepth=2.f*(clamp(params.lowPassEnv,0.f,1.f)-56.f/127.f);
+   const float trackDepth=2.f*(clamp(params.lowPassTrack,0.f,1.f)-64.f/127.f);
+   const float avgAmpEnv=filterWeight>0.f?filterEnvelopeWeighted/filterWeight:0.f;
+   const float avgNote=filterWeight>0.f?filterNoteWeighted/filterWeight:0.f;
+   // New depth controls are bipolar: their LAB23 stored defaults are
+   // neutral, and neither replaces the previously approved LPF.
+   const float cutoffOctaves=3.f*(routed[1]+maxEnvCutoff)+
+       3.f*envDepth*avgAmpEnv+trackDepth*avgNote/12.f;
    float hz=clamp(params.lowPassCutoff*std::pow(2.f,cutoffOctaves),20.f,sr*.46f);
    float alpha=1.f-std::exp(-2.f*float(PI)*hz/sr);
    lpL+=alpha*(mix.l-lpL);lpR+=alpha*(mix.r-lpR);
