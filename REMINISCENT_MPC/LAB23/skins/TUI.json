@@ -6278,23 +6278,29 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_OSC_WAVE_LAB10",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_osc_wave_live_8.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_osc_wave_live_8.png",
                   "numFrames": 8,
-                  "handleName": "Parameter 2"
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
@@ -6309,23 +6315,29 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_OSC_SELECTOR_LAB10",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_osc_selection_live_8.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_osc_selection_live_8.png",
                   "numFrames": 8,
-                  "handleName": "Parameter 2"
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
@@ -6340,23 +6352,29 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_BLENDECLIPSE_LAB10",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_blend_eclipse_live_16.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_blend_eclipse_live_16.png",
                   "numFrames": 16,
-                  "handleName": "Parameter 20"
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 20"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
@@ -6534,19 +6552,25 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_MEMORY_READHEAD_UI31",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_memory_playhead_32.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_memory_playhead_32.png",
                   "numFrames": 32,
-                  "handleName": "Parameter 121"
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 121"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
@@ -6565,23 +6589,29 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_MEMORY_WINDOW_BOUNDS_UI32",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_memory_window_dynamic_64.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_memory_window_dynamic_64.png",
                   "numFrames": 64,
-                  "handleName": "Parameter 33"
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 33"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
@@ -6596,23 +6626,29 @@
               "componentData": {
                 "version": 1,
                 "name": "LIVE_MEMORY_SELECTED_POSITION_UI32",
-                "type": "Image",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "lab10_memory_position_dynamic_64.png",
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_memory_position_dynamic_64.png",
                   "numFrames": 64,
-                  "handleName": "Parameter 35"
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
                 }
               },
               "handle remapping": {
                 "version": 1,
-                "map": []
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 35"
+                  }
+                ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
@@ -7516,9 +7552,14 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_1_TOUCH_WHEEL_VALUE",
-                "type": "UI32_FOCUS_Q_LINK_1_TOUCH_WHEEL_VALUE",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7546,9 +7587,14 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_2_TOUCH_WHEEL_VALUE",
-                "type": "UI32_FOCUS_Q_LINK_2_TOUCH_WHEEL_VALUE",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7576,9 +7622,14 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_3_TOUCH_WHEEL_VALUE",
-                "type": "UI32_FOCUS_Q_LINK_3_TOUCH_WHEEL_VALUE",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7606,9 +7657,14 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_4_TOUCH_WHEEL_VALUE",
-                "type": "UI32_FOCUS_Q_LINK_4_TOUCH_WHEEL_VALUE",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7636,9 +7692,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_SOURCE_A",
-                "type": "UI32_FOCUS_ACOUSTIC_SOURCE_A",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7668,10 +7729,15 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_POWER_A",
-                "type": "UI32_TOGGLE_ACOUSTIC_POWER_A",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -7700,9 +7766,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_SOURCE_B",
-                "type": "UI32_FOCUS_ACOUSTIC_SOURCE_B",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -7732,10 +7803,15 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_POWER_B",
-                "type": "UI32_TOGGLE_ACOUSTIC_POWER_B",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -7764,9 +7840,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_BLEND_TOUCH",
-                "type": "UI32_FOCUS_ACOUSTIC_BLEND_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
                   "handleName": "Data"
                 }
               },
@@ -8166,9 +8247,14 @@
               "componentData": {
                 "version": 1,
                 "name": "BLEND_ECLIPSE_TOUCH",
-                "type": "UI32_FOCUS_BLEND_ECLIPSE_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8198,9 +8284,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_ATTACK_WHEEL",
-                "type": "UI32_FOCUS_ENVELOPE_ATTACK_WHEEL",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8230,9 +8321,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_DECAY_WHEEL",
-                "type": "UI32_FOCUS_ENVELOPE_DECAY_WHEEL",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8262,9 +8358,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_SUSTAIN_WHEEL",
-                "type": "UI32_FOCUS_ENVELOPE_SUSTAIN_WHEEL",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8294,9 +8395,14 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_RELEASE_WHEEL",
-                "type": "UI32_FOCUS_ENVELOPE_RELEASE_WHEEL",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8326,10 +8432,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_FREEZE",
-                "type": "UI32_TOGGLE_MEMORY_FREEZE",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -8358,10 +8469,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_REVERSE",
-                "type": "UI32_TOGGLE_MEMORY_REVERSE",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -8390,10 +8506,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_TIDE",
-                "type": "UI32_TOGGLE_MEMORY_TIDE",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -8422,9 +8543,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_WINDOW_VISUAL_TOUCH",
-                "type": "UI32_FOCUS_MEMORY_WINDOW_VISUAL_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
                   "handleName": "Data"
                 }
               },
@@ -8454,9 +8580,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_POSITION_VISUAL_TOUCH",
-                "type": "UI32_FOCUS_MEMORY_POSITION_VISUAL_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
                   "handleName": "Data"
                 }
               },
@@ -8486,9 +8617,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_MIX",
-                "type": "UI32_FOCUS_MEMORY_MIX",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8518,9 +8654,14 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_1_TOUCH",
-                "type": "UI32_FOCUS_RESONANCE_PARAM_1_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8550,9 +8691,14 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_2_TOUCH",
-                "type": "UI32_FOCUS_RESONANCE_PARAM_2_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8582,9 +8728,14 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_3_TOUCH",
-                "type": "UI32_FOCUS_RESONANCE_PARAM_3_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8614,9 +8765,14 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_4_TOUCH",
-                "type": "UI32_FOCUS_RESONANCE_PARAM_4_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8646,9 +8802,14 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_1_TOUCH",
-                "type": "UI32_FOCUS_FILTER_PARAM_1_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8678,9 +8839,14 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_2_TOUCH",
-                "type": "UI32_FOCUS_FILTER_PARAM_2_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8710,9 +8876,14 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_3_TOUCH",
-                "type": "UI32_FOCUS_FILTER_PARAM_3_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8742,9 +8913,14 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_4_TOUCH",
-                "type": "UI32_FOCUS_FILTER_PARAM_4_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8774,9 +8950,14 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_1_TOUCH",
-                "type": "UI32_FOCUS_GRANULAR_PARAM_1_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8806,9 +8987,14 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_2_TOUCH",
-                "type": "UI32_FOCUS_GRANULAR_PARAM_2_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8838,9 +9024,14 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_3_TOUCH",
-                "type": "UI32_FOCUS_GRANULAR_PARAM_3_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8870,9 +9061,14 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_4_TOUCH",
-                "type": "UI32_FOCUS_GRANULAR_PARAM_4_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -8939,10 +9135,15 @@
               "componentData": {
                 "version": 1,
                 "name": "CHAR_ONOFF_DISTORTION",
-                "type": "UI32_TOGGLE_CHAR_ONOFF_DISTORTION",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9008,10 +9209,15 @@
               "componentData": {
                 "version": 1,
                 "name": "CHAR_ONOFF_TAPE",
-                "type": "UI32_TOGGLE_CHAR_ONOFF_TAPE",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9077,10 +9283,15 @@
               "componentData": {
                 "version": 1,
                 "name": "CHAR_ONOFF_VINYL",
-                "type": "UI32_TOGGLE_CHAR_ONOFF_VINYL",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9146,10 +9357,15 @@
               "componentData": {
                 "version": 1,
                 "name": "CHAR_ONOFF_CRUSH",
-                "type": "UI32_TOGGLE_CHAR_ONOFF_CRUSH",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9215,10 +9431,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ONOFF_LFO1",
-                "type": "UI32_TOGGLE_MOD_ONOFF_LFO1",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9284,10 +9505,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ONOFF_LFO2",
-                "type": "UI32_TOGGLE_MOD_ONOFF_LFO2",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9353,10 +9579,15 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ONOFF_ENV2",
-                "type": "UI32_TOGGLE_MOD_ONOFF_ENV2",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9385,9 +9616,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_1",
-                "type": "UI32_FOCUS_MOD_LFO1_SECONDARY_1",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9418,9 +9654,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_2",
-                "type": "UI32_FOCUS_MOD_LFO1_SECONDARY_2",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9451,9 +9692,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_3",
-                "type": "UI32_FOCUS_MOD_LFO1_SECONDARY_3",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9484,9 +9730,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_4",
-                "type": "UI32_FOCUS_MOD_LFO1_SECONDARY_4",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9517,9 +9768,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_1",
-                "type": "UI32_FOCUS_MOD_LFO2_SECONDARY_1",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9550,9 +9806,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_2",
-                "type": "UI32_FOCUS_MOD_LFO2_SECONDARY_2",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9583,9 +9844,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_3",
-                "type": "UI32_FOCUS_MOD_LFO2_SECONDARY_3",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9616,9 +9882,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_4",
-                "type": "UI32_FOCUS_MOD_LFO2_SECONDARY_4",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9649,9 +9920,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ENV2_SECONDARY_1",
-                "type": "UI32_FOCUS_MOD_ENV2_SECONDARY_1",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9682,9 +9958,14 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ENV2_SECONDARY_2",
-                "type": "UI32_FOCUS_MOD_ENV2_SECONDARY_2",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -9752,10 +10033,15 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_ONOFF_DELAY",
-                "type": "UI32_TOGGLE_SEND_ONOFF_DELAY",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9821,10 +10107,15 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_ONOFF_REVERB",
-                "type": "UI32_TOGGLE_SEND_ONOFF_REVERB",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9890,10 +10181,15 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_ONOFF_MOD1",
-                "type": "UI32_TOGGLE_SEND_ONOFF_MOD1",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9959,10 +10255,15 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_ONOFF_MOD2",
-                "type": "UI32_TOGGLE_SEND_ONOFF_MOD2",
+                "type": "Button",
                 "data": {
-                  "version": 1,
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -9991,9 +10292,14 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_MOD1_ALGORITHM_TOUCH",
-                "type": "UI32_FOCUS_SEND_MOD1_ALGORITHM_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -10024,9 +10330,14 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_MOD2_ALGORITHM_TOUCH",
-                "type": "UI32_FOCUS_SEND_MOD2_ALGORITHM_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_native_touch_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -10049,6 +10360,368 @@
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112",
                   "IndexedEnabling/3/4/Parameter 110"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "VOICE_0_OLD_TEXT_COVER",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_voice_a_text_clean.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "153 251 404 28",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "VOICE_0_LIVE_HOST_VALUE",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Bold",
+                      "height": 13.0
+                    },
+                    "colour": "fff1dbc1",
+                    "justification": "verticallyCentred",
+                    "case": "Original"
+                  },
+                  "type": "Value",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 0"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "159 251 396 28",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "VOICE_1_OLD_TEXT_COVER",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_voice_b_text_clean.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "153 319 404 28",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "VOICE_1_LIVE_HOST_VALUE",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Bold",
+                      "height": 13.0
+                    },
+                    "colour": "fff1dbc1",
+                    "justification": "verticallyCentred",
+                    "case": "Original"
+                  },
+                  "type": "Value",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 1"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "159 319 396 28",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "QLINK_1_LAB10_LIVE_POINTER",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_qlink_1_pointer_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 113"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1025 198 50 50",
+                "additionalInvalidatingHandles": []
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "QLINK_2_LAB10_LIVE_POINTER",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_qlink_2_pointer_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 114"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1025 297 50 50",
+                "additionalInvalidatingHandles": []
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "QLINK_3_LAB10_LIVE_POINTER",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_qlink_3_pointer_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 115"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1025 397 50 50",
+                "additionalInvalidatingHandles": []
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "QLINK_4_LAB10_LIVE_POINTER",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_qlink_4_pointer_101.png",
+                  "numFrames": 101,
+                  "invert": false,
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 116"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "1025 497 50 50",
+                "additionalInvalidatingHandles": []
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_CUTOFF_ORIGINAL_LAB10_REACTIVE",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_filter_from_approved_html_24.png",
+                  "numFrames": 24,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 42"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 248 595 231",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_BLEND_LAB10_LIVE_THUMB",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_acoustic_blend_direct_from_html_32.png",
+                  "numFrames": 32,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 19"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 457 530 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
                 ]
               }
             }

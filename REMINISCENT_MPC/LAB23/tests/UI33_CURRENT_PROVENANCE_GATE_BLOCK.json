@@ -1,0 +1,28 @@
+{
+  "archive": "REminiSCENT_UI33_LAB10_FILTER_CUTOFF_CANDIDATE.zip",
+  "base_images_verified": 19,
+  "graphics_total": 38,
+  "components": 140,
+  "errors": [],
+  "requires_visual_approval": [
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_adsr_clean_panel.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_blend_eclipse_live_16.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_memory_clean_panel.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_memory_playhead_32.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_mod_env2_clean_panel.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_osc_selection_live_8.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_osc_wave_live_8.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_memory_window_dynamic_64.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_memory_position_dynamic_64.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_on_state_glow.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_native_touch_101.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_voice_a_text_clean.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_voice_b_text_clean.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_qlink_1_pointer_101.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_qlink_2_pointer_101.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_qlink_3_pointer_101.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_qlink_4_pointer_101.png",
+    "OVERLAY NO COTEJADO CON HTML LAB10: lab10_filter_from_approved_html_24.png"
+  ],
+  "release_gate": "BLOCK"
+}
