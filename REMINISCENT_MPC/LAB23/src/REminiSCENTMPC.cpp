@@ -132,15 +132,28 @@ public:
   const float env=get(missingUi_[2]), track=get(missingUi_[3]);
   const float effective=std::clamp(cutoff+(env-64.f)*37.f/127.f+(track-64.f)*15.f/127.f,0.f,127.f);
   const int v=int(std::lround(effective));
-  if(getInt(visualFilterEffectiveCutoff_)!=v)set(visualFilterEffectiveCutoff_,float(v));
+  if(getInt(visualFilterEffectiveCutoff_)!=v){
+   set(visualFilterEffectiveCutoff_,float(v));
+   notifyHostParameterChanged(visualFilterEffectiveCutoff_);
+  }
   const int step=std::clamp(int(std::lround(effective*63.f/127.f)),0,63);
-  if(getInt(visualFilterFrame_)!=step%32)set(visualFilterFrame_,float(step%32));
-  if(getInt(visualFilterGroup_)!=step/32)set(visualFilterGroup_,float(step/32));
+  if(getInt(visualFilterFrame_)!=step%32){
+   set(visualFilterFrame_,float(step%32));
+   notifyHostParameterChanged(visualFilterFrame_);
+  }
+  if(getInt(visualFilterGroup_)!=step/32){
+   set(visualFilterGroup_,float(step/32));
+   notifyHostParameterChanged(visualFilterGroup_);
+  }
  }
  void syncQLinks(){
   for(int k=0;k<4;k++){
    const int target=qLinkTarget(k);if(target<0||qLinkProxy_[k]<0)continue;
-   set(qLinkProxy_[k],std::round(127.f*getNormalised(target)));
+   const float scaled=std::round(127.f*getNormalised(target));
+   if(getInt(qLinkProxy_[k])!=int(scaled)){
+    set(qLinkProxy_[k],scaled);
+    notifyHostParameterChanged(qLinkProxy_[k]);
+   }
   }
  }
  void parameterChanged(int index,float plain)override{
