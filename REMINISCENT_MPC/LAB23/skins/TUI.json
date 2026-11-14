@@ -5450,6 +5450,3372 @@
               }
             ]
           }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_149_38_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_149_38_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_149_38_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_149_38_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 149 38"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_434_39_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 434 39"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 434 39"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_434_39_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 434 39"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 434 39"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_530_46_HORIZONTAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 530 46"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Horizontal",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 530 46"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_462_310_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 462 310"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 462 310"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_124_177_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 124 177"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 124 177"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_145_177_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 145 177"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 145 177"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_146_177_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 146 177"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 146 177"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_164_177_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 164 177"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 164 177"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_290_106_HORIZONTAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 290 106"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Horizontal",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 290 106"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_422_106_HORIZONTAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 422 106"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Horizontal",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 422 106"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_450_35_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 450 35"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 450 35"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_162_72_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_162_72_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_162_72_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_162_72_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 162 72"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_155_63_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 155 63"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 155 63"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_170_63_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 170 63"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 170 63"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_170_63_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 170 63"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 170 63"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_172_63_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 172 63"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 172 63"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_185_70_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_184_70_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 184 70"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 184 70"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_185_70_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_185_70_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 185 70"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_120_34_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S1_120_34_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 114",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S2_120_34_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 115",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S3_120_34_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 116",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 120 34"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_290_38_VERTICAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 290 38"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Vertical",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 290 38"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "LAB10_SDK_FOCUS_S0_530_31_HORIZONTAL",
+          "value": {
+            "version": 2,
+            "actions": [
+              {
+                "version": 1,
+                "onAction": "Mouse Down",
+                "handler": "Q-Link",
+                "handleName": "Parameter 113",
+                "additionalData": ""
+              },
+              {
+                "version": 1,
+                "onAction": "Double Click",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              },
+              {
+                "version": 1,
+                "onAction": "Enter Pressed",
+                "handler": "Show Overlay",
+                "handleName": "Data",
+                "additionalData": "knob overlay"
+              }
+            ],
+            "backgroundData": {
+              "version": 1,
+              "focussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              },
+              "unfocussed": {
+                "version": 1,
+                "colour": "0",
+                "image": ""
+              }
+            },
+            "ignoreMousePresses": false,
+            "disableCoarseDataWheel": false,
+            "componentsData": [
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "selected control focus",
+                  "type": "Focus",
+                  "data": {
+                    "version": 1,
+                    "backgroundColour": "00000000",
+                    "outlineColour": "88e1ac80",
+                    "backgroundInset": 1.0,
+                    "outlineThickness": 1.0
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "WhenFocussed",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 530 31"
+                }
+              },
+              {
+                "version": 2,
+                "componentData": {
+                  "version": 1,
+                  "name": "native handle editor",
+                  "type": "Knob",
+                  "data": {
+                    "version": 3,
+                    "knobType": "FilmStrip",
+                    "filmStrip": "lab10_native_touch_101.png",
+                    "numFrames": 101,
+                    "invert": false,
+                    "dragOrientation": "Horizontal",
+                    "handleName": "Data"
+                  }
+                },
+                "handle remapping": {
+                  "version": 1,
+                  "map": []
+                },
+                "bounds": {
+                  "version": 1,
+                  "acceptsHWFocus": "No",
+                  "showWhenDataModelInvalid": "Show",
+                  "whenVisible": "Always",
+                  "boundsType": "Absolute",
+                  "bounds": "0 0 530 31"
+                }
+              }
+            ]
+          }
         }
       ]
     },
@@ -7552,14 +10918,9 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_1_TOUCH_WHEEL_VALUE",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_149_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7587,14 +10948,9 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_2_TOUCH_WHEEL_VALUE",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_149_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7622,14 +10978,9 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_3_TOUCH_WHEEL_VALUE",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_149_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7657,14 +11008,9 @@
               "componentData": {
                 "version": 1,
                 "name": "Q_LINK_4_TOUCH_WHEEL_VALUE",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_149_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7692,14 +11038,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_SOURCE_A",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_434_39_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7766,14 +11107,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_SOURCE_B",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_434_39_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -7840,14 +11176,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_BLEND_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_530_46_HORIZONTAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Horizontal",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8247,14 +11578,9 @@
               "componentData": {
                 "version": 1,
                 "name": "BLEND_ECLIPSE_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_462_310_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8284,14 +11610,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_ATTACK_WHEEL",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_124_177_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8321,14 +11642,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_DECAY_WHEEL",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_145_177_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8358,14 +11674,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_SUSTAIN_WHEEL",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_146_177_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8395,14 +11706,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ENVELOPE_RELEASE_WHEEL",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_164_177_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8543,14 +11849,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_WINDOW_VISUAL_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_290_106_HORIZONTAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Horizontal",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8580,14 +11881,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_POSITION_VISUAL_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_422_106_HORIZONTAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Horizontal",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8617,14 +11913,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MEMORY_MIX",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_450_35_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8654,14 +11945,9 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_1_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_162_72_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8691,14 +11977,9 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_2_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_162_72_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8728,14 +12009,9 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_3_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_162_72_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8765,14 +12041,9 @@
               "componentData": {
                 "version": 1,
                 "name": "RESONANCE_PARAM_4_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_162_72_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8802,14 +12073,9 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_1_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_155_63_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8839,14 +12105,9 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_2_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_170_63_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8876,14 +12137,9 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_3_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_170_63_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8913,14 +12169,9 @@
               "componentData": {
                 "version": 1,
                 "name": "FILTER_PARAM_4_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_172_63_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8950,14 +12201,9 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_1_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_185_70_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -8987,14 +12233,9 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_2_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_184_70_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9024,14 +12265,9 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_3_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_185_70_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9061,14 +12297,9 @@
               "componentData": {
                 "version": 1,
                 "name": "GRANULAR_PARAM_4_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_185_70_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9616,14 +12847,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_1",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9654,14 +12880,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_2",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9692,14 +12913,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_3",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9730,14 +12946,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO1_SECONDARY_4",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9768,14 +12979,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_1",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9806,14 +13012,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_2",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9844,14 +13045,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_3",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S2_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9882,14 +13078,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_LFO2_SECONDARY_4",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S3_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9920,14 +13111,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ENV2_SECONDARY_1",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -9958,14 +13144,9 @@
               "componentData": {
                 "version": 1,
                 "name": "MOD_ENV2_SECONDARY_2",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S1_120_34_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -10292,14 +13473,9 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_MOD1_ALGORITHM_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_290_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -10330,14 +13506,9 @@
               "componentData": {
                 "version": 1,
                 "name": "SEND_MOD2_ALGORITHM_TOUCH",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_290_38_VERTICAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_native_touch_101.png",
-                  "numFrames": 101,
-                  "invert": false,
-                  "dragOrientation": "Vertical",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
@@ -10693,14 +13864,9 @@
               "componentData": {
                 "version": 1,
                 "name": "ACOUSTIC_BLEND_LAB10_LIVE_THUMB",
-                "type": "Knob",
+                "type": "LAB10_SDK_FOCUS_S0_530_31_HORIZONTAL",
                 "data": {
-                  "version": 3,
-                  "knobType": "FilmStrip",
-                  "filmStrip": "lab10_acoustic_blend_direct_from_html_32.png",
-                  "numFrames": 32,
-                  "invert": false,
-                  "dragOrientation": "Horizontal",
+                  "version": 1,
                   "handleName": "Data"
                 }
               },
