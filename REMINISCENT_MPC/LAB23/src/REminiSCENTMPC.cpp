@@ -158,6 +158,12 @@ public:
      const float next=std::clamp(plain/127.f,0.f,1.f);
      if(std::lround(param(t).toPlain(next))!=getInt(t)){
       setNormalised(t,next);
+      // setNormalised() only updates the plugin's internal atomic value.
+      // Official MPC SDK requires a separate audioMasterAutomate notification
+      // for host/UI observers of the REAL target (not just the Q-Link proxy).
+      // Otherwise filmstrips/envelopes bound to t can stay at their old frame.
+      // parameterChanged() is invoked from the UI edit path, not process().
+      notifyHostParameterChanged(t);
       if(t==hostIndices_[48] || t==missingUi_[2] || t==missingUi_[3])syncFilterVisual();
      }
     }else if(index==t){
