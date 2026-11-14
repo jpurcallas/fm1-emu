@@ -3613,7 +3613,15 @@
         }
       ]
     },
-    "replacementStrings": [],
+    "replacementStrings": [
+      {
+        "key": "Parameter 124",
+        "value": [
+          "WHITE",
+          "PINK"
+        ]
+      }
+    ],
     "info": {
       "version": 1,
       "type": "CompleteDescription"
@@ -7288,6 +7296,121 @@
                 "bounds": "520 194 240 240",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/5/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_NOISE_LABEL",
+                "type": "Label",
+                "data": {
+                  "version": 1,
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Titillium Web",
+                      "style": "Bold",
+                      "height": 14
+                    },
+                    "colour": "ffffd8ae",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "type": "Text",
+                  "handleName": "Invalid",
+                  "text": "ACOUSTIC NOISE"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "648 422 240 26",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_NOISE_WHITE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "noise_white_on.png",
+                  "offImage": "noise_white_off.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 2,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 124"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "648 450 98 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_NOISE_PINK",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "noise_pink_on.png",
+                  "offImage": "noise_pink_off.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 2,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 124"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "755 450 98 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
                 ]
               }
             }
