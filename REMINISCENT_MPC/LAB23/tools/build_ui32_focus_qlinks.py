@@ -74,9 +74,9 @@ for group in ('Screen Mode Q-Links','Program Mode Q-Links'):
     for i in range(1,17):
         spec[f'Q-Link {i}']=113+((i-1)%4)
 q['Screen Mode Q-Links']['map'][0]['Bank Direction']='RowTopDown'
-assert sum(e['componentData']['type'].startswith('UI32_FOCUS_') for e in cs)==len([e for e in cs if e['componentData']['name'].startswith('Q_LINK_') or e['componentData']['name'].endswith('_TOUCH') or ('_WHEEL' in e['componentData']['name']) or (e['componentData']['name'].startswith('MOD_') and 'SECONDARY' in e['componentData']['name']) or e['componentData']['name'].startswith('MEMORY_') and e['componentData']['type'].startswith('UI32_FOCUS_') or e['componentData']['name'].startswith('ACOUSTIC_SOURCE_') or e['componentData']['name'].startswith('ENVELOPE_') or e['componentData']['name'].startswith('FILTER_') or e['componentData']['name'].startswith('GRANULAR_') or e['componentData']['name'].startswith('RESONANCE_') or e['componentData']['name'].startswith('BLEND_ECLIPSE_') or e['componentData']['name'].startswith('SEND_MOD')])
+assert sum(e['componentData']['type'].startswith('UI32_FOCUS_') for e in cs)==39
 assert len(toggle_names)==11, toggle_names
-assert len(cs)==124 and sum(x['componentData']['type']=='Image' for x in cs)==37 if False else len(cs)==124
+assert len(cs)==124
 newt=(json.dumps(t,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
 newq=(json.dumps(q,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
 ( WORK/'Yeti Fingers - VST - REminiSCENT/Plugin Skins').mkdir(parents=True,exist_ok=True)
