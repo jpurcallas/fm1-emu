@@ -205,7 +205,8 @@ private:
   const int value=std::clamp(int(std::lround(63.5f*(std::clamp(m.wet,-1.f,1.f)+1.f))),0,127);
   if(getInt(visualMemory_)!=value)set(visualMemory_,float(value));
   const uint32_t span=m.captured?m.capturedWindow:std::min(uint32_t(std::max(1,m.window)),m.available);
-  const float phase=span>1?std::clamp(float(m.phaseQ16/65536.0)/float(span-1),0.f,1.f):0.f;
+  const float rawPhase=span>1?std::clamp(float(m.phaseQ16/65536.0)/float(span-1),0.f,1.f):0.f;
+  const float phase=m.reverse?1.f-rawPhase:rawPhase; // exact reverse-read direction
   const int play=std::clamp(int(std::lround(phase*127.f)),0,127);
   if(getInt(visualPlayhead_)!=play)set(visualPlayhead_,float(play));
  }
