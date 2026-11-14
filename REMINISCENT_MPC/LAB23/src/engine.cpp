@@ -172,6 +172,7 @@ float Engine::oscillator(Voice& v,float pitchSemitone,float pulseWidth){
 void Engine::render(Stereo* out,int frames){if(!out||frames<=0)return;const double masterPitchRatio=std::ldexp(1.,std::max(-2,std::min(2,params.masterOctave)));params.acousticBlend=clamp(params.acousticBlend,0,1);params.masterBlend=clamp(params.masterBlend,0,1);params.sustain=clamp(params.sustain,0,1);resonance.configure(params,sr);
  for(int i=0;i<frames;i++){
  const auto lfo=modulation.tick(params,sr);
+ uiLastLfo_=lfo; // visual telemetry only, does not enter audio routing
  float routed[6]={};
  float ampLfoDepth=0.f;
  for(int k=0;k<2;k++){
