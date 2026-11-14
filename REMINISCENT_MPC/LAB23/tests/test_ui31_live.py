@@ -12,13 +12,13 @@ rep=Reporter();validate.check_skins(rep,str(skin),125)
 assert not rep.errors,(len(rep.errors),rep.errors[:10]);assert not rep.warnings,(len(rep.warnings),rep.warnings[:10]);print('SDK',len(rep.passes),'PASS / 0 WARN / 0 FAIL')
 a=json.loads((skin/'TUI.json').read_text()); cs=a['pageData']['tabs'][0]['componentDefinition']['componentsData'];names={c['componentData']['name']:c for c in cs}
 base=json.loads((ROOT/'REBUILD_CONTROLS_COMPLETE/Plugin Skins/TUI.json').read_text());prev=base['pageData']['tabs'][0]['componentDefinition']['componentsData']
-assert len(cs)==121 and len(prev)==106
+assert len(cs)==124 and len(prev)==106
 assert [(c['componentData']['name'],c['componentData']['data']) for c in cs if c['componentData']['name'].startswith('APPROVED_LAB10')]==[(c['componentData']['name'],c['componentData']['data']) for c in prev if c['componentData']['name'].startswith('APPROVED_LAB10')]
 assert len([n for n in names if n.startswith('TOUCH_TAB_')])==11
 assert len([n for n in names if n.startswith('Q_LINK_')])==4
 assert len([n for n in names if n.startswith('SOLARIS_V09_SEGMENT')])==6
 assert len([n for n in names if n.startswith('LIVE_MOD_LFO')])==2
-params={'LIVE_OSC_WAVE_LAB10':2,'LIVE_BLENDECLIPSE_LAB10':20,'LIVE_MEMORY_READHEAD_UI31':121,'LIVE_MOD_LFO1_PCM_UI31':118,'LIVE_MOD_LFO2_PCM_UI31':119,'LIVE_MEMORY_PCM_TRACE_UI31':120}
+params={'LIVE_OSC_WAVE_LAB10':2,'LIVE_OSC_SELECTOR_LAB10':2,'LIVE_BLENDECLIPSE_LAB10':20,'LIVE_MEMORY_READHEAD_UI31':121,'LIVE_MOD_LFO1_PCM_UI31':118,'LIVE_MOD_LFO2_PCM_UI31':119,'LIVE_MEMORY_PCM_TRACE_UI31':120}
 for n,p in params.items():
  d=names[n]['componentData']['data'];ref=d.get('handleName',d.get('dataHandle'));assert ref==f'Parameter {p}',(n,ref)
 for i in range(6):
@@ -28,6 +28,7 @@ for i in range(6):
 assert not any(x.get('bounds',{}).get('additionalInvalidatingHandles')==['IndexedEnabling/6/7/Parameter 122'] for x in cs), 'Solaris must HIDE at DONE'
 assert 'Parameter 122' in {v['key'] for v in a['pageData']['replacementStrings']}
 adsr=names['LIVE_ADSR_4_PARAMS_UI31']['componentData']['data']; assert [adsr[k+'Handle'] for k in ('attack','decay','sustain','release')]==[f'Parameter {i}' for i in [29,30,31,32]]
+env2=names['LIVE_MOD_ENV2_ADSR_4_PARAMS_UI31']['componentData']['data']; assert [env2[k+'Handle'] for k in ('attack','decay','sustain','release')]==[f'Parameter {i}' for i in range(88,92)]
 # No performance-hostile sprite sheets: SDK target supports up to 8192 px texture.
 for p in skin.glob('*.png'):
  im=Image.open(p); assert im.width<=1280 and im.height<=8192,(p.name,im.size)
