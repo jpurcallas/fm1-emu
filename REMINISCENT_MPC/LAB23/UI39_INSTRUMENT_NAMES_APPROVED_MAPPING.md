@@ -15,3 +15,7 @@
 `0,24,4,20,7,26,1,8,11,3,14,25,13,5,10,18,19,12,21,9,2,15,16,17,6,22,23`.
 
 La secuencia vieja de `bank.tsv` y los ajustes de proyectos grabados se mantienen como fuente de verdad.
+
+
+## UI39 actualización adicional: interruptores A/B
+Se detectó que los dos botones A/B estaban vinculados al parámetro booleano correcto, pero su `onImage` y `offImage` eran **el mismo PNG transparente**. Su brillo en pantalla procedía de un fondo LAB10 inmóvil. Se derivaron cuatro sprites de 80×48 directamente de las zonas originales A/B de `lab10_mpc_00.png`: versiones **ON idénticas a LAB10** y versiones **OFF atenuadas**. El TUI sólo sustituye las rutas de imágenes de `ACOUSTIC_POWER_A/B`; sigue usando los bool históricos `Parameter 3/4`. No se ha rediseñado la pantalla ni cambiado el audio. Prueba: `tests/test_ui39_acoustic_selector_mapping.py` comprueba la identidad de los 27 instrumentos, el orden y los cuatro sprites de estado. Queda **pendiente validación táctil en hardware**, como las demás correcciones.
