@@ -23,6 +23,12 @@ class REminiSCENTMPC : public mpc::Plugin {
  int selectChar_=-1,selectSend_=-1,selectMod_=-1,tabPage_=-1;
  std::array<int,4> qLinkProxy_{{-1,-1,-1,-1}};
  int selectMemory_=-1;
+ // Read-only MPC SDK display channels, appended after the existing 118 parameters.
+ int visualLfo_[2]{{-1,-1}},visualMemory_=-1,visualPlayhead_=-1;
+ int splashGroup_=-1,splashFrame_=-1;
+ uint64_t visualSamples_=0;
+ uint64_t visualLastTick_=~uint64_t(0);
+ int visualSampleRate_=44100;
  std::atomic<bool> routing_{false};
  static bool isUiOnly(const char* id){return !strcmp(id,"params.acousticNoise") || !strcmp(id,"params.filterEnv") || !strcmp(id,"params.filterTrack") || !strcmp(id,"params.spread") || !strcmp(id,"selectedChar") || !strcmp(id,"selectedMemory") || !strcmp(id,"selectedMod") || !strcmp(id,"selectedSend");}
 public:
@@ -54,6 +60,15 @@ public:
    qLinkProxy_[k]=addParam(mpc::intParam(id.c_str(),nm.c_str(),0,127,64));
   }
   selectMemory_=addParam(mpc::choiceParam("ui.selectedMemory","Memory edit",{"Freeze","Reverse","Tide"},0));
+  // The SDK's Plotter reads these actual DSP signals; none edits the sound.
+  visualLfo_[0]=addParam(mpc::intParam("ui.live.lfo1","LFO 1 live signal",0,127,64));
+  visualLfo_[1]=addParam(mpc::intParam("ui.live.lfo2","LFO 2 live signal",0,127,64));
+  visualMemory_=addParam(mpc::intParam("ui.live.memory","MEMORY live audio",0,127,64));
+  visualPlayhead_=addParam(mpc::intParam("ui.live.memoryPhase","MEMORY actual playhead",0,127,0));
+  // Solaris v09: 150 source frames, 25 fps, six segments of 25 to stay
+  // under the MPC skin renderer's texture height limits.
+  splashGroup_=addParam(mpc::choiceParam("ui.splash.group","Solaris frame group",{"0","1","2","3","4","5","DONE"},0));
+  splashFrame_=addParam(mpc::intParam("ui.splash.frame","Solaris frame",0,24,0));
   syncQLinks();
  }
  int qLinkTarget(int slot)const{
@@ -136,6 +151,9 @@ public:
   return false;
  }
  void prepare(double sampleRate,int) override {
+  visualSampleRate_=std::max(1,int(std::lround(sampleRate)));
+  visualSamples_=0;visualLastTick_=~uint64_t(0);
+  set(splashGroup_,0.f);set(splashFrame_,0.f);
   // The MPC may prepare repeatedly at different block sizes. Free the previous
   // bank before loading 254 samples again, avoiding 2x memory spikes.
   engine_.reset();
@@ -146,7 +164,7 @@ public:
   else {mpc::log("PCM BANK loaded: %d samples",loaded);bankOk_=true;}
   next->setPolyphony(8);engine_=std::move(next);
  }
- void reset() override {if(engine_)engine_->allSoundOff();}
+ void reset() override {if(engine_)engine_->allSoundOff();visualSamples_=0;visualLastTick_=~uint64_t(0);set(splashGroup_,0.f);set(splashFrame_,0.f);}
  void process(mpc::ProcessContext& ctx) override {
   if(!engine_||ctx.numOutputs<1||!ctx.outputs)return;
   std::array<float,ui07::FIELDS.size()> v{};
@@ -159,8 +177,38 @@ public:
     if(ev.size>=3)engine_->midiMessage(ev.data[0],ev.data[1],ev.data[2]);
   }
   renderRange(ctx,pos,ctx.numFrames);
+  advanceVisuals(std::max(0,ctx.numFrames));
  }
 private:
+ // 25 fps UI clock derived from the HOST AUDIO SAMPLE CLOCK, not a visual
+ // estimate. Outputs of the real LFO and MEMORY DSP drive the live Plotters.
+ // Never call the VST host automation callback from this audio-thread path.
+ void advanceVisuals(int renderedFrames){
+  visualSamples_+=uint64_t(renderedFrames);
+  const uint64_t tick=visualSamples_*25u/uint64_t(visualSampleRate_);
+  if(tick==visualLastTick_)return;
+  visualLastTick_=tick;
+  const int splashTick=int(std::min<uint64_t>(tick,150u));
+  const int group=(splashTick>=150)?6:splashTick/25;
+  const int frame=(splashTick>=150)?0:splashTick%25;
+  if(getInt(splashGroup_)!=group)set(splashGroup_,float(group));
+  if(getInt(splashFrame_)!=frame)set(splashFrame_,float(frame));
+  if(!engine_)return;
+  const auto lfo=engine_->modulationBlackbox();
+  for(int k=0;k<2;k++){
+   const float signal=std::clamp(lfo[k],-1.f,1.f);
+   const int value=std::clamp(int(std::lround(63.5f*(signal+1.f))),0,127);
+   if(getInt(visualLfo_[k])!=value)set(visualLfo_[k],float(value));
+  }
+  const auto m=engine_->memoryBlackbox();
+  // True post-MEMORY mono sample, not the simulated HTML buffer.
+  const int value=std::clamp(int(std::lround(63.5f*(std::clamp(m.wet,-1.f,1.f)+1.f))),0,127);
+  if(getInt(visualMemory_)!=value)set(visualMemory_,float(value));
+  const uint32_t span=m.captured?m.capturedWindow:std::min(uint32_t(std::max(1,m.window)),m.available);
+  const float phase=span>1?std::clamp(float(m.phaseQ16/65536.0)/float(span-1),0.f,1.f):0.f;
+  const int play=std::clamp(int(std::lround(phase*127.f)),0,127);
+  if(getInt(visualPlayhead_)!=play)set(visualPlayhead_,float(play));
+ }
  bool bankOk_=false;
  static void applyParams(rem::Engine &e,const std::array<float,ui07::FIELDS.size()> &v){
   auto &p=e.params;
