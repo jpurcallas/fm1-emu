@@ -30,9 +30,22 @@ class REminiSCENTMPC : public mpc::Plugin {
  uint64_t visualSamples_=0;
  uint64_t visualLastTick_=~uint64_t(0);
  int visualSampleRate_=44100;
+ // Holds restored preview values until live MIDI restarts audio. Does not
+ // freeze any DSP parameter, sound, Q-Link or musical state.
+ std::atomic<bool> restoredPreviewHold_{false};
  std::atomic<bool> routing_{false};
  static bool isUiOnly(const char* id){return !strcmp(id,"params.acousticNoise") || !strcmp(id,"params.filterEnv") || !strcmp(id,"params.filterTrack") || !strcmp(id,"params.spread") || !strcmp(id,"selectedChar") || !strcmp(id,"selectedMemory") || !strcmp(id,"selectedMod") || !strcmp(id,"selectedSend");}
 public:
+ // SDK VST2 chunks serialize every host parameter, including read-only UI
+ // telemetry. Mark the new format so a restored project can retain its exact
+ // visual snapshot until there is genuine new audio to display.
+ void saveExtraState(std::vector<uint8_t>& out) override {
+  out.push_back('V');out.push_back('I');out.push_back('1');
+ }
+ void loadExtraState(const uint8_t* data,size_t size) override {
+  if(size>=3&&data[0]=='V'&&data[1]=='I'&&data[2]=='1')
+   restoredPreviewHold_.store(true,std::memory_order_release);
+ }
  static mpc::PluginInfo info(){mpc::PluginInfo i;i.name="REminiSCENT MPC LAB20";i.vendor="Yeti Fingers";i.uniqueId=MPC_FOURCC('R','m','2','0');i.version=2000;i.isInstrument=true;i.numInputs=0;i.numOutputs=2;return i;}
  REminiSCENTMPC():mpc::Plugin(info()){
   hostIndices_.fill(-1);
@@ -156,7 +169,9 @@ public:
  void prepare(double sampleRate,int) override {
   visualSampleRate_=std::max(1,int(std::lround(sampleRate)));
   visualSamples_=0;visualLastTick_=~uint64_t(0);
-  set(splashGroup_,0.f);set(splashFrame_,0.f);
+  if(!restoredPreviewHold_.load(std::memory_order_acquire)){
+   set(splashGroup_,0.f);set(splashFrame_,0.f);
+  }
   // The MPC may prepare repeatedly at different block sizes. Free the previous
   // bank before loading 254 samples again, avoiding 2x memory spikes.
   engine_.reset();
@@ -167,7 +182,15 @@ public:
   else {mpc::log("PCM BANK loaded: %d samples",loaded);bankOk_=true;}
   next->setPolyphony(8);engine_=std::move(next);
  }
- void reset() override {if(engine_)engine_->allSoundOff();visualSamples_=0;visualLastTick_=~uint64_t(0);set(splashGroup_,0.f);set(splashFrame_,0.f);}
+ void reset() override {
+  if(engine_)engine_->allSoundOff();
+  // Called on state loads as well as fresh resume; never clobber an actual
+  // restored snapshot with a new splash startup frame.
+  if(!restoredPreviewHold_.load(std::memory_order_acquire)){
+   visualSamples_=0;visualLastTick_=~uint64_t(0);
+   set(splashGroup_,0.f);set(splashFrame_,0.f);
+  }
+ }
  void process(mpc::ProcessContext& ctx) override {
   if(!engine_||ctx.numOutputs<1||!ctx.outputs)return;
   std::array<float,ui07::FIELDS.size()> v{};
@@ -187,6 +210,16 @@ public:
     if(ev.size>=3)engine_->midiMessage(ev.data[0],ev.data[1],ev.data[2]);
   }
   renderRange(ctx,pos,ctx.numFrames);
+  // Loading a project resets the DSP engine. With no new notes there is
+  // nothing live to display: leave the visual snapshot exactly as saved.
+  // On the first real note, resume LFO/MEMORY telemetry and skip the startup
+  // splash (which only plays when creating a fresh instance).
+  if(restoredPreviewHold_.load(std::memory_order_acquire)){
+   if(engine_->activeVoices()==0)return;
+   restoredPreviewHold_.store(false,std::memory_order_release);
+   visualSamples_=uint64_t(visualSampleRate_)*6u;
+   visualLastTick_=~uint64_t(0);
+  }
   advanceVisuals(std::max(0,ctx.numFrames));
  }
 private:
