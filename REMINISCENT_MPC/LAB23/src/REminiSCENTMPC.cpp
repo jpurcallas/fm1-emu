@@ -24,7 +24,7 @@ class REminiSCENTMPC : public mpc::Plugin {
  std::array<int,4> qLinkProxy_{{-1,-1,-1,-1}};
  int selectMemory_=-1;
  // Read-only MPC SDK display channels, appended after the existing 118 parameters.
- int visualLfo_[2]{{-1,-1}},visualMemory_=-1,visualPlayhead_=-1;
+ int visualLfo_[2]{-1,-1},visualMemory_=-1,visualPlayhead_=-1;
  int splashGroup_=-1,splashFrame_=-1;
  uint64_t visualSamples_=0;
  uint64_t visualLastTick_=~uint64_t(0);
