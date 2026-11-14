@@ -4,13 +4,17 @@
 #include <string>
 #include <cstdint>
 #include <cstddef>
+#include <memory>
 
 namespace rem {
 struct Stereo { float l=0, r=0; };
 struct Sample {
  int root=60, rate=48000, channels=2, bits=16, wavFormat=1;
  float tuneCents=0.f;
- std::vector<uint8_t> pcm; // Preserve original bytes; decode two adjacent frames at render time.
+ std::vector<uint8_t> pcm; // Portable fallback: original bytes, unchanged.
+ std::shared_ptr<const uint8_t> mappedPcm; // Read-only file-backed lossless sample.
+ size_t mappedOffset=0;
+ const uint8_t* pcmData() const {return mappedPcm ? mappedPcm.get()+mappedOffset : pcm.data();}
  size_t frames=0;
 };
 struct Bank {
