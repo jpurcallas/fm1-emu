@@ -1,16 +1,16 @@
 {
-  "name": "REminiSCENT MPC LAB20",
+  "name": "REminiSCENT",
   "manufacturer": "Yeti Fingers",
-  "version": "0.20.0",
+  "version": "0.24.0",
   "format": "vst2",
   "kind": "instrument",
   "uid": "Rm20",
   "numInputs": 0,
   "numOutputs": 2,
   "category": "Synth",
-  "file32": "VST/reminiscent-mpc-lab20-arm32.so",
-  "file64": "VST/reminiscent-mpc-lab20-arm64.so",
-  "description": "LAB20 MPC staging: Bridge16 DSP + LAB19 27 acoustic PCM source bank. Not author approved.",
+  "file32": "VST/reminiscent-arm32.so",
+  "file64": "VST/reminiscent-arm64.so",
+  "description": "REminiSCENT — Acoustic Memory Synthesizer, LAB24: Bridge16 + 27 original acoustic sources (254 PCM), 11 touch pages and Solaris v09. MPC standalone staged for author acceptance.",
   "author": "Yeti Fingers",
   "license": "Private evaluation; track source attribution and licenses separately"
 }
