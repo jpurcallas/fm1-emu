@@ -4602,7 +4602,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4645,7 +4645,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4688,7 +4688,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4731,7 +4731,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4848,7 +4848,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4894,7 +4894,7 @@
                       "version": 1,
                       "name": "Nexa",
                       "style": "Bold",
-                      "height": 20.0
+                      "height": 20
                     },
                     "colour": "ffffc792",
                     "justification": "left verticallyCentred",
@@ -4936,7 +4936,7 @@
                   "knobType": "RotatingImage",
                   "foregroundImage": "lab10_touch_hit.png",
                   "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1.0,
+                  "imageScale": 1,
                   "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
@@ -4973,7 +4973,7 @@
                   "knobType": "RotatingImage",
                   "foregroundImage": "lab10_touch_hit.png",
                   "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1.0,
+                  "imageScale": 1,
                   "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
@@ -5010,7 +5010,7 @@
                   "knobType": "RotatingImage",
                   "foregroundImage": "lab10_touch_hit.png",
                   "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1.0,
+                  "imageScale": 1,
                   "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
@@ -5753,10 +5753,9 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "68 543 590 85",
+                "bounds": "84 316 175 56",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112",
-                  "IndexedEnabling/0/3/Parameter 111"
+                  "IndexedEnabling/9/11/Parameter 112"
                 ]
               }
             },
@@ -5790,10 +5789,9 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "68 543 590 85",
+                "bounds": "294 316 175 56",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112",
-                  "IndexedEnabling/1/3/Parameter 111"
+                  "IndexedEnabling/9/11/Parameter 112"
                 ]
               }
             },
@@ -5849,7 +5847,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "68 543 590 85",
+                "bounds": "79 510 548 97",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112",
                   "IndexedEnabling/2/3/Parameter 111"
@@ -6223,6 +6221,185 @@
                 "bounds": "612 429 125 42",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_LFO_1_AUDIO_TRACE",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "b80a2528",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ffe5cda2",
+                  "lineColourEnd": "ffe5cda2",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 118",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ffe5cda2",
+                  "historyColour2": "ffe5cda2",
+                  "historyTime": 3,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "84 521 540 81",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_LFO_2_AUDIO_TRACE",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "b80a2528",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ff85bdba",
+                  "lineColourEnd": "ff85bdba",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 119",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ff85bdba",
+                  "historyColour2": "ff85bdba",
+                  "historyTime": 3,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "84 521 540 81",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_WET_AUDIO_WAVE",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "b80a2528",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ffe4bb88",
+                  "lineColourEnd": "ffe4bb88",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 120",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ffe4bb88",
+                  "historyColour2": "ffe4bb88",
+                  "historyTime": 3,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "85 451 718 61",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_READ_PLAYHEAD",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "memory_playhead_live_32.png",
+                  "numFrames": 32,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 121"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Show",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "85 451 718 61",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
                 ]
               }
             }
