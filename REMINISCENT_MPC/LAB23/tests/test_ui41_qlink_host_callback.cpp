@@ -28,7 +28,7 @@ int main(int argc,char** argv){
   const int targetStart=(page==5?38:page==6?42:44);
   fx->setParameter(fx,112,float(page)/10.f);
   for(int k=0;k<4;++k){
-   const int target=(page==6 && k==1)?107:(page==6&&k==2)?108:targetStart+k;
+   const int target=(page==6 && k==1)?107:(page==6&&k==2)?108:(page==6&&k==3)?43:targetStart+k;
    // Exceed the current default so this is an actual edit rather than no-op.
    const float before=fx->getParameter(fx,target);
    const float next=before>.5f?.13f:.87f;
