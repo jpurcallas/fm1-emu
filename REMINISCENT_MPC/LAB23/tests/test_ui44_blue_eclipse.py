@@ -47,6 +47,13 @@ def inspect_tui(tui, qlinks):
     assert touch['handle remapping']['map']==[{'key':'Data','value':'Parameter 20'}]
     assert touch['bounds']['acceptsHWFocus']=='Yes'
     assert touch['componentData']['type'].startswith('LAB10_SDK_FOCUS_')
+    custom=[x for x in t['pageData']['componentDefinitions']['localComponentDefinitions']
+            if x['key']==touch['componentData']['type']]
+    assert len(custom)==1
+    editors=[x for x in custom[0]['value']['componentsData']
+             if x['componentData']['name']=='native handle editor']
+    assert len(editors)==1
+    assert editors[0]['componentData']['data']['dragOrientation']=='Horizontal', 'UI44 touch patch missing'
     bg=byname['APPROVED_LAB10_02_0']
     assert bg['componentData']['data']['image']=='lab10_mpc_02.png'
     assert bg['bounds']['bounds']=='0 0 1280 628'
@@ -118,11 +125,18 @@ def main():
     ap.add_argument('--tui',type=Path)
     ap.add_argument('--qlinks',type=Path)
     ap.add_argument('--no-rebuild',action='store_true')
+    ap.add_argument('--cpp',type=Path)
     args=ap.parse_args()
     if args.tui and args.qlinks:
         inspect_tui(args.tui,args.qlinks)
     elif args.tui or args.qlinks:
         ap.error('--tui and --qlinks must be supplied together')
+    if args.cpp:
+        cpp=args.cpp.read_text()
+        assert '{24,30,29,31}' in cpp, 'BLEND Q-Link mapping changed'
+        assert 'notifyHostParameterChanged(t)' in cpp, 'Q-Link->real parameter notification missing'
+        assert 'notifyHostParameterChanged(qLinkProxy_[k])' in cpp, 'touch->Q-Link proxy refresh missing'
+        print('PASS C++ UI41 bidirectional notification path retained; hardware not verified')
     if args.asset_dir or args.approved or args.lab10_background:
         if not all([args.asset_dir,args.approved,args.lab10_background]):
             ap.error('private asset tests require --approved, --lab10-background, --asset-dir')
