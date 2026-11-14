@@ -6851,6 +6851,445 @@
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
               }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_LFO1_PLOTTER",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "fff1d19f",
+                  "lineColourEnd": "ff8ab4ad",
+                  "horizLineGradient": false,
+                  "lineWidth": 2,
+                  "fillColourStart": "20e9c99f",
+                  "fillColourEnd": "057ab2ab",
+                  "horizFillGradient": false,
+                  "fillZero": 63.5,
+                  "dataHandle": "Data",
+                  "dataMin": 0,
+                  "dataMax": 127,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "fff3d4a4",
+                  "historyColour2": "ff84b6af",
+                  "historyTime": 2,
+                  "historySkipFrames": 0
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 118"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "55 395 607 86",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_LFO2_PLOTTER",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "fff1d19f",
+                  "lineColourEnd": "ff8ab4ad",
+                  "horizLineGradient": false,
+                  "lineWidth": 2,
+                  "fillColourStart": "20e9c99f",
+                  "fillColourEnd": "057ab2ab",
+                  "horizFillGradient": false,
+                  "fillZero": 63.5,
+                  "dataHandle": "Data",
+                  "dataMin": 0,
+                  "dataMax": 127,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "fff3d4a4",
+                  "historyColour2": "ff84b6af",
+                  "historyTime": 2,
+                  "historySkipFrames": 0
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 119"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "55 395 607 86",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_PCM_PLOTTER",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "fff1d19f",
+                  "lineColourEnd": "ff8ab4ad",
+                  "horizLineGradient": false,
+                  "lineWidth": 2,
+                  "fillColourStart": "20e9c99f",
+                  "fillColourEnd": "057ab2ab",
+                  "horizFillGradient": false,
+                  "fillZero": 63.5,
+                  "dataHandle": "Data",
+                  "dataMin": 0,
+                  "dataMax": 127,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "fff3d4a4",
+                  "historyColour2": "ff84b6af",
+                  "historyTime": 3,
+                  "historySkipFrames": 0
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 120"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "67 446 750 88",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_REAL_PLAYHEAD",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "memory_playhead_live_32.png",
+                  "numFrames": 32,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 121"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "67 446 750 88",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_PLATE",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "solaris_v09_plate.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "0 0 1280 628",
+                "additionalInvalidatingHandles": [
+                  "RangedEnabling/0/5/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_0",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_00.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_1",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_01.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_2",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_02.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/2/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_3",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_03.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_4",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_04.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_FRAMES_5",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_05.png",
+                  "numFrames": 25,
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 123"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "520 194 240 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/7/Parameter 122"
+                ]
+              }
             }
           ]
         },
