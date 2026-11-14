@@ -10724,6 +10724,82 @@
                   "IndexedEnabling/0/11/Parameter 112"
                 ]
               }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_ENV_KEY_ORIGINAL_LAB10_REACTIVE_0",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_filter_envtrack_from_html_32_0.png",
+                  "numFrames": 32,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 126"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 248 595 231",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112",
+                  "IndexedEnabling/0/2/Parameter 127"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_ENV_KEY_ORIGINAL_LAB10_REACTIVE_1",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_filter_envtrack_from_html_32_1.png",
+                  "numFrames": 32,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 126"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 248 595 231",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112",
+                  "IndexedEnabling/1/2/Parameter 127"
+                ]
+              }
             }
           ]
         },
