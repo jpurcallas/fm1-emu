@@ -24,6 +24,23 @@ class REminiSCENTMPC : public mpc::Plugin {
  int selectChar_=-1,selectSend_=-1,selectMod_=-1,tabPage_=-1;
  std::array<int,4> qLinkProxy_{{-1,-1,-1,-1}};
  int selectMemory_=-1;
+ // UI-only acoustic selectors: keep legacy source IDs and sample order unchanged.
+ int voiceUi_[2]{-1,-1};
+ static constexpr std::array<int,27> kUiVoiceToLegacy{{0,24,4,20,7,26,1,8,11,3,14,25,13,5,10,18,19,12,21,9,2,15,16,17,6,22,23}};
+ static constexpr int uiVoiceForLegacy(int legacy){
+  for(int i=0;i<27;++i)if(kUiVoiceToLegacy[i]==legacy)return i;
+  return 0;
+ }
+ void syncVoiceUi(){
+  for(int k=0;k<2;k++){
+   if(voiceUi_[k]<0||hostIndices_[k]<0)continue;
+   const int ui=uiVoiceForLegacy(getInt(hostIndices_[k]));
+   if(getInt(voiceUi_[k])!=ui){
+    set(voiceUi_[k],float(ui));
+    notifyHostParameterChanged(voiceUi_[k]);
+   }
+  }
+ }
  // Read-only MPC SDK display channels, appended after the existing 118 parameters.
  int visualLfo_[2]{-1,-1},visualMemory_=-1,visualPlayhead_=-1;
  int splashGroup_=-1,splashFrame_=-1;
@@ -47,6 +64,8 @@ public:
  void loadExtraState(const uint8_t* data,size_t size) override {
   if(size>=3&&data[0]=='V'&&data[1]=='I'&&data[2]=='1')
    restoredPreviewHold_.store(true,std::memory_order_release);
+  // Old and new chunks both keep the original source index as the truth.
+  syncVoiceUi();
  }
  static mpc::PluginInfo info(){mpc::PluginInfo i;i.name="REminiSCENT";i.vendor="Yeti Fingers";i.uniqueId=MPC_FOURCC('R','m','2','0');i.version=2700;i.isInstrument=true;i.numInputs=0;i.numOutputs=2;return i;}
  REminiSCENTMPC():mpc::Plugin(info()){
@@ -91,7 +110,10 @@ public:
   visualFilterEffectiveCutoff_=addParam(mpc::intParam("ui.filter.effectiveCutoff","Filter ENV + KEY response position",0,127,64));
   visualFilterFrame_=addParam(mpc::intParam("ui.filter.visualFrame","Filter visual frame",0,31,0));
   visualFilterGroup_=addParam(mpc::choiceParam("ui.filter.visualGroup","Filter visual group",{"0","1"},0));
-  syncQLinks();syncFilterVisual();
+  // The added UI parameters are appended after every existing persistent ID.
+  voiceUi_[0]=addParam(mpc::choiceParam("ui.acoustic.voiceA","Acoustic A display order",{"PIANO","HARPSICHORD","BANDONEON","VIBRAPHONE","MARIMBA","GLASS HARP","MBIRA","BALAFON","HANG","VIOLIN","CELLO","BOWED PSALTERY","HARP","DOUBLE BASS","NYLON GUITAR","STEEL GUITAR","ARCHTOP GUITAR","OCARINA","HARMONICA","DIDGERIDOO","TRUMPET","FLUTE","CLARINET","TENOR SAXOPHONE","TUBA","TROMBONE","FRENCH HORN"},0));
+  voiceUi_[1]=addParam(mpc::choiceParam("ui.acoustic.voiceB","Acoustic B display order",{"PIANO","HARPSICHORD","BANDONEON","VIBRAPHONE","MARIMBA","GLASS HARP","MBIRA","BALAFON","HANG","VIOLIN","CELLO","BOWED PSALTERY","HARP","DOUBLE BASS","NYLON GUITAR","STEEL GUITAR","ARCHTOP GUITAR","OCARINA","HARMONICA","DIDGERIDOO","TRUMPET","FLUTE","CLARINET","TENOR SAXOPHONE","TUBA","TROMBONE","FRENCH HORN"},6));
+  syncQLinks();syncFilterVisual();syncVoiceUi();
  }
  int qLinkTarget(int slot)const{
   // UI field numbers are NOT host parameter numbers: eight UI-only fields were
@@ -160,6 +182,17 @@ public:
   bool expected=false;
   if(!routing_.compare_exchange_strong(expected,true,std::memory_order_acquire))return;
   if(index==tabPage_||index==selectChar_||index==selectSend_||index==selectMod_){syncQLinks();}
+  else if(index==voiceUi_[0] || index==voiceUi_[1]){
+   const int k=(index==voiceUi_[0])?0:1;
+   const int newSource=kUiVoiceToLegacy[std::clamp(getInt(index),0,26)];
+   if(getInt(hostIndices_[k])!=newSource){
+    set(hostIndices_[k],float(newSource));
+    notifyHostParameterChanged(hostIndices_[k]);
+   }
+  }
+  else if(index==hostIndices_[0] || index==hostIndices_[1]){
+   syncVoiceUi();
+  }
   else{
    for(int k=0;k<4;k++){
     int t=qLinkTarget(k);
