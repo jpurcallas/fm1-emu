@@ -21,7 +21,9 @@ def verify(path,asset_dir=None):
  t=json.loads(path.read_text())
  assert len(t["pageData"]["tabs"])==1
  components=t["pageData"]["tabs"][0]["componentDefinition"]["componentsData"]
- assert len(components)==146, f"unexpected number of components: {len(components)}"
+ extra_ui43=sum(c["componentData"]["name"].startswith("UI43_") for c in components)
+ assert extra_ui43 in (0,8), f"unexpected UI43 overlay count: {extra_ui43}"
+ assert len(components)==146+extra_ui43, f"unexpected number of components: {len(components)}"
  names={c["componentData"]["name"]:c for c in components}
  assert len(names)==len(components), "duplicated component names"
  required_images=set()

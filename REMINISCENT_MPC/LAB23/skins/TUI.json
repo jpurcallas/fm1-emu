@@ -9296,7 +9296,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_05.png"
+                  "image": "ui43_lab10_mpc_05.png"
                 }
               },
               "handle remapping": {
@@ -9474,7 +9474,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_08.png"
+                  "image": "ui43_lab10_mpc_08.png"
                 }
               },
               "handle remapping": {
@@ -12119,6 +12119,154 @@
               "version": 2,
               "componentData": {
                 "version": 1,
+                "name": "UI43_RADAR_BODY",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_radar_body_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 38"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "457 232 323 272",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_RADAR_DECAY",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_radar_decay_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 39"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "457 232 323 272",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_RADAR_EXCITE",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_radar_excite_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 40"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "457 232 323 272",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_RADAR_MIX",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_radar_mix_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 41"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "457 232 323 272",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
                 "name": "RESONANCE_PARAM_1_TOUCH",
                 "type": "LAB10_SDK_FOCUS_S0_162_72_VERTICAL",
                 "data": {
@@ -12368,6 +12516,154 @@
                 "bounds": "585 258 172 63",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_GRANULAR_SIZE",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_granular_size_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 44"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "73 246 604 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_GRANULAR_DENSITY",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_granular_density_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 45"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "73 246 604 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_GRANULAR_POSITION",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_granular_position_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 46"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "73 246 604 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "UI43_GRANULAR_MIX",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "ui43_granular_mix_16.png",
+                  "numFrames": 16,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 47"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "73 246 604 240",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
                 ]
               }
             },
