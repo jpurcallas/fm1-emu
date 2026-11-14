@@ -21,7 +21,7 @@ int main(int argc,char**argv){
  if(s.channels!=channels||s.rate!=rate||s.bits!=bits||s.frames!=size_t(frames)||s.wavFormat!=1||s.root!=60){
   std::cerr<<"format mismatch\n";return 6;
  }
- if(s.pcm!=ref){auto it=std::mismatch(s.pcm.begin(),s.pcm.end(),ref.begin(),ref.end());
+ if(s.pcm!=ref){
   std::cerr<<"LOSSLESS MISMATCH raw PCM bytes="<<s.pcm.size()<<" expected="<<ref.size()<<"\n";return 7;
  }
  std::cout<<"PASS "<<flac<<" PCM bytes="<<ref.size()<<" frames="<<frames<<" bits="<<bits<<"\n";
