@@ -172,15 +172,12 @@ public:
   for(int k=0;k<4;k++)if(index==qLinkProxy_[k]){
    const int target=qLinkTarget(k);
    if(target>=0){
-    if(target==hostIndices_[30]){
-      int v=getInt(target);out=(v>0?"+":"")+std::to_string(v)+" OCT";
-    }else{
-      const int pctFields[]={23,24,25,26,28,29,31};
-      bool pct=false;
-      for(int f:pctFields)if(target==hostIndices_[f])pct=true;
-      if(pct)out=std::to_string(int(std::lround(getNormalised(target)*100)))+" %";
-      else out=param(target).display(get(target));
-    }
+    // All four visible Q-Link positions display a consistent 0..100%,
+    // regardless of whether the real DSP parameter is 0..127, signed,
+    // an on/off choice, or a categorical parameter. Never change the real
+    // parameter's scaling; only the front-panel proxy display is formatted.
+    const int pct=std::clamp(int(std::lround(getNormalised(target)*100.f)),0,100);
+    out=std::to_string(pct)+" %";
     return true;
    }
   }
