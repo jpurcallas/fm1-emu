@@ -3,6 +3,12 @@
 #include <cmath>
 #include <fstream>
 #include <cstring>
+#if defined(__unix__) || defined(__APPLE__)
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 #define RN_TABLE
 #include "rn_osc_tables.inc"
 #undef RN_TABLE
@@ -16,19 +22,41 @@ static uint32_t rd32(const uint8_t* p){return uint32_t(p[0])|(uint32_t(p[1])<<8)
 bool Bank::loadWav(const std::string& path,int root,std::string& err){
  std::ifstream f(path,std::ios::binary);if(!f){err="No se puede abrir "+path;return false;}
  uint8_t head[12];if(!f.read((char*)head,12)||memcmp(head,"RIFF",4)||memcmp(head+8,"WAVE",4)){err="Formato RIFF/WAVE inválido";return false;}
- int format=0,ch=0,bits=0,rate=0;std::vector<uint8_t> data;
+ int format=0,ch=0,bits=0,rate=0;size_t dataSize=0;std::streamoff dataOffset=-1;
  while(f){uint8_t h[8];if(!f.read((char*)h,8))break;uint32_t n=rd32(h+4);std::string id((char*)h,4);
   if(n>300000000){err="Chunk WAV excesivo";return false;}
   if(id=="fmt "){std::vector<uint8_t> b(n);if(!f.read((char*)b.data(),n)||n<16){err="fmt roto";return false;}format=rd16(b.data());ch=rd16(b.data()+2);rate=rd32(b.data()+4);bits=rd16(b.data()+14);}
-  else if(id=="data"){data.resize(n);if(!f.read((char*)data.data(),n)){err="data roto";return false;}}
+  else if(id=="data"){dataOffset=f.tellg();dataSize=n;f.seekg(n,std::ios::cur);}
   else f.seekg(n,std::ios::cur);
   if(n&1)f.seekg(1,std::ios::cur);
  }
  if(ch<1||ch>2||rate<8000||rate>192000||!((format==1&&(bits==16||bits==24||bits==32))||(format==3&&bits==32))){err="WAV no soportado (PCM16/24/32 o FLOAT32)";return false;}
- int bps=bits/8;size_t frames=data.size()/(bps*ch);if(frames==0){err="WAV sin audio";return false;}
+ if(dataOffset<0||!dataSize){err="WAV sin audio";return false;}
+ int bps=bits/8;size_t frames=dataSize/(bps*ch);if(frames==0){err="WAV sin audio";return false;}
  Sample s;s.root=root;s.rate=rate;s.channels=ch;s.bits=bits;s.wavFormat=format;s.frames=frames;
- // No audio conversion or reduction: keep the exact original interleaved PCM bytes.
- s.pcm=std::move(data);
+ // Read-only map of the exact PCM on disk: no format conversion and no
+ // allocation/copy of the full 372 MB bank before the instrument opens.
+ // The OS pages source data as required; physical MPC timing remains to test.
+#if defined(__unix__) || defined(__APPLE__)
+ int fd=::open(path.c_str(),O_RDONLY);
+ if(fd>=0){struct stat st{};if(::fstat(fd,&st)==0&&st.st_size>0&&
+     uint64_t(dataOffset)+uint64_t(dataSize)<=uint64_t(st.st_size)){
+   const size_t fileSize=size_t(st.st_size);
+   void* mem=::mmap(nullptr,fileSize,PROT_READ,MAP_PRIVATE,fd,0);
+   if(mem!=MAP_FAILED){
+    s.mappedPcm=std::shared_ptr<const uint8_t>(static_cast<const uint8_t*>(mem),[fileSize](const uint8_t* p){::munmap(const_cast<uint8_t*>(p),fileSize);});
+    s.mappedOffset=size_t(dataOffset);
+   }
+  }
+  ::close(fd);
+ }
+#endif
+ if(!s.mappedPcm){
+  // Same lossless source, portable fallback if file mapping is unavailable.
+  f.clear();f.seekg(dataOffset);
+  s.pcm.resize(dataSize);
+  if(!f.read(reinterpret_cast<char*>(s.pcm.data()),std::streamsize(dataSize))){err="data roto";return false;}
+ }
  layers.push_back(std::move(s));return true;
 }
 void Engine::setPolyphony(int n){limit=std::max(1,std::min(MAX_VOICES,n));for(int i=limit;i<MAX_VOICES;i++)voices[i].active=false;}
@@ -95,7 +123,7 @@ float Engine::env2Tick(Voice& v){
 // Read only the two neighboring frames needed for interpolation; source PCM is untouched.
 static Stereo decodeFrame(const Sample& s, size_t frame){
  const size_t bps=size_t(s.bits/8);
- const uint8_t* p=s.pcm.data()+frame*size_t(s.channels)*bps;
+ const uint8_t* p=s.pcmData()+frame*size_t(s.channels)*bps;
  auto val=[&](const uint8_t* b)->float{
   if(s.wavFormat==3){float v;memcpy(&v,b,4);return v;}
   if(s.bits==16)return float(int16_t(rd16(b)))/32768.f;
