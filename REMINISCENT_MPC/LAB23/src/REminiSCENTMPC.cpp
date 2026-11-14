@@ -46,7 +46,7 @@ public:
   if(size>=3&&data[0]=='V'&&data[1]=='I'&&data[2]=='1')
    restoredPreviewHold_.store(true,std::memory_order_release);
  }
- static mpc::PluginInfo info(){mpc::PluginInfo i;i.name="REminiSCENT MPC LAB20";i.vendor="Yeti Fingers";i.uniqueId=MPC_FOURCC('R','m','2','0');i.version=2000;i.isInstrument=true;i.numInputs=0;i.numOutputs=2;return i;}
+ static mpc::PluginInfo info(){mpc::PluginInfo i;i.name="REminiSCENT";i.vendor="Yeti Fingers";i.uniqueId=MPC_FOURCC('R','m','2','0');i.version=2400;i.isInstrument=true;i.numInputs=0;i.numOutputs=2;return i;}
  REminiSCENTMPC():mpc::Plugin(info()){
   hostIndices_.fill(-1);
   for(size_t i=0;i<ui07::FIELDS.size();++i){
