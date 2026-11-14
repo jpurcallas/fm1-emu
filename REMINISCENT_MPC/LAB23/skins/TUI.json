@@ -221,6 +221,18 @@
           "1/4T",
           "1/8T"
         ]
+      },
+      {
+        "key": "Parameter 122",
+        "value": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "DONE"
+        ]
       }
     ],
     "info": {
@@ -811,6 +823,664 @@
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112",
                   "IndexedEnabling/3/4/Parameter 110"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_OSC_WAVE_LAB10",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "lab10_osc_wave_live_8.png",
+                  "numFrames": 8,
+                  "handleName": "Parameter 2"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "198 246 488 82",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_OSC_SELECTOR_LAB10",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "lab10_osc_selection_live_8.png",
+                  "numFrames": 8,
+                  "handleName": "Parameter 2"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 368 779 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_BLENDECLIPSE_LAB10",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "lab10_blend_eclipse_live_16.png",
+                  "numFrames": 16,
+                  "handleName": "Parameter 20"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "192 178 613 392",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/2/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_ADSR_CLEAN_PANEL",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_adsr_clean_panel.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "50 271 591 185",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_ADSR_4_PARAMS_UI31",
+                "type": "Envelope",
+                "data": {
+                  "version": 1,
+                  "envelopeType": "ADSR",
+                  "envelopeStyle": "WithoutHeader",
+                  "envelopeName": "",
+                  "backgroundColour": "00000000",
+                  "scaleColour": "00000000",
+                  "lineColour": "ffe9d1a8",
+                  "fillColour": "0fe8caa0",
+                  "highlightColour": "fff5cfa1",
+                  "lineWidth": 3,
+                  "handleWidth": 17,
+                  "handleHeight": 11,
+                  "handleShape": "Circle",
+                  "handleLineWidth": 2,
+                  "handleLineColour": "fff5cfa1",
+                  "handleFillColour": "ff263638",
+                  "handleTextColour": "ffe3c8a4",
+                  "handleLineWidthOnPressed": 2,
+                  "handleLineColourOnPressed": "fff5cfa1",
+                  "handleFillColourOnPressed": "ffdf9970",
+                  "handleTextColourOnPressed": "ffe3c8a4",
+                  "handleArrowLineColourOnPressed": "ffe3c8a4",
+                  "handleArrowFillColourOnPressed": "ffe3c8a4",
+                  "attackHandle": "Parameter 29",
+                  "decayHandle": "Parameter 30",
+                  "sustainHandle": "Parameter 31",
+                  "releaseHandle": "Parameter 32",
+                  "attackShapeHandle": "Invalid",
+                  "decayShapeHandle": "Invalid",
+                  "releaseShapeHandle": "Invalid",
+                  "forceHideShapeHandles": true,
+                  "forceCurveShape": 0.5,
+                  "curveType": "Quadratic"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "64 276 565 149",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_CLEAN_PANEL",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_memory_clean_panel.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "84 455 712 69",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_PCM_TRACE_UI31",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ffe4bb88",
+                  "lineColourEnd": "ffe4bb88",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 120",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ffe4bb88",
+                  "historyColour2": "ffe4bb88",
+                  "historyTime": 2,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "84 461 712 54",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MEMORY_READHEAD_UI31",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "lab10_memory_playhead_32.png",
+                  "numFrames": 32,
+                  "handleName": "Parameter 121"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "84 455 712 69",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_LFO1_PCM_UI31",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ffe5cda2",
+                  "lineColourEnd": "ffe5cda2",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 118",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ffe5cda2",
+                  "historyColour2": "ffe5cda2",
+                  "historyTime": 3,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "94 543 516 77",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_LFO2_PCM_UI31",
+                "type": "Plotter",
+                "data": {
+                  "version": 2,
+                  "backgroundColour": "00000000",
+                  "drawLine": true,
+                  "lineDirection": "Right",
+                  "tightClip": true,
+                  "lineColourStart": "ff85bdba",
+                  "lineColourEnd": "ff85bdba",
+                  "horizLineGradient": false,
+                  "lineWidth": 2.4,
+                  "fillColourStart": "17e6cba4",
+                  "fillColourEnd": "08e6cba4",
+                  "horizFillGradient": false,
+                  "fillZero": 0.5,
+                  "dataHandle": "Parameter 119",
+                  "dataMin": 0,
+                  "dataMax": 1,
+                  "drawHistory": true,
+                  "historyDirection": "Left",
+                  "historyColour1": "ff85bdba",
+                  "historyColour2": "ff85bdba",
+                  "historyTime": 3,
+                  "historySkipFrames": 1
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "94 543 516 77",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2_CLEAN_PANEL",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "Regular",
+                  "colour": "0",
+                  "image": "lab10_mod_env2_clean_panel.png"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "94 511 534 112",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "LIVE_MOD_ENV2_ADSR_4_PARAMS_UI31",
+                "type": "Envelope",
+                "data": {
+                  "version": 1,
+                  "envelopeType": "ADSR",
+                  "envelopeStyle": "WithoutHeader",
+                  "envelopeName": "",
+                  "backgroundColour": "00000000",
+                  "scaleColour": "00000000",
+                  "lineColour": "ffe9d1a8",
+                  "fillColour": "0fe8caa0",
+                  "highlightColour": "fff5cfa1",
+                  "lineWidth": 3,
+                  "handleWidth": 17,
+                  "handleHeight": 11,
+                  "handleShape": "Circle",
+                  "handleLineWidth": 2,
+                  "handleLineColour": "fff5cfa1",
+                  "handleFillColour": "ff263638",
+                  "handleTextColour": "ffe3c8a4",
+                  "handleLineWidthOnPressed": 2,
+                  "handleLineColourOnPressed": "fff5cfa1",
+                  "handleFillColourOnPressed": "ffdf9970",
+                  "handleTextColourOnPressed": "ffe3c8a4",
+                  "handleArrowLineColourOnPressed": "ffe3c8a4",
+                  "handleArrowFillColourOnPressed": "ffe3c8a4",
+                  "attackHandle": "Parameter 88",
+                  "decayHandle": "Parameter 89",
+                  "sustainHandle": "Parameter 90",
+                  "releaseHandle": "Parameter 91",
+                  "attackShapeHandle": "Invalid",
+                  "decayShapeHandle": "Invalid",
+                  "releaseShapeHandle": "Invalid",
+                  "forceHideShapeHandles": true,
+                  "forceCurveShape": 0.5,
+                  "curveType": "Quadratic"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "101 515 520 101",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_0",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_00.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_1",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_01.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_2",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_02.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/2/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_3",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_03.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_4",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_04.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/7/Parameter 122"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SOLARIS_V09_SEGMENT_5",
+                "type": "Image",
+                "data": {
+                  "version": 2,
+                  "imageType": "FilmStrip",
+                  "colour": "0",
+                  "image": "solaris_v09_05.png",
+                  "numFrames": 25,
+                  "handleName": "Parameter 123"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": []
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "No",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "482 195 316 316",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/7/Parameter 122"
                 ]
               }
             },
