@@ -20,3 +20,12 @@ jobs:
       - run: python -m pip install 'Pillow>=10,<13'
       - name: Rebuild native skin from synthetic reference, check all 8 parameters and 16 frames each
         run: python REMINISCENT_MPC/LAB23/tests/test_ui43_representative_graphics.py
+
+      - name: Export checked-in generator + TUI for private original-art QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-ui43-repro-source-${{ github.sha }}
+          path: |
+            REMINISCENT_MPC/LAB23/tools/ui43_generate_representative_graphics.py
+            REMINISCENT_MPC/LAB23/skins/TUI.json
+          retention-days: 7
