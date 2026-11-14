@@ -17,10 +17,10 @@ Fecha: 14 nov 2026 Costa Rica.
 7. No hay Solaris, FM1 ni recurso histórico reaprovechado. **Los 254 WAV, ARM32/ARM64 y los 19 fondos originales son idénticos byte a byte a UI32 sin Solaris**.
 
 ## Pruebas realizadas
-- `test_ui33_native.py` y `test_ui33_filter_release_gate.py`: PASS de tipos SDK, conexiones, recursos existentes y conservación de todos los archivos originales; el ZIP contiene 140 componentes y 254 WAV.
+- `test_ui33_native.py` y `test_ui33_filter_release_gate.py`: PASS de tipos SDK, conexiones, recursos existentes y conservación de todos los archivos originales; el ZIP contiene 141 componentes y 254 WAV.
 - Revisión visual local compositada de FILTER con sus 24 frames obtenidos de HTML LAB10. No prueba de renderer MPC.
-- Gate obligatorio `audit_release_art.py`: **0 errores de tipo/arte prohibido**, pero **18 overlays aún sin cotejo individual y BLOQUEADOS por calidad**. No eliminar/relajar regla por comodidad.
-- ZIP privado **solo como estado de código para continuidad**, no apto para pasar al autor como plugin listo: Biblioteca `/REminiSCENT MPC/UI33_FILTER_NATIVE_PRIVATE_BLOCKED.zip`; generadores y pruebas en esta rama.
+- Gate obligatorio `audit_release_art.py`: **0 errores de tipo/arte prohibido**, pero **19 overlays aún sin cotejo individual y BLOQUEADOS por calidad**. No eliminar/relajar regla por comodidad.
+- ZIP privado **solo como estado de código para continuidad**, no apto para pasar al autor como plugin listo: Biblioteca `/REminiSCENT MPC/UI33_NATIVE_FILTER_ACOUSTIC_PRIVATE_BLOCKED.zip`; generadores y pruebas en esta rama.
 
 ## Pendiente — NO declarar terminado
 - Revisar 18 capas contra HTML LAB10 y capturas visuales, especialmente punteros, gráficos dinámicos y limpieza de textos.
@@ -28,3 +28,9 @@ Fecha: 14 nov 2026 Costa Rica.
 - ACOUSTIC BLEND: el control está convertido a Knob nativo; falta completar actualización visual de su barra/indicador, así como prueba Data Wheel en MPC.
 - Validar en MPC real interacción táctil y visual, animaciones y persistencia. No repetir tests de audio sin evidencia.
 - No cambiar master ni fusionar; no subir PCM privados a GitHub.
+
+## Último checkpoint UI33
+- TUI final: **141 componentes nativos**; añadida barra ACOUSTIC BLEND 32 frames/parameter 19, renderizados mediante la función de control original LAB10.
+- Paquete privado actual (NO APTO PARA INSTALAR): Biblioteca `/REminiSCENT MPC/UI33_NATIVE_FILTER_ACOUSTIC_PRIVATE_BLOCKED.zip`, SHA256 `8dafc79e53530de282569f504a6e0f96a1d81ec9f7603119de7fa0ee6993c5f8`, 302 ZIP members, 254 WAV. Todos los archivos existentes de UI32 salvo TUI se preservaron byte por byte.
+- Gate de procedencia: **0 errores, 19 overlays bajo revisión, BLOCK**; no declarar QA visual aprobado. No se compiló ni se probó hardware.
+- Script de origen reproducible: `LAB23/tools/ui33_acoustic_bar_from_approved_html.py`.
