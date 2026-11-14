@@ -2,7 +2,7 @@
   "project": "REminiSCENT LAB23",
   "date": "2026-11-13",
   "source": "LAB22+UI LAB10 HTML, build LAB23",
-  "asset_count": 54,
+  "asset_count": 58,
   "backgrounds": 11,
   "native_tabs": 1,
   "touch_navigation": "internal selector/parameter 112, hardware unverified",
@@ -296,6 +296,34 @@
       "height": 40
     },
     {
+      "path": "skins/noise_pink_off.png",
+      "bytes": 830,
+      "width": 98,
+      "height": 31,
+      "sha256": "e7d6844461addb605e2f823415402e619e313d75e0bc2dc3b1df375040af06f2"
+    },
+    {
+      "path": "skins/noise_pink_on.png",
+      "bytes": 803,
+      "width": 98,
+      "height": 31,
+      "sha256": "b12924f0b1f7bec37db41001b071098cca1bd1eeefba0e329953a27c83b863f2"
+    },
+    {
+      "path": "skins/noise_white_off.png",
+      "bytes": 813,
+      "width": 98,
+      "height": 31,
+      "sha256": "cbc06e6bdc72cebb2cf28869379bc5406df1008fe850c9de136b8a8d7c5aed5f"
+    },
+    {
+      "path": "skins/noise_white_on.png",
+      "bytes": 806,
+      "width": 98,
+      "height": 31,
+      "sha256": "b4c3beae2e0b65d02a2efc9100222136a5b85b3fc8f9abea546f72b79a993aa0"
+    },
+    {
       "path": "skins/osc_lab10_eight_waves.png",
       "bytes": 1084900,
       "sha256": "f9f9684407a8de71920ff68df4531f0bb9ccebf4fcf3f5175027fa021012401a",
@@ -390,5 +418,6 @@
   "live_art_note": "LAB23 follow-up: 2 LAB10-derived private visual FilmStrips for 27 acoustic sources and 8 OSC waveform states. Exporter in LAB23/tools; generator output local/private, no binary images added to public GitHub; 11 original backgrounds untouched. Not MPC tested.",
   "note_adsr": "LAB23 native ADSR Envelope overlay uses original LAB10 image with ONLY static curve removed. Stage handles mapped to host params 29..32. Unverified on MPC hardware; original fondos/03.png retained for reference and rollback. New PNG remains private, no public binaries.",
   "note_mod_memory": "Current LAB23 MOD page has exactly LFO1/LFO2/ENV2; no Mod Wheel. Shape-driven strips reflect existing DSP shape choices, Env2 Envelope binds four exact host parameters. MEMORY simulated buffer's selection position reflects a real parameter; visualisation is NOT a captured PCM waveform and not full time-domain animation. No DSP change.",
-  "note_live_runtime": "LAB23: 6 filmstrips of 25 exact decoded MP4 frames for author-approved Solaris v09 6sec/25fps at 240x240; background matte and live playhead. LFO1/2 & MEMORY now render real engine telemetry using SDK Plotter; host parameters appended 118..123. No Mod Wheel. Hardware UI not yet verified."
+  "note_live_runtime": "LAB23: 6 filmstrips of 25 exact decoded MP4 frames for author-approved Solaris v09 6sec/25fps at 240x240; background matte and live playhead. LFO1/2 & MEMORY now render real engine telemetry using SDK Plotter; host parameters appended 118..123. No Mod Wheel. Hardware UI not yet verified.",
+  "noise_choice": "White/Pink acoustic noise new user-approved two-way selector, host index 124. Original 11 backgrounds unchanged. Separate noise amount host index 105. Four new touch button PNGs private; their source is in LAB24 tool script."
 }
