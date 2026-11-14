@@ -10687,6 +10687,43 @@
                   "IndexedEnabling/6/11/Parameter 112"
                 ]
               }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_BLEND_LAB10_LIVE_THUMB",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_acoustic_blend_direct_from_html_32.png",
+                  "numFrames": 32,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 19"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 457 530 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
             }
           ]
         },
