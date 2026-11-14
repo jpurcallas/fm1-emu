@@ -151,13 +151,15 @@ public:
    for(int k=0;k<4;k++){
     int t=qLinkTarget(k);
     if(index==qLinkProxy_[k]&&t>=0){
-     // A displayed Q-Link integer can round-trip through a project chunk
-     // without the original continuous normalised value. In that case the
-     // proxy is already showing the target's exact plain value: DO NOT
-     // overwrite the saved target normalised value while loading the chunk.
-     // A real Q-Link move that crosses a target step still updates its DSP.
+     // Hardware edits a proxy. Route to the real host parameter so the
+     // DSP, direct-touch widgets and animated visuals share ONE state.
+     // The routing guard deliberately prevents nested parameterChanged()
+     // callbacks, so explicitly recompute derived visual handles below.
      const float next=std::clamp(plain/127.f,0.f,1.f);
-     if(std::lround(param(t).toPlain(next))!=getInt(t))setNormalised(t,next);
+     if(std::lround(param(t).toPlain(next))!=getInt(t)){
+      setNormalised(t,next);
+      if(t==hostIndices_[48] || t==missingUi_[2] || t==missingUi_[3])syncFilterVisual();
+     }
     }else if(index==t){
      set(qLinkProxy_[k],std::round(127.f*getNormalised(t)));
     }
