@@ -70,7 +70,7 @@ jobs:
           cat > dist/version.xml <<'XML'
           <?xml version="1.0" encoding="utf-8"?>
           <plugincontent version="1.0">
-            <version>0.25.0.0</version>
+            <version>0.27.0.0</version>
             <uiversion>0.1.0.0</uiversion>
           </plugincontent>
           XML
@@ -105,7 +105,7 @@ jobs:
           root=pathlib.Path('dist')
           m=json.loads((root/'plugin.json').read_text())
           assert m['name']=='REminiSCENT' and m['manufacturer']=='Yeti Fingers'
-          assert m['uid']=='Rm20' and m['version']=='0.25.0'
+          assert m['uid']=='Rm20' and m['version']=='0.27.0'
           assert (root/m['file32']).is_file() and (root/m['file64']).is_file()
           print('PASS manifest, name, UID and both binary paths')
           PY
