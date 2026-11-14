@@ -8,6 +8,68 @@
     },
     "replacementStrings": [
       {
+        "key": "Parameter 109",
+        "value": [
+          "Distortion",
+          "Lo-Fi Tape",
+          "Lo-Fi Vinyl",
+          "Bit Crush"
+        ]
+      },
+      {
+        "key": "Parameter 110",
+        "value": [
+          "Delay",
+          "Reverb",
+          "Mod 1",
+          "Mod 2"
+        ]
+      },
+      {
+        "key": "Parameter 111",
+        "value": [
+          "LFO 1",
+          "LFO 2",
+          "Envelope 2"
+        ]
+      },
+      {
+        "key": "Parameter 112",
+        "value": [
+          "Acoustic",
+          "OSC",
+          "Blend",
+          "Envelope",
+          "Memory",
+          "Resonance",
+          "Filter",
+          "Character",
+          "Granular",
+          "Mod",
+          "Send FX"
+        ]
+      },
+      {
+        "key": "Parameter 117",
+        "value": [
+          "Freeze",
+          "Reverse",
+          "Tide"
+        ]
+      },
+      {
+        "key": "Parameter 122",
+        "value": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "DONE"
+        ]
+      },
+      {
         "key": "Parameter 124",
         "value": [
           "WHITE",
