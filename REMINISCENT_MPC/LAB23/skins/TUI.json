@@ -6247,7 +6247,7 @@
                     "filmStrip": "lab10_native_touch_101.png",
                     "numFrames": 101,
                     "invert": false,
-                    "dragOrientation": "Vertical",
+                    "dragOrientation": "Horizontal",
                     "handleName": "Data"
                   }
                 },

@@ -1,0 +1,37 @@
+name: REminiSCENT UI44 — blue eclipse BLEND SDK and touch contract
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/tools/ui44_*'
+      - 'REMINISCENT_MPC/LAB23/tests/test_ui44_*'
+      - 'REMINISCENT_MPC/LAB23/skins/TUI.json'
+      - 'REMINISCENT_MPC/LAB23/skins/Q-Links.json'
+      - '.github/workflows/test-reminiscent-ui44-blend.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install QA image dependencies (private image bytes are never uploaded)
+        run: python -m pip install --disable-pip-version-check Pillow numpy opencv-python-headless
+      - name: Patch BLEND touch horizontally in isolated temp output ONLY
+        run: |
+          python REMINISCENT_MPC/LAB23/tools/ui44_patch_blend_touch.py \
+            --input-tui REMINISCENT_MPC/LAB23/skins/TUI.json \
+            --output-tui /tmp/reminiscent-ui44-TUI.json
+      - name: Confirm current SDK widget and same host parameter for touch, wheel and Q-Link
+        run: |
+          python REMINISCENT_MPC/LAB23/tests/test_ui44_blue_eclipse.py \
+            --tui /tmp/reminiscent-ui44-TUI.json \
+            --qlinks REMINISCENT_MPC/LAB23/skins/Q-Links.json \
+            --cpp REMINISCENT_MPC/LAB23/src/REminiSCENTMPC.cpp \
+            --no-rebuild
+      - name: Ensure no repo TUI, Q-Links, audio or source assets were edited by QA
+        run: git diff --exit-code

@@ -1,0 +1,32 @@
+name: REminiSCENT UI45 integrated UI43+UI44
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/skins/TUI.json'
+      - 'REMINISCENT_MPC/LAB23/tests/test_ui45_integrated_ui43_ui44.py'
+      - 'REMINISCENT_MPC/LAB23/tools/ui44_patch_blend_touch.py'
+      - '.github/workflows/test-reminiscent-ui45-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Confirm exact UI43 base from immutable Git SHA
+        run: |
+          git show 2b196cdd9f0db2888c1ed16623f8490854f54c22:REMINISCENT_MPC/LAB23/skins/TUI.json > /tmp/UI43_baseline_TUI.json
+      - name: Assert one approved BLEND delta and all RADAR/DNA controls
+        run: |
+          python REMINISCENT_MPC/LAB23/tests/test_ui45_integrated_ui43_ui44.py \
+            --tui REMINISCENT_MPC/LAB23/skins/TUI.json \
+            --ui43-tui /tmp/UI43_baseline_TUI.json
+      - name: Check imported UI44 patch is idempotent on combined UI43 TUI
+        run: |
+          python REMINISCENT_MPC/LAB23/tools/ui44_patch_blend_touch.py \
+            --input-tui REMINISCENT_MPC/LAB23/skins/TUI.json \
+            --output-tui /tmp/ui45_idempotent.json
+          cmp REMINISCENT_MPC/LAB23/skins/TUI.json /tmp/ui45_idempotent.json
