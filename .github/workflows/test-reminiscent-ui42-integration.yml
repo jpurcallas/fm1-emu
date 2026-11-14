@@ -17,9 +17,9 @@ jobs:
         run: |
           python REMINISCENT_MPC/LAB23/tests/test_ui42_integrated_tui.py --tui REMINISCENT_MPC/LAB23/skins/TUI.json
 
-      - name: Export exact UI42 TUI for private asset assembly
+      - name: Export verified active TUI for private asset assembly
         uses: actions/upload-artifact@v4
         with:
-          name: reminiscent-ui42-verified-tui-${{ github.sha }}
+          name: reminiscent-active-tui-${{ github.sha }}
           path: REMINISCENT_MPC/LAB23/skins/TUI.json
           retention-days: 7
