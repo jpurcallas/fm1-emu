@@ -45,6 +45,31 @@ strip=Image.new('RGBA',(w,h*8));
 for i,im in enumerate(frames):strip.alpha_composite(im,(0,h*i))
 strip.save(D/'lab10_osc_wave_live_8.png',optimize=True)
 visual.append(make_visual('LIVE_OSC_WAVE_LAB10','Image',film('lab10_osc_wave_live_8.png',8,2),(x0,y0,w,h),page(1)))
+# OSC cards: original SAW is baked as selected. Update lamp/bar overlays so the
+# eight radio-button selections show their own selected state, not a stuck SAW.
+card_x,card_y,card_w,card_h=49,368,779,146
+card_source=orig.crop((card_x,card_y,card_x+card_w,card_y+card_h)).convert('RGBA')
+led_on=orig.crop((281,374,302,396)).convert('RGBA')
+led_off=orig.crop((378,374,399,396)).convert('RGBA')
+bar_on=orig.crop((257,484,331,503)).convert('RGBA')
+bar_off=orig.crop((354,484,428,503)).convert('RGBA')
+selector=Image.new('RGBA',(card_w,card_h*8),(0,0,0,0))
+for i in range(8):
+ frame=Image.new('RGBA',(card_w,card_h),(0,0,0,0))
+ # Eliminate the original fixed SAW indicator from the approved source image.
+ frame.alpha_composite(led_off,(281-card_x,374-card_y))
+ frame.alpha_composite(bar_off,(257-card_x,484-card_y))
+ # Reuse exact SAW-approved glowing LED/bar pixels on the actual selected card.
+ if i!=2:
+  sx=281+(i-2)*98;bx=257+(i-2)*98
+  frame.alpha_composite(led_on,(sx-card_x,374-card_y))
+  frame.alpha_composite(bar_on,(bx-card_x,484-card_y))
+ else:
+  frame.alpha_composite(led_on,(281-card_x,374-card_y))
+  frame.alpha_composite(bar_on,(257-card_x,484-card_y))
+ selector.alpha_composite(frame,(0,i*card_h))
+selector.save(D/'lab10_osc_selection_live_8.png',optimize=True)
+visual.append(make_visual('LIVE_OSC_SELECTOR_LAB10','Image',film('lab10_osc_selection_live_8.png',8,2),(card_x,card_y,card_w,card_h),page(1)))
 # BLEND: reconstruct eclipse over the ORIGINAL LAB10 sun JPEG & dark planet raster (no new art).
 base=Image.open(src/'lab10_mpc_02.png').convert('RGB')
 sun=Image.open(R/'imgs_blend.png').convert('RGB');planet=base.crop((281,184,735,555)).convert('RGBA')
@@ -127,8 +152,20 @@ for n,where,source in [('LFO1',0,118),('LFO2',1,119)]:
  t['componentData']['data']['backgroundColour']='00000000';t['bounds']['bounds']='94 543 516 77'
  t['bounds']['additionalInvalidatingHandles']=sub(9,111,where,3)
  visual.append(t)
-# MOD ENV2 uses real ADSR controls? No connection to four independent dedicated envelope2 handles in current DSP source.
-# Preserve the artist-approved ENV2 panel without inventing an unsupported modulation graph.
+# MOD ENV2 has its OWN REAL DSP envelope fields 96..99 = host parameters 88..91.
+# Restore an independent four-stage moving envelope, gated to the approved third MOD card.
+x,y,w,h=94,511,534,112
+base_env2=np.array(Image.open(src/'lab10_mpc_09_2.png').convert('RGB').crop((x,y,x+w,y+h)))
+hsv=cv2.cvtColor(base_env2,cv2.COLOR_RGB2HSV)
+mask=cv2.inRange(hsv,np.array([5,35,105]),np.array([40,200,255]));mask[:3]=0;mask[-7:]=0;mask[:,:10]=0;mask[:,-8:]=0
+mask=cv2.dilate(mask,np.ones((3,3),np.uint8),iterations=1)
+clean=cv2.inpaint(base_env2,mask,5,cv2.INPAINT_TELEA)
+Image.fromarray(clean).save(D/'lab10_mod_env2_clean_panel.png',optimize=True)
+visual.append(make_visual('LIVE_MOD_ENV2_CLEAN_PANEL','Image',normal('lab10_mod_env2_clean_panel.png'),(x,y,w,h),sub(9,111,2,3)))
+env2=copy.deepcopy(adsr);env2['componentData']['name']='LIVE_MOD_ENV2_ADSR_4_PARAMS_UI31'
+for field,host in [('attack',88),('decay',89),('sustain',90),('release',91)]:env2['componentData']['data'][field+'Handle']=f'Parameter {host}'
+env2['bounds']['bounds']='101 515 520 101';env2['bounds']['additionalInvalidatingHandles']=sub(9,111,2,3)
+visual.append(env2)
 # Solaris v09, the approved 240x240 art. 6 segments x25 frames, gated by engine startup parameter 122;
 # UI draws nothing after param 122=6. No opaque fallback / no whole-screen obstruction.
 with zipfile.ZipFile(R/'REminiSCENT_LAB24_58_PNG_WHITE_PINK_PRIVADO.zip') as z:
@@ -148,6 +185,6 @@ assert len([x for x in cs if x['componentData']['name'].startswith('Q_LINK_')])=
 assert len(cs)==106+len(visual)
 (D/'TUI.json').write_text(json.dumps(tui,indent=2,ensure_ascii=False)+'\n')
 assets={p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size,'size':Image.open(p).size} for p in D.glob('*.png')}
-report={'parent':'UI30 PR32 source; binary LAB29 254 WAV, DSP unchanged','status':'UI source + skin, static validation; MPC physical not verified','modules':11,'approved_backgrounds_sha256':{name:assets[name]['sha256'] for _,name in old_imgs},'added_visuals':len(visual),'components_total':len(cs),'assets':assets,'wav':254,'limitations':['Native Envelope/Plotter renderer must be tested on actual MPC','Solaris auto-hide depends on audio engine host 122 advancing to 6','MOD ENV2 realtime envelope not implemented; SDK no second ADSR handles exposed']}
+report={'parent':'UI30 PR32 source; binary LAB29 254 WAV, DSP unchanged','status':'UI source + skin, static validation; MPC physical not verified','modules':11,'approved_backgrounds_sha256':{name:assets[name]['sha256'] for _,name in old_imgs},'added_visuals':len(visual),'components_total':len(cs),'assets':assets,'wav':254,'limitations':['Native Envelope/Plotter renderer must be tested on actual MPC','Solaris auto-hide depends on audio engine host 122 advancing to 6','MOD ENV2 4 real host ADSR handles 88..91 structurally bound; actual MPC render untested']}
 (R/'UI31_LIVE'/'REPORT.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
 print(json.dumps({k:v for k,v in report.items() if k not in ('assets','approved_backgrounds_sha256')}))
