@@ -1,0 +1,74 @@
+name: REminiSCENT LAB24 — ARM32 standalone SDK build
+
+on:
+  push:
+    branches:
+      - work/reminiscent-mpc-integracion-20261113
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - '.github/workflows/build-reminiscent-lab24-arm32.yml'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - '.github/workflows/build-reminiscent-lab24-arm32.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-arm32:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the isolated REminiSCENT development branch
+        uses: actions/checkout@v4
+      - name: Checkout official Akai plugin builder SDK (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: inmusic-software/mpc-plugin-builder-sdk
+          ref: febd2ca5bd9eb16c4a412837196e145566bc981b
+          path: mpc-sdk
+          persist-credentials: false
+      - name: Install ARMv7 hard-float C++ cross compiler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+      - name: Compile actual LAB24 sources as ARMv7 NEON VST2
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT=REMINISCENT_MPC/LAB23
+          mkdir -p dist/VST
+          arm-linux-gnueabihf-g++ \
+            -std=c++17 -O2 -fPIC -shared \
+            -march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard \
+            -fvisibility=hidden -fvisibility-inlines-hidden \
+            -ffunction-sections -fdata-sections \
+            -Wl,--gc-sections -Wl,--version-script=mpc-sdk/tools/exports.map \
+            -static-libstdc++ -static-libgcc \
+            -Impc-sdk/framework -I"$PROJECT/src" \
+            "$PROJECT"/src/*.cpp \
+            -o dist/VST/reminiscent-mpc-lab24-arm32.so
+          arm-linux-gnueabihf-strip --strip-unneeded dist/VST/reminiscent-mpc-lab24-arm32.so
+      - name: Prove architecture and host entrypoint; preserve provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          F=dist/VST/reminiscent-mpc-lab24-arm32.so
+          file "$F"
+          arm-linux-gnueabihf-readelf -h "$F" | tee dist/ELF_HEADER.txt
+          arm-linux-gnueabihf-readelf -d "$F" | tee dist/ELF_DYNAMIC.txt
+          arm-linux-gnueabihf-readelf -Ws "$F" | tee dist/ELF_SYMBOLS.txt
+          grep -q 'Machine:.*ARM' dist/ELF_HEADER.txt
+          grep -q 'Class:.*ELF32' dist/ELF_HEADER.txt
+          grep -q 'VSTPluginMain' dist/ELF_SYMBOLS.txt
+          sha256sum "$F" | tee dist/SHA256SUMS.txt
+          printf 'GitHub source SHA: %s\nAkai SDK SHA: febd2ca5bd9eb16c4a412837196e145566bc981b\n' "$GITHUB_SHA" > dist/PROVENANCE.txt
+      - name: Export ARM32 binary only — no private PCM or artwork on GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-lab24-arm32-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
