@@ -10650,6 +10650,43 @@
                 "bounds": "1025 497 50 50",
                 "additionalInvalidatingHandles": []
               }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_CUTOFF_ORIGINAL_LAB10_REACTIVE",
+                "type": "Knob",
+                "data": {
+                  "version": 3,
+                  "knobType": "FilmStrip",
+                  "filmStrip": "lab10_filter_from_approved_html_24.png",
+                  "numFrames": 24,
+                  "invert": false,
+                  "dragOrientation": "Horizontal",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 42"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "49 248 595 231",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
             }
           ]
         },
