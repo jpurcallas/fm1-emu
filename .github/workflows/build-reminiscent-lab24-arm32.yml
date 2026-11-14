@@ -1,0 +1,120 @@
+name: REminiSCENT LAB24 — MPC standalone 32+64 build
+
+on:
+  push:
+    branches:
+      - work/reminiscent-mpc-integracion-20261113
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - 'REMINISCENT_MPC/LAB23/plugin.json'
+      - 'REMINISCENT_MPC/LAB23/skins/TUI.json'
+      - '.github/workflows/build-reminiscent-lab24-arm32.yml'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - 'REMINISCENT_MPC/LAB23/plugin.json'
+      - '.github/workflows/build-reminiscent-lab24-arm32.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-for-standalone-mpc:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - name: Read author-approved isolated REminiSCENT source
+        uses: actions/checkout@v4
+      - name: Fetch pinned official Akai plugin builder SDK
+        uses: actions/checkout@v4
+        with:
+          repository: inmusic-software/mpc-plugin-builder-sdk
+          ref: febd2ca5bd9eb16c4a412837196e145566bc981b
+          path: mpc-sdk
+          persist-credentials: false
+      - name: Install pinned Zig cross compiler with glibc 2.31 sysroots
+        run: |
+          python3 -m venv /tmp/zig-sdk
+          /tmp/zig-sdk/bin/pip install --disable-pip-version-check 'ziglang==0.14.1'
+          /tmp/zig-sdk/bin/python -m ziglang version
+      - name: Compile ARM32 and ARM64 directly using official SDK flags
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=REMINISCENT_MPC/LAB23
+          mkdir -p dist/VST 'dist/Plugin Skins'
+          for architecture in arm32 arm64; do
+            case "$architecture" in
+              arm32)
+                target='arm-linux-gnueabihf.2.31'
+                cpu='cortex_a17'
+                ;;
+              arm64)
+                target='aarch64-linux-gnu.2.31'
+                cpu='cortex_a55'
+                ;;
+            esac
+            /tmp/zig-sdk/bin/python -m ziglang c++ \
+              -std=c++17 -O2 -fPIC -shared \
+              -fvisibility=hidden -fvisibility-inlines-hidden \
+              -ffunction-sections -fdata-sections \
+              -Wl,--gc-sections -Wl,--version-script=mpc-sdk/tools/exports.map \
+              -Impc-sdk/framework -I"$P/src" \
+              -target "$target" -mcpu="$cpu" \
+              "$P"/src/*.cpp -o "dist/VST/reminiscent-$architecture.so"
+          done
+          cp "$P/plugin.json" dist/plugin.json
+          cp "$P/skins/TUI.json" 'dist/Plugin Skins/TUI.json'
+          cp "$P/skins/Q-Links.json" 'dist/Plugin Skins/Q-Links.json'
+          cat > dist/version.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <plugincontent version="1.0">
+            <version>0.27.0.0</version>
+            <uiversion>0.1.0.0</uiversion>
+          </plugincontent>
+          XML
+      - name: Reject wrong architecture, wrong manifest paths or glibc dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          for architecture in arm32 arm64; do
+            file="dist/VST/reminiscent-$architecture.so"
+            readelf -h "$file" > "dist/ELF_$architecture.txt"
+            readelf -W --dyn-syms "$file" > "dist/SYMBOLS_$architecture.txt"
+            readelf -W -V "$file" > "dist/VERSIONS_$architecture.txt"
+            case "$architecture" in
+              arm32) grep -q 'Class:.*ELF32' "dist/ELF_$architecture.txt"
+                     grep -q 'Machine:.*ARM' "dist/ELF_$architecture.txt";;
+              arm64) grep -q 'Class:.*ELF64' "dist/ELF_$architecture.txt"
+                     grep -q 'Machine:.*AArch64' "dist/ELF_$architecture.txt";;
+            esac
+            grep -q 'VSTPluginMain' "dist/SYMBOLS_$architecture.txt"
+            python3 - "$file" <<'PY'
+          import re,subprocess,sys
+          f=sys.argv[1]
+          versions=subprocess.check_output(['readelf','-W','-V',f],text=True)
+          glibcs=[tuple(map(int,x.split('.'))) for x in re.findall(r'Name: GLIBC_([0-9.]+)',versions)]
+          if glibcs and max(glibcs)>(2,31):
+              raise SystemExit(f+' requires glibc '+str(max(glibcs))+' (expected <= 2.31)')
+          print(f, 'max GLIBC',max(glibcs) if glibcs else 'none')
+          PY
+          done
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('dist')
+          m=json.loads((root/'plugin.json').read_text())
+          assert m['name']=='REminiSCENT' and m['manufacturer']=='Yeti Fingers'
+          assert m['uid']=='Rm20' and m['version']=='0.27.0'
+          assert (root/m['file32']).is_file() and (root/m['file64']).is_file()
+          print('PASS manifest, name, UID and both binary paths')
+          PY
+          (cd dist && sha256sum VST/*.so > SHA256SUMS.txt)
+          printf 'GitHub source SHA: %s\nAkai SDK SHA: febd2ca5bd9eb16c4a412837196e145566bc981b\nToolchain: ziglang 0.14.1\nTarget glibc: 2.31\n' "$GITHUB_SHA" > dist/PROVENANCE.txt
+      - name: Export binaries and exact GitHub UI files — never private samples/images
+        uses: actions/upload-artifact@v4
+        with:
+          name: reminiscent-lab24-zig231-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
