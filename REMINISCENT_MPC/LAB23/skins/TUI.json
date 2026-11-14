@@ -48,32 +48,6 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "FALLBACK_ACOUSTIC_ALWAYS_VISIBLE",
-                "type": "Image",
-                "data": {
-                  "version": 2,
-                  "imageType": "Regular",
-                  "colour": "0",
-                  "image": "lab10_mpc_00.png"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
-              },
-              "bounds": {
-                "version": 1,
-                "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "0 0 1280 628"
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
                 "name": "APPROVED_LAB10_SCREEN_00",
                 "type": "Image",
                 "data": {
@@ -90,7 +64,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -119,7 +93,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -148,7 +122,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -177,7 +151,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -206,7 +180,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -235,7 +209,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -264,7 +238,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -293,7 +267,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -323,7 +297,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -353,7 +327,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -383,7 +357,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -413,7 +387,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -442,7 +416,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -472,7 +446,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -502,7 +476,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -532,7 +506,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -562,7 +536,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -592,7 +566,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -622,7 +596,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "0 0 1280 628",
@@ -2681,7 +2655,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "84 521 540 81",
@@ -2729,7 +2703,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "84 521 540 81",
@@ -2777,7 +2751,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "85 451 718 61",
@@ -2813,7 +2787,7 @@
               "bounds": {
                 "version": 2,
                 "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Show",
+                "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
                 "bounds": "85 451 718 61",
