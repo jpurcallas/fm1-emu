@@ -1,0 +1,41 @@
+{
+  "status": "SHA-256 archivados de las 19 imágenes base LAB10 presentes en UI32, NO sustituyen cotejo visual completo del HTML LAB10",
+  "source": "UI32_SIN_ARTE_ANTIGUO (derivado de LAB29, primera pantalla cotejada con HTML)",
+  "base_image_sha256": {
+    "lab10_mpc_00.png": "b8b38de9a5370f85f139d1bc13ce8f46b56b88b5bcde96a027a895d223b6ea47",
+    "lab10_mpc_01.png": "ef6a426f77733e565f2e9562332ae031122a69e5a4d92958847a7fc3ee48f909",
+    "lab10_mpc_02.png": "1b2cc5541b2bcebff57b13df653586f937e6d938dd869f7d1f161f18b759dce1",
+    "lab10_mpc_03.png": "4b7c0a9e48514cab6e79b7a4c07327b29aec8bda79e900ad7dcf254113763652",
+    "lab10_mpc_04.png": "9b10fea36e2911f543fc6cdccefe124e31003f016a4e0130bc64cd851e68b280",
+    "lab10_mpc_05.png": "1fbe70f51920521de90fd107310e801513705d252c9772cc542e85308b260641",
+    "lab10_mpc_06.png": "234ba4a383147b44d316eaffc5dd291358b5e250a23731b968b01e45ab8fbe43",
+    "lab10_mpc_07_0.png": "3ec070561c5ae0bb33b66332bc9fb9dc5bbeda5b6a6abe2a0107192836a43436",
+    "lab10_mpc_07_1.png": "c5eee48d458a292e795b58b97fc5869101b938198d537e726acec1b6965f95c3",
+    "lab10_mpc_07_2.png": "713b7825bcd6e6a2c5c34f6e5cfbddceaa69464e9b4ad51fed0a2232c25869eb",
+    "lab10_mpc_07_3.png": "c725cd2ff7c9620963b6552f3e0632504cf47b09c81300a0b1bf54f9262fe193",
+    "lab10_mpc_08.png": "ca4f51f4712fb5a724be35cda8c5cbcf43729e74b3a584d6c4f86c719476a984",
+    "lab10_mpc_09_0.png": "a9fefdfc48cea74e340d41fc6c5cbafe5cfdc57d8f4fa417ec25893bf8a3922a",
+    "lab10_mpc_09_1.png": "665566561d6fe85a64aa91853886b6b719100ed5bfe401679c16e1bb9b8a411b",
+    "lab10_mpc_09_2.png": "2293238a68cbcbd6532f33f9bd56aafa986476612ee6626f502442de50c0a435",
+    "lab10_mpc_10_0.png": "36cf52e14f0050e06a06b849fc15ca2ecbacaea236c67f8fe151744daff85efe",
+    "lab10_mpc_10_1.png": "893c302773a0299aa5182cbae95a5e0525fa492b5c3f43c3e9550f7ee83bd49d",
+    "lab10_mpc_10_2.png": "99b1013df8d99c23e3454f4b5a401605d88daea19df16a490b1aa10356a5be8a",
+    "lab10_mpc_10_3.png": "6e5a3cfc95521a3e184bdc3e7952b1a0bded442b4c333f37849691de05a2e4a3"
+  },
+  "disallowed_patterns": [
+    "solaris_v09_",
+    "solar_v09_",
+    "fm1_old",
+    "old_fm1"
+  ],
+  "allowed_sdk_types": [
+    "Button",
+    "Image",
+    "Knob",
+    "Slider",
+    "Label",
+    "Plotter",
+    "Envelope"
+  ],
+  "audit_notes": "Los demás PNG son overlays candidatos; deben revisarse contra HTML LAB10 uno por uno. Fuentes originales y binarios no se borran; nunca incluir arte rechazado en paquete."
+}
