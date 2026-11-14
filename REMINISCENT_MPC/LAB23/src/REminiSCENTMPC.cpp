@@ -20,6 +20,7 @@ class REminiSCENTMPC : public mpc::Plugin {
  std::array<int,ui07::FIELDS.size()> hostIndices_{};
  // LAB21: 11 touch-tabs and dynamic 4-Q-Link proxy routing. The approved 105 DSP parameter indices NEVER change.
  int missingUi_[4]={-1,-1,-1,-1};
+ int acousticNoiseType_=-1;
  int selectChar_=-1,selectSend_=-1,selectMod_=-1,tabPage_=-1;
  std::array<int,4> qLinkProxy_{{-1,-1,-1,-1}};
  int selectMemory_=-1;
@@ -45,12 +46,12 @@ public:
       hostIndices_[i]=addParam(mpc::choiceParam(f.id,label.c_str(),options,int(f.def)));
     } else hostIndices_[i]=addParam(mpc::intParam(f.id,label.c_str(),int(f.minimum),int(f.maximum),int(f.def)));
   }
-  // Previously omitted UI controls: exposed without altering the approved DSP implementation.
-  // Four remain DSP-PENDING, not falsely presented as completed audio processing.
-  missingUi_[0]=addParam(mpc::intParam("params.acousticNoise","Acoustic noise (DSP pending)",0,127,0));
-  missingUi_[1]=addParam(mpc::intParam("params.spread","Osc spread (DSP pending)",0,127,64));
-  missingUi_[2]=addParam(mpc::intParam("params.filterEnv","Filter env (DSP pending)",0,127,56));
-  missingUi_[3]=addParam(mpc::intParam("params.filterTrack","Key track (DSP pending)",0,127,64));
+  // Existing parameter IDs and indices stay untouched; new WHITE/PINK
+  // acoustic noise colour is a separate MIDI-safe touch choice.
+  missingUi_[0]=addParam(mpc::intParam("params.acousticNoise","Acoustic WHITE/PINK level",0,127,0));
+  missingUi_[1]=addParam(mpc::intParam("params.spread","Osc stereo spread",0,127,64));
+  missingUi_[2]=addParam(mpc::intParam("params.filterEnv","Filter ADSR depth",0,127,56));
+  missingUi_[3]=addParam(mpc::intParam("params.filterTrack","LPF key track",0,127,64));
   selectChar_=addParam(mpc::choiceParam("ui.selectedChar","Character edit",{"Distortion","Lo-Fi Tape","Lo-Fi Vinyl","Bit Crush"},1));
   selectSend_=addParam(mpc::choiceParam("ui.selectedSend","Send FX edit",{"Delay","Reverb","Mod 1","Mod 2"},0));
   selectMod_=addParam(mpc::choiceParam("ui.selectedMod","Modulation edit",{"LFO 1","LFO 2","Envelope 2"},0));
@@ -69,6 +70,8 @@ public:
   // under the MPC skin renderer's texture height limits.
   splashGroup_=addParam(mpc::choiceParam("ui.splash.group","Solaris frame group",{"0","1","2","3","4","5","DONE"},0));
   splashFrame_=addParam(mpc::intParam("ui.splash.frame","Solaris frame",0,24,0));
+  // Append only: old chunks identify all previous parameters by stable ID.
+  acousticNoiseType_=addParam(mpc::choiceParam("ui.acousticNoiseType","Acoustic noise colour",{"WHITE","PINK"},0));
   syncQLinks();
  }
  int qLinkTarget(int slot)const{
@@ -77,13 +80,13 @@ public:
   // hostIndices_ to prevent Q-Links editing the wrong instrument parameters.
   if(slot<0||slot>=4)return -1;
   static constexpr int fieldQ[][4]={
-   {23,25,26,27}, // ACOUSTIC: blend / A level / B level / noise (DSP pending)
-   {28,32,33,34}, // OSC: level / tune / harmonics / spread (pending)
+   {23,25,26,27}, // ACOUSTIC: blend / A level / B level / WHITE/PINK noise amount
+   {28,32,33,34}, // OSC: level / tune / harmonics / stereo spread
    {24,30,29,31}, // BLEND: master blend / pitch / output / presence
    {35,36,37,38}, // ENVELOPE ADSR
    {39,40,41,42}, // MEMORY: window / speed / position / shape
    {44,45,46,47}, // RESONANCE
-   {48,49,50,51}, // FILTER: cutoff / env pending / track pending / mix
+   {48,49,50,51}, // FILTER: cutoff / amp env depth / key track / mix
    {-1,-1,-1,-1},
    {52,53,54,55}, // GRANULAR
    {-1,-1,-1,-1},
@@ -170,6 +173,13 @@ public:
   std::array<float,ui07::FIELDS.size()> v{};
   for(size_t i=0;i<v.size();i++)v[i]=hostIndices_[i]<0?ui07::FIELDS[i].def:get(hostIndices_[i]);
   applyParams(*engine_,v);
+  // These existing host parameters were UI-only in LAB23. Their values now
+  // reach the real DSP without renumbering any of the saved 118 parameters.
+  engine_->params.acousticNoiseLevel=float(getInt(missingUi_[0]))/127.f;
+  engine_->params.oscSpread=float(getInt(missingUi_[1]))/127.f;
+  engine_->params.lowPassEnv=float(getInt(missingUi_[2]))/127.f;
+  engine_->params.lowPassTrack=float(getInt(missingUi_[3]))/127.f;
+  engine_->params.acousticNoiseType=getInt(acousticNoiseType_);
   if(ctx.transport.tempoValid){engine_->params.lfoTempoBpm=std::max(30.f,std::min(300.f,float(ctx.transport.bpm)));}
   int pos=0;
   for(int i=0;i<ctx.numMidiEvents;i++){
