@@ -114,6 +114,8 @@ public:
   int window=0, voices=0;
  };
  MemoryBlackbox memoryBlackbox() const;
+ // Read-only actual modulation samples for SDK Plotter; never feeds DSP or MIDI.
+ std::array<float,2> modulationBlackbox() const { return uiLastLfo_; }
 
  static constexpr int MAX_VOICES=16;
  explicit Engine(int rate=48000):sr(rate){}
@@ -215,6 +217,7 @@ private:
  std::array<Voice,MAX_VOICES> voices{};
  int sr=48000,limit=8; uint64_t clock=0;
  float debugLastMono=0.f,debugLastWet=0.f;
+ std::array<float,2> uiLastLfo_{{0.f,0.f}};
  bool pedalDown=false;
  float lpL=0.f,lpR=0.f;
  float envelope(Voice& v);
