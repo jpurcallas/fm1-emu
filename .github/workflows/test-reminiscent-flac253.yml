@@ -37,7 +37,7 @@ jobs:
               w.setnchannels(ch);w.setsampwidth(bits//8);w.setframerate(rate);w.writeframes(data)
           PY
           for wav in /tmp/flac_fixture/*.wav;do
-            flac --silent --verify --best --force -o "\${wav%.wav}.flac" "$wav"
+            flac --silent --verify --best --force -o "${wav%.wav}.flac" "$wav"
           done
       - name: Compile host dr_flac reader and compare every original PCM byte
         shell: bash
