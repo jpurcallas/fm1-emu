@@ -27,6 +27,8 @@ class REminiSCENTMPC : public mpc::Plugin {
  // Read-only MPC SDK display channels, appended after the existing 118 parameters.
  int visualLfo_[2]{-1,-1},visualMemory_=-1,visualPlayhead_=-1;
  int splashGroup_=-1,splashFrame_=-1;
+ // UI34: HOST-only visual derived from real filter cutoff + ENV + KEY TRACK.
+ int visualFilterEffectiveCutoff_=-1,visualFilterFrame_=-1,visualFilterGroup_=-1;
  uint64_t visualSamples_=0;
  uint64_t visualLastTick_=~uint64_t(0);
  int visualSampleRate_=44100;
@@ -85,7 +87,11 @@ public:
   splashFrame_=addParam(mpc::intParam("ui.splash.frame","Solaris frame",0,24,0));
   // Append only: old chunks identify all previous parameters by stable ID.
   acousticNoiseType_=addParam(mpc::choiceParam("ui.acousticNoiseType","Acoustic noise colour",{"WHITE","PINK"},0));
-  syncQLinks();
+  // Append-only visual parameter: does not affect DSP or legacy 125 indices.
+  visualFilterEffectiveCutoff_=addParam(mpc::intParam("ui.filter.effectiveCutoff","Filter ENV + KEY response position",0,127,64));
+  visualFilterFrame_=addParam(mpc::intParam("ui.filter.visualFrame","Filter visual frame",0,31,0));
+  visualFilterGroup_=addParam(mpc::choiceParam("ui.filter.visualGroup","Filter visual group",{"0","1"},0));
+  syncQLinks();syncFilterVisual();
  }
  int qLinkTarget(int slot)const{
   // UI field numbers are NOT host parameter numbers: eight UI-only fields were
@@ -120,6 +126,17 @@ public:
    default:return -1;
   }
  }
+ void syncFilterVisual(){
+  if(visualFilterEffectiveCutoff_<0 || hostIndices_[48]<0)return;
+  const float cutoff=get(hostIndices_[48]);
+  const float env=get(missingUi_[2]), track=get(missingUi_[3]);
+  const float effective=std::clamp(cutoff+(env-64.f)*37.f/127.f+(track-64.f)*15.f/127.f,0.f,127.f);
+  const int v=int(std::lround(effective));
+  if(getInt(visualFilterEffectiveCutoff_)!=v)set(visualFilterEffectiveCutoff_,float(v));
+  const int step=std::clamp(int(std::lround(effective*63.f/127.f)),0,63);
+  if(getInt(visualFilterFrame_)!=step%32)set(visualFilterFrame_,float(step%32));
+  if(getInt(visualFilterGroup_)!=step/32)set(visualFilterGroup_,float(step/32));
+ }
  void syncQLinks(){
   for(int k=0;k<4;k++){
    const int target=qLinkTarget(k);if(target<0||qLinkProxy_[k]<0)continue;
@@ -146,6 +163,7 @@ public:
     }
    }
   }
+  if(index==hostIndices_[48] || index==missingUi_[2] || index==missingUi_[3])syncFilterVisual();
   routing_.store(false,std::memory_order_release);
  }
  bool formatValue(int index,float value,std::string &out)override{
