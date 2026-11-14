@@ -1,0 +1,74 @@
+{
+  "ui_version": "UI33",
+  "checked": {
+    "Acoustic Blend": {
+      "page": 0,
+      "visual_parameter_evidence": {
+        "19": [
+          "ACOUSTIC_BLEND_LAB10_LIVE_THUMB"
+        ]
+      }
+    },
+    "Master Blend Eclipse": {
+      "page": 2,
+      "visual_parameter_evidence": {
+        "20": [
+          "LIVE_BLENDECLIPSE_LAB10"
+        ]
+      }
+    },
+    "Envelope ADSR": {
+      "page": 3,
+      "visual_parameter_evidence": {
+        "29": [
+          "LIVE_ADSR_4_PARAMS_UI31"
+        ],
+        "30": [
+          "LIVE_ADSR_4_PARAMS_UI31"
+        ],
+        "31": [
+          "LIVE_ADSR_4_PARAMS_UI31"
+        ],
+        "32": [
+          "LIVE_ADSR_4_PARAMS_UI31"
+        ]
+      }
+    },
+    "Resonance 4 params": {
+      "page": 5,
+      "visual_parameter_evidence": {}
+    },
+    "Filter 4 params": {
+      "page": 6,
+      "visual_parameter_evidence": {
+        "42": [
+          "FILTER_CUTOFF_ORIGINAL_LAB10_REACTIVE"
+        ]
+      }
+    },
+    "Granular 4 params": {
+      "page": 8,
+      "visual_parameter_evidence": {}
+    }
+  },
+  "missing": {
+    "Resonance 4 params": [
+      38,
+      39,
+      40,
+      41
+    ],
+    "Filter 4 params": [
+      107,
+      108,
+      43
+    ],
+    "Granular 4 params": [
+      44,
+      45,
+      46,
+      47
+    ]
+  },
+  "result": "BLOCK"
+}
