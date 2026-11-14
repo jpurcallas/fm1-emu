@@ -1,0 +1,43 @@
+name: REminiSCENT UI41 — host Q-Link route and exact graphics maths
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/**'
+      - 'REMINISCENT_MPC/LAB23/tests/test_ui41_*.cpp'
+      - '.github/workflows/test-reminiscent-ui41-graphics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  host-and-visual:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: inmusic-software/mpc-plugin-builder-sdk
+          ref: febd2ca5bd9eb16c4a412837196e145566bc981b
+          path: mpc-sdk
+          persist-credentials: false
+      - name: Build and exercise exact LAB10 radar/ADN geometry
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra \
+            -IREMINISCENT_MPC/LAB23/src \
+            REMINISCENT_MPC/LAB23/tests/test_ui41_approved_visual_math.cpp \
+            -o /tmp/ui41-graphics-test
+          /tmp/ui41-graphics-test
+      - name: Build native host plugin from complete unchanged motor
+        run: |
+          g++ -std=c++17 -O2 -fPIC -shared -pthread \
+            -Impc-sdk/framework -IREMINISCENT_MPC/LAB23/src \
+            REMINISCENT_MPC/LAB23/src/*.cpp \
+            -o /tmp/reminiscent-ui41-native.so
+          nm -D /tmp/reminiscent-ui41-native.so | grep VSTPluginMain
+      - name: Validate host callback and four Q-Link values on three screens
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra \
+            -Impc-sdk/framework \
+            REMINISCENT_MPC/LAB23/tests/test_ui41_qlink_host_callback.cpp \
+            -ldl -o /tmp/ui41-host-test
+          /tmp/ui41-host-test /tmp/reminiscent-ui41-native.so
