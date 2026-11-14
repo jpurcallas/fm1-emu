@@ -10,7 +10,7 @@
       {
         "Tab": 1,
         "SubTab": 1,
-        "Bank Direction": "Column",
+        "Bank Direction": "RowTopDown",
         "Q-Links": {
           "Q-Link 1": -1,
           "Q-Link 2": -1,
