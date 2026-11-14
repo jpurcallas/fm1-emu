@@ -1,0 +1,38 @@
+name: REminiSCENT UI40 three-zone bar structure
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/tools/ui40_build_approved_three_zone_bars.py'
+      - 'REMINISCENT_MPC/LAB23/tests/test_ui40_three_zone_bars.py'
+      - 'REMINISCENT_MPC/LAB23/skins/TUI.json'
+      - '.github/workflows/test-reminiscent-ui40-bars.yml'
+  workflow_dispatch:
+jobs:
+  ui40-three-zone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install asset generation dependency
+        run: python -m pip install 'Pillow>=10,<13'
+      - name: Create synthetic 1280x628 page fixtures (real LAB10 assets private)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          p=Path('/tmp/ui40_input');p.mkdir(exist_ok=True)
+          names=['lab10_mpc_04.png']
+          names += [f'lab10_mpc_07_{k}.png' for k in range(4)]
+          names += [f'lab10_mpc_09_{k}.png' for k in range(3)]
+          names += [f'lab10_mpc_10_{k}.png' for k in range(4)]
+          for n in names:Image.new('RGB',(1280,628),(11,31,34)).save(p/n)
+          PY
+      - name: Assert native SDK button mappings and three independent zones
+        env:
+          PYTHONPATH: REMINISCENT_MPC/LAB23/tools
+        run: |
+          python REMINISCENT_MPC/LAB23/tests/test_ui40_three_zone_bars.py \
+            --tui REMINISCENT_MPC/LAB23/skins/TUI.json \
+            --assets /tmp/ui40_input --out /tmp/ui40_out
