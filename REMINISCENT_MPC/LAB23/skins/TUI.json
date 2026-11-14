@@ -58,22 +58,168 @@
         ]
       },
       {
-        "key": "Parameter 122",
-        "value": [
-          "0",
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "DONE"
-        ]
-      },
-      {
         "key": "Parameter 124",
         "value": [
           "WHITE",
           "PINK"
+        ]
+      },
+      {
+        "key": "Parameter 0",
+        "value": [
+          "Piano VEL 3",
+          "Mbira de Zimbabue",
+          "Trompeta",
+          "Violín",
+          "Bandoneón",
+          "Contrabajo jazz",
+          "Tuba",
+          "Marimba",
+          "Balafón",
+          "Didgeridoo",
+          "Guitarra nylon",
+          "Hang",
+          "Ocarina",
+          "Arpa",
+          "Violonchelo",
+          "Flauta",
+          "Clarinete",
+          "Saxo tenor",
+          "Guitarra acero",
+          "Guitarra archtop",
+          "Vibráfono",
+          "Armónica cromática",
+          "Trombón",
+          "Corno francés",
+          "Clavecín",
+          "Salterio de arco",
+          "Vasos musicales"
+        ]
+      },
+      {
+        "key": "Parameter 1",
+        "value": [
+          "Piano VEL 3",
+          "Mbira de Zimbabue",
+          "Trompeta",
+          "Violín",
+          "Bandoneón",
+          "Contrabajo jazz",
+          "Tuba",
+          "Marimba",
+          "Balafón",
+          "Didgeridoo",
+          "Guitarra nylon",
+          "Hang",
+          "Ocarina",
+          "Arpa",
+          "Violonchelo",
+          "Flauta",
+          "Clarinete",
+          "Saxo tenor",
+          "Guitarra acero",
+          "Guitarra archtop",
+          "Vibráfono",
+          "Armónica cromática",
+          "Trombón",
+          "Corno francés",
+          "Clavecín",
+          "Salterio de arco",
+          "Vasos musicales"
+        ]
+      },
+      {
+        "key": "Parameter 2",
+        "value": [
+          "SINE",
+          "TRIANGLE",
+          "SAW",
+          "SQUARE",
+          "PULSE",
+          "ORGAN",
+          "BRIGHT",
+          "HOLLOW"
+        ]
+      },
+      {
+        "key": "Parameter 103",
+        "value": [
+          "CHORUS",
+          "FLANGER",
+          "PHASER",
+          "TREMOLO",
+          "AUTO-PAN"
+        ]
+      },
+      {
+        "key": "Parameter 104",
+        "value": [
+          "CHORUS",
+          "FLANGER",
+          "PHASER",
+          "TREMOLO",
+          "AUTO-PAN"
+        ]
+      },
+      {
+        "key": "Parameter 92",
+        "value": [
+          "PITCH",
+          "CUTOFF",
+          "AMP",
+          "PAN",
+          "BLEND",
+          "PWM"
+        ]
+      },
+      {
+        "key": "Parameter 93",
+        "value": [
+          "PITCH",
+          "CUTOFF",
+          "AMP",
+          "PAN",
+          "BLEND",
+          "PWM"
+        ]
+      },
+      {
+        "key": "Parameter 94",
+        "value": [
+          "PITCH",
+          "CUTOFF",
+          "AMP",
+          "PAN",
+          "BLEND",
+          "PWM"
+        ]
+      },
+      {
+        "key": "Parameter 98",
+        "value": [
+          "1/1",
+          "1/2",
+          "1/4",
+          "1/8",
+          "1/16",
+          "1/4D",
+          "1/8D",
+          "1/4T",
+          "1/8T"
+        ]
+      },
+      {
+        "key": "Parameter 101",
+        "value": [
+          "1/1",
+          "1/2",
+          "1/4",
+          "1/8",
+          "1/16",
+          "1/4D",
+          "1/8D",
+          "1/4T",
+          "1/8T"
         ]
       }
     ],
@@ -94,12 +240,12 @@
             "version": 1,
             "focussed": {
               "version": 1,
-              "colour": "ff101d25",
+              "colour": "ff06191d",
               "image": ""
             },
             "unfocussed": {
               "version": 1,
-              "colour": "ff101d25",
+              "colour": "ff06191d",
               "image": ""
             }
           },
@@ -110,7 +256,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_00",
+                "name": "APPROVED_LAB10_00_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -139,7 +285,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_01",
+                "name": "APPROVED_LAB10_01_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -168,7 +314,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_02",
+                "name": "APPROVED_LAB10_02_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -197,7 +343,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_03",
+                "name": "APPROVED_LAB10_03_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -226,7 +372,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_04",
+                "name": "APPROVED_LAB10_04_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -255,7 +401,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_05",
+                "name": "APPROVED_LAB10_05_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -284,7 +430,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_06",
+                "name": "APPROVED_LAB10_06_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -313,7 +459,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_07_STATE_0",
+                "name": "APPROVED_LAB10_07_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -343,7 +489,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_07_STATE_1",
+                "name": "APPROVED_LAB10_07_1",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -373,7 +519,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_07_STATE_2",
+                "name": "APPROVED_LAB10_07_2",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -403,7 +549,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_07_STATE_3",
+                "name": "APPROVED_LAB10_07_3",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -433,7 +579,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_08",
+                "name": "APPROVED_LAB10_08_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -462,7 +608,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_09_STATE_0",
+                "name": "APPROVED_LAB10_09_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -492,7 +638,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_09_STATE_1",
+                "name": "APPROVED_LAB10_09_1",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -522,7 +668,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_09_STATE_2",
+                "name": "APPROVED_LAB10_09_2",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -552,7 +698,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_10_STATE_0",
+                "name": "APPROVED_LAB10_10_0",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -582,7 +728,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_10_STATE_1",
+                "name": "APPROVED_LAB10_10_1",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -612,7 +758,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_10_STATE_2",
+                "name": "APPROVED_LAB10_10_2",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -642,7 +788,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "APPROVED_LAB10_SCREEN_10_STATE_3",
+                "name": "APPROVED_LAB10_10_3",
                 "type": "Image",
                 "data": {
                   "version": 2,
@@ -699,7 +845,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "15 70 110 37"
+                "bounds": "15 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -733,7 +880,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "128 70 110 37"
+                "bounds": "128 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -767,7 +915,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "241 70 110 37"
+                "bounds": "241 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -801,7 +950,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "354 70 110 37"
+                "bounds": "354 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -835,7 +985,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "467 70 110 37"
+                "bounds": "467 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -869,7 +1020,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "580 70 110 37"
+                "bounds": "580 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -903,7 +1055,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "693 70 110 37"
+                "bounds": "693 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -937,7 +1090,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "806 70 110 37"
+                "bounds": "806 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -971,7 +1125,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "919 70 110 37"
+                "bounds": "919 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -1005,7 +1160,8 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1032 70 110 37"
+                "bounds": "1032 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
@@ -1039,14 +1195,15 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1145 70 110 37"
+                "bounds": "1145 70 110 37",
+                "additionalInvalidatingHandles": []
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Q_LINK_1_EDIT_AND_LIVE_VALUE",
+                "name": "Q_LINK_1_TOUCH_WHEEL_VALUE",
                 "type": "Knob",
                 "data": {
                   "version": 4,
@@ -1056,10 +1213,10 @@
                     "font": {
                       "version": 1,
                       "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
+                      "style": "Regular",
+                      "height": 19.0
                     },
-                    "colour": "ffffc792",
+                    "colour": "ffffcf9c",
                     "justification": "left verticallyCentred",
                     "case": "Original"
                   },
@@ -1082,14 +1239,15 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1093 224 150 34"
+                "bounds": "1093 224 149 38",
+                "additionalInvalidatingHandles": []
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Q_LINK_2_EDIT_AND_LIVE_VALUE",
+                "name": "Q_LINK_2_TOUCH_WHEEL_VALUE",
                 "type": "Knob",
                 "data": {
                   "version": 4,
@@ -1099,10 +1257,10 @@
                     "font": {
                       "version": 1,
                       "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
+                      "style": "Regular",
+                      "height": 19.0
                     },
-                    "colour": "ffffc792",
+                    "colour": "ffffcf9c",
                     "justification": "left verticallyCentred",
                     "case": "Original"
                   },
@@ -1125,14 +1283,15 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1093 322 150 34"
+                "bounds": "1093 322 149 38",
+                "additionalInvalidatingHandles": []
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Q_LINK_3_EDIT_AND_LIVE_VALUE",
+                "name": "Q_LINK_3_TOUCH_WHEEL_VALUE",
                 "type": "Knob",
                 "data": {
                   "version": 4,
@@ -1142,10 +1301,10 @@
                     "font": {
                       "version": 1,
                       "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
+                      "style": "Regular",
+                      "height": 19.0
                     },
-                    "colour": "ffffc792",
+                    "colour": "ffffcf9c",
                     "justification": "left verticallyCentred",
                     "case": "Original"
                   },
@@ -1168,14 +1327,15 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1093 422 150 34"
+                "bounds": "1093 421 149 38",
+                "additionalInvalidatingHandles": []
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "Q_LINK_4_EDIT_AND_LIVE_VALUE",
+                "name": "Q_LINK_4_TOUCH_WHEEL_VALUE",
                 "type": "Knob",
                 "data": {
                   "version": 4,
@@ -1185,10 +1345,10 @@
                     "font": {
                       "version": 1,
                       "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
+                      "style": "Regular",
+                      "height": 19.0
                     },
-                    "colour": "ffffc792",
+                    "colour": "ffffcf9c",
                     "justification": "left verticallyCentred",
                     "case": "Original"
                   },
@@ -1211,14 +1371,61 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "1093 519 150 34"
+                "bounds": "1093 519 149 38",
+                "additionalInvalidatingHandles": []
               }
             },
             {
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "ACOUSTIC_ON_A",
+                "name": "ACOUSTIC_SOURCE_A",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "ffffcf9c",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 0"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "144 246 434 39",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_POWER_A",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -1245,7 +1452,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "49 244 80 53",
+                "bounds": "49 244 80 48",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/0/11/Parameter 112"
                 ]
@@ -1255,7 +1462,53 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "ACOUSTIC_ON_B",
+                "name": "ACOUSTIC_SOURCE_B",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "ffffcf9c",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 1"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "144 315 434 39",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_POWER_B",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -1282,7 +1535,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "49 314 80 53",
+                "bounds": "49 313 80 48",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/0/11/Parameter 112"
                 ]
@@ -1292,7 +1545,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "ACOUSTIC_SOURCE_A",
+                "name": "ACOUSTIC_BLEND_TOUCH",
                 "type": "Knob",
                 "data": {
                   "version": 4,
@@ -1302,96 +1555,13 @@
                     "font": {
                       "version": 1,
                       "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
+                      "style": "Regular",
+                      "height": 19.0
                     },
-                    "colour": "ffffc792",
+                    "colour": "00ffffff",
                     "justification": "left verticallyCentred",
                     "case": "Original"
                   },
-                  "dragOrientation": "Vertical",
-                  "handleName": "Data"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 0"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "144 247 435 36",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/0/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "ACOUSTIC_SOURCE_B",
-                "type": "Knob",
-                "data": {
-                  "version": 4,
-                  "knobType": "ValueSlider",
-                  "textStyle": {
-                    "version": 1,
-                    "font": {
-                      "version": 1,
-                      "name": "Nexa",
-                      "style": "Bold",
-                      "height": 20
-                    },
-                    "colour": "ffffc792",
-                    "justification": "left verticallyCentred",
-                    "case": "Original"
-                  },
-                  "dragOrientation": "Vertical",
-                  "handleName": "Data"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 1"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "144 314 435 36",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/0/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "ACOUSTIC_BLEND_BAR",
-                "type": "Knob",
-                "data": {
-                  "version": 4,
-                  "knobType": "RotatingImage",
-                  "foregroundImage": "lab10_touch_hit.png",
-                  "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1,
                   "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
@@ -1411,7 +1581,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "49 459 529 36",
+                "bounds": "49 449 530 46",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/0/11/Parameter 112"
                 ]
@@ -1421,16 +1591,90 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "OSC_WAVE_SELECT",
-                "type": "Knob",
+                "name": "ACOUSTIC_NOISE_WHITE",
+                "type": "Button",
                 "data": {
-                  "version": 4,
-                  "knobType": "RotatingImage",
-                  "foregroundImage": "lab10_touch_hit.png",
-                  "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1,
-                  "dragOrientation": "Vertical",
-                  "handleName": "Data"
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 2,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 124"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "660 539 98 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ACOUSTIC_NOISE_PINK",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 2,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 124"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "770 539 98 31",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/0/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_SINE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
                 }
               },
               "handle remapping": {
@@ -1448,7 +1692,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "70 348 700 100",
+                "bounds": "49 368 93 146",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/1/11/Parameter 112"
                 ]
@@ -1458,14 +1702,282 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "BLEND_ECLIPSE",
+                "name": "OSC_WAVE_TRIANGLE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "147 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_SAW",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 2,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "245 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_SQUARE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 3,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "343 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_PULSE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 4,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "441 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_ORGAN",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 5,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "539 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_BRIGHT",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 6,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "637 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "OSC_WAVE_HOLLOW",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 7,
+                  "numButtonsInGroup": 8,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 2"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "735 368 93 146",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/1/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "BLEND_ECLIPSE_TOUCH",
                 "type": "Knob",
                 "data": {
                   "version": 4,
-                  "knobType": "RotatingImage",
-                  "foregroundImage": "lab10_touch_hit.png",
-                  "backgroundImage": "lab10_touch_hit.png",
-                  "imageScale": 1,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
                   "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
@@ -1485,9 +1997,193 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "250 209 480 370",
+                "bounds": "258 225 462 310",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/2/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ENVELOPE_ATTACK_WHEEL",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 29"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "65 243 124 177",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ENVELOPE_DECAY_WHEEL",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 30"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "189 243 145 177",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ENVELOPE_SUSTAIN_WHEEL",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 31"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "334 243 146 177",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "ENVELOPE_RELEASE_WHEEL",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 32"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "480 243 164 177",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/3/11/Parameter 112"
                 ]
               }
             },
@@ -1522,7 +2218,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "49 243 155 75",
+                "bounds": "461 244 145 137",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -1559,7 +2255,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "218 243 155 75",
+                "bounds": "620 244 145 137",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -1596,7 +2292,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "388 243 155 75",
+                "bounds": "779 244 145 137",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -1606,590 +2302,24 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "LIVE_ADSR_NATIVE_LAB10",
-                "type": "Envelope",
+                "name": "MEMORY_WINDOW_VISUAL_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 1,
-                  "envelopeType": "ADSR",
-                  "envelopeStyle": "WithoutHeader",
-                  "envelopeName": "",
-                  "backgroundColour": "00000000",
-                  "scaleColour": "00000000",
-                  "lineColour": "ffe9d1a8",
-                  "fillColour": "0fe8caa0",
-                  "highlightColour": "fff5cfa1",
-                  "lineWidth": 3,
-                  "handleWidth": 17,
-                  "handleHeight": 11,
-                  "handleShape": "Circle",
-                  "handleLineWidth": 2,
-                  "handleLineColour": "fff5cfa1",
-                  "handleFillColour": "ff263638",
-                  "handleTextColour": "ffe3c8a4",
-                  "handleLineWidthOnPressed": 2,
-                  "handleLineColourOnPressed": "fff5cfa1",
-                  "handleFillColourOnPressed": "ffdf9970",
-                  "handleTextColourOnPressed": "ffe3c8a4",
-                  "handleArrowLineColourOnPressed": "ffe3c8a4",
-                  "handleArrowFillColourOnPressed": "ffe3c8a4",
-                  "attackHandle": "Parameter 29",
-                  "decayHandle": "Parameter 30",
-                  "sustainHandle": "Parameter 31",
-                  "releaseHandle": "Parameter 32",
-                  "attackShapeHandle": "Invalid",
-                  "decayShapeHandle": "Invalid",
-                  "releaseShapeHandle": "Invalid",
-                  "forceHideShapeHandles": true,
-                  "forceCurveShape": 0.5,
-                  "curveType": "Quadratic"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "64 254 580 158",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/3/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_SELECT_0",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 0,
-                  "numButtonsInGroup": 3,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 111"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "48 231 192 241",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_SELECT_1",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 3,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 111"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "257 231 192 241",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_SELECT_2",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 2,
-                  "numButtonsInGroup": 3,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 111"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "466 231 192 241",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_ONOFF_0",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 1,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 16"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "67 403 155 32",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_ONOFF_1",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 1,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 17"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "276 403 155 32",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "MOD_ONOFF_2",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 1,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 18"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "485 403 155 32",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "CHAR_SELECT_0",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 0,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 109"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "50 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/7/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "CHAR_SELECT_1",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 109"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "230 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/7/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "CHAR_SELECT_2",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 2,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 109"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "410 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/7/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "CHAR_SELECT_3",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 3,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 109"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "590 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/7/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "SEND_SELECT_0",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 0,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 110"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "50 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/10/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "SEND_SELECT_1",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 110"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "230 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/10/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "SEND_SELECT_2",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 2,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 110"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "410 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/10/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "SEND_SELECT_3",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
-                  "buttonId": 3,
-                  "numButtonsInGroup": 4,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 110"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "590 231 164 210",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/10/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "LIVE_MOD_LFO1_SHAPE",
-                "type": "Image",
-                "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "mod_lfo_shape_engine_5.png",
-                  "numFrames": 5,
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -2198,19 +2328,19 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 82"
+                    "value": "Parameter 33"
                   }
                 ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "84 316 175 56",
+                "bounds": "50 460 290 106",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
+                  "IndexedEnabling/4/11/Parameter 112"
                 ]
               }
             },
@@ -2218,14 +2348,24 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "LIVE_MOD_LFO2_SHAPE",
-                "type": "Image",
+                "name": "MEMORY_POSITION_VISUAL_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "mod_lfo_shape_engine_5.png",
-                  "numFrames": 5,
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -2234,67 +2374,9 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 86"
+                    "value": "Parameter 35"
                   }
                 ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "294 316 175 56",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "LIVE_MOD_ENV2",
-                "type": "Envelope",
-                "data": {
-                  "version": 1,
-                  "envelopeType": "ADSR",
-                  "envelopeStyle": "WithoutHeader",
-                  "envelopeName": "",
-                  "backgroundColour": "00000000",
-                  "scaleColour": "00000000",
-                  "lineColour": "ffe9d1a8",
-                  "fillColour": "0fe8caa0",
-                  "highlightColour": "fff5cfa1",
-                  "lineWidth": 3,
-                  "handleWidth": 17,
-                  "handleHeight": 11,
-                  "handleShape": "Circle",
-                  "handleLineWidth": 2,
-                  "handleLineColour": "fff5cfa1",
-                  "handleFillColour": "ff263638",
-                  "handleTextColour": "ffe3c8a4",
-                  "handleLineWidthOnPressed": 2,
-                  "handleLineColourOnPressed": "fff5cfa1",
-                  "handleFillColourOnPressed": "ffdf9970",
-                  "handleTextColourOnPressed": "ffe3c8a4",
-                  "handleArrowLineColourOnPressed": "ffe3c8a4",
-                  "handleArrowFillColourOnPressed": "ffe3c8a4",
-                  "attackHandle": "Parameter 88",
-                  "decayHandle": "Parameter 89",
-                  "sustainHandle": "Parameter 90",
-                  "releaseHandle": "Parameter 91",
-                  "attackShapeHandle": "Invalid",
-                  "decayShapeHandle": "Invalid",
-                  "releaseShapeHandle": "Invalid",
-                  "forceHideShapeHandles": true,
-                  "forceCurveShape": 0.5,
-                  "curveType": "Quadratic"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
               },
               "bounds": {
                 "version": 2,
@@ -2302,10 +2384,9 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "79 510 548 97",
+                "bounds": "341 460 422 106",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112",
-                  "IndexedEnabling/2/3/Parameter 111"
+                  "IndexedEnabling/4/11/Parameter 112"
                 ]
               }
             },
@@ -2313,14 +2394,612 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "ACOUSTIC_NOISE_WHITE",
+                "name": "MEMORY_MIX",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 37"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "60 556 450 35",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "RESONANCE_PARAM_1_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 38"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "108 275 162 72",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "RESONANCE_PARAM_2_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 39"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "108 348 162 72",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "RESONANCE_PARAM_3_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 40"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "108 420 162 72",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "RESONANCE_PARAM_4_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 41"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "108 494 162 72",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/5/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_PARAM_1_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 42"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "90 258 155 63",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_PARAM_2_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 107"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "245 258 170 63",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_PARAM_3_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 108"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "415 258 170 63",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "FILTER_PARAM_4_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 43"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "585 258 172 63",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/6/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "GRANULAR_PARAM_1_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 44"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "50 503 185 70",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "GRANULAR_PARAM_2_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 45"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "235 503 184 70",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "GRANULAR_PARAM_3_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 46"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "419 503 185 70",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "GRANULAR_PARAM_4_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 47"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "604 503 185 70",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/8/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "CHAR_SELECT_DISTORTION",
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "noise_white_on.png",
-                  "offImage": "noise_white_off.png",
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
                   "buttonId": 0,
-                  "numButtonsInGroup": 2,
+                  "numButtonsInGroup": 4,
                   "handleName": "Data",
                   "gestureBehaviour": "Instant"
                 }
@@ -2330,7 +3009,7 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 124"
+                    "value": "Parameter 109"
                   }
                 ]
               },
@@ -2340,9 +3019,9 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "660 539 98 31",
+                "bounds": "50 232 164 180",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/0/11/Parameter 112"
+                  "IndexedEnabling/7/11/Parameter 112"
                 ]
               }
             },
@@ -2350,44 +3029,7 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "ACOUSTIC_NOISE_PINK",
-                "type": "Button",
-                "data": {
-                  "version": 2,
-                  "onImage": "noise_pink_on.png",
-                  "offImage": "noise_pink_off.png",
-                  "buttonId": 1,
-                  "numButtonsInGroup": 2,
-                  "handleName": "Data",
-                  "gestureBehaviour": "Instant"
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": [
-                  {
-                    "key": "Data",
-                    "value": "Parameter 124"
-                  }
-                ]
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "Yes",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "770 539 98 31",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/0/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "CHAR_ONOFF_0",
+                "name": "CHAR_ONOFF_DISTORTION",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2424,7 +3066,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "CHAR_ONOFF_1",
+                "name": "CHAR_SELECT_TAPE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 109"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "230 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/7/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "CHAR_ONOFF_TAPE",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2461,7 +3140,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "CHAR_ONOFF_2",
+                "name": "CHAR_SELECT_VINYL",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 2,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 109"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "410 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/7/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "CHAR_ONOFF_VINYL",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2498,7 +3214,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "CHAR_ONOFF_3",
+                "name": "CHAR_SELECT_CRUSH",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 3,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 109"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "590 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/7/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "CHAR_ONOFF_CRUSH",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2535,7 +3288,736 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "SEND_ONOFF_0",
+                "name": "MOD_SELECT_LFO1",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 111"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "48 231 192 159",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_ONOFF_LFO1",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 16"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "67 403 155 32",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_SELECT_LFO2",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 111"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "257 231 192 159",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_ONOFF_LFO2",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 17"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "276 403 155 32",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_SELECT_ENV2",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 2,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 111"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "466 231 192 159",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_ONOFF_ENV2",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 1,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 18"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "485 403 155 32",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO1_SECONDARY_1",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 92"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "54 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO1_SECONDARY_2",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 97"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "182 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO1_SECONDARY_3",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 98"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "310 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO1_SECONDARY_4",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 99"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "438 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/0/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO2_SECONDARY_1",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 93"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "54 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO2_SECONDARY_2",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 100"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "182 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO2_SECONDARY_3",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 101"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "310 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_LFO2_SECONDARY_4",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 102"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "438 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/1/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_ENV2_SECONDARY_1",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 94"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "54 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MOD_ENV2_SECONDARY_2",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 95"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "182 482 120 34",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/9/11/Parameter 112",
+                  "IndexedEnabling/2/3/Parameter 111"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_SELECT_DELAY",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 110"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "50 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/10/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_ONOFF_DELAY",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2572,7 +4054,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "SEND_ONOFF_1",
+                "name": "SEND_SELECT_REVERB",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 110"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "230 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/10/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_ONOFF_REVERB",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2609,7 +4128,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "SEND_ONOFF_2",
+                "name": "SEND_SELECT_MOD1",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 2,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 110"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "410 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/10/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_ONOFF_MOD1",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2646,7 +4202,44 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "SEND_ONOFF_3",
+                "name": "SEND_SELECT_MOD2",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "lab10_touch_hit.png",
+                  "offImage": "lab10_touch_hit.png",
+                  "buttonId": 3,
+                  "numButtonsInGroup": 4,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 110"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "590 232 164 180",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/10/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_ONOFF_MOD2",
                 "type": "Button",
                 "data": {
                   "version": 2,
@@ -2683,157 +4276,24 @@
               "version": 2,
               "componentData": {
                 "version": 1,
-                "name": "LIVE_LFO_1_AUDIO_TRACE",
-                "type": "Plotter",
+                "name": "SEND_MOD1_ALGORITHM_TOUCH",
+                "type": "Knob",
                 "data": {
-                  "version": 2,
-                  "backgroundColour": "b80a2528",
-                  "drawLine": true,
-                  "lineDirection": "Right",
-                  "tightClip": true,
-                  "lineColourStart": "ffe5cda2",
-                  "lineColourEnd": "ffe5cda2",
-                  "horizLineGradient": false,
-                  "lineWidth": 2.4,
-                  "fillColourStart": "17e6cba4",
-                  "fillColourEnd": "08e6cba4",
-                  "horizFillGradient": false,
-                  "fillZero": 0.5,
-                  "dataHandle": "Parameter 118",
-                  "dataMin": 0,
-                  "dataMax": 1,
-                  "drawHistory": true,
-                  "historyDirection": "Left",
-                  "historyColour1": "ffe5cda2",
-                  "historyColour2": "ffe5cda2",
-                  "historyTime": 3,
-                  "historySkipFrames": 1
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "84 521 540 81",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112",
-                  "IndexedEnabling/0/3/Parameter 111"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "LIVE_LFO_2_AUDIO_TRACE",
-                "type": "Plotter",
-                "data": {
-                  "version": 2,
-                  "backgroundColour": "b80a2528",
-                  "drawLine": true,
-                  "lineDirection": "Right",
-                  "tightClip": true,
-                  "lineColourStart": "ff85bdba",
-                  "lineColourEnd": "ff85bdba",
-                  "horizLineGradient": false,
-                  "lineWidth": 2.4,
-                  "fillColourStart": "17e6cba4",
-                  "fillColourEnd": "08e6cba4",
-                  "horizFillGradient": false,
-                  "fillZero": 0.5,
-                  "dataHandle": "Parameter 119",
-                  "dataMin": 0,
-                  "dataMax": 1,
-                  "drawHistory": true,
-                  "historyDirection": "Left",
-                  "historyColour1": "ff85bdba",
-                  "historyColour2": "ff85bdba",
-                  "historyTime": 3,
-                  "historySkipFrames": 1
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "84 521 540 81",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/9/11/Parameter 112",
-                  "IndexedEnabling/1/3/Parameter 111"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "LIVE_MEMORY_WET_AUDIO_WAVE",
-                "type": "Plotter",
-                "data": {
-                  "version": 2,
-                  "backgroundColour": "b80a2528",
-                  "drawLine": true,
-                  "lineDirection": "Right",
-                  "tightClip": true,
-                  "lineColourStart": "ffe4bb88",
-                  "lineColourEnd": "ffe4bb88",
-                  "horizLineGradient": false,
-                  "lineWidth": 2.4,
-                  "fillColourStart": "17e6cba4",
-                  "fillColourEnd": "08e6cba4",
-                  "horizFillGradient": false,
-                  "fillZero": 0.5,
-                  "dataHandle": "Parameter 120",
-                  "dataMin": 0,
-                  "dataMax": 1,
-                  "drawHistory": true,
-                  "historyDirection": "Left",
-                  "historyColour1": "ffe4bb88",
-                  "historyColour2": "ffe4bb88",
-                  "historyTime": 3,
-                  "historySkipFrames": 1
-                }
-              },
-              "handle remapping": {
-                "version": 1,
-                "map": []
-              },
-              "bounds": {
-                "version": 2,
-                "acceptsHWFocus": "No",
-                "showWhenDataModelInvalid": "Hide",
-                "whenVisible": "Always",
-                "boundsType": "Absolute",
-                "bounds": "85 451 718 61",
-                "additionalInvalidatingHandles": [
-                  "IndexedEnabling/4/11/Parameter 112"
-                ]
-              }
-            },
-            {
-              "version": 2,
-              "componentData": {
-                "version": 1,
-                "name": "LIVE_MEMORY_READ_PLAYHEAD",
-                "type": "Image",
-                "data": {
-                  "version": 2,
-                  "imageType": "FilmStrip",
-                  "colour": "0",
-                  "image": "memory_playhead_live_32.png",
-                  "numFrames": 32,
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
                   "handleName": "Data"
                 }
               },
@@ -2842,26 +4302,77 @@
                 "map": [
                   {
                     "key": "Data",
-                    "value": "Parameter 121"
+                    "value": "Parameter 103"
                   }
                 ]
               },
               "bounds": {
                 "version": 2,
-                "acceptsHWFocus": "No",
+                "acceptsHWFocus": "Yes",
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "85 451 718 61",
+                "bounds": "155 486 290 38",
                 "additionalInvalidatingHandles": [
-                  "IndexedEnabling/4/11/Parameter 112"
+                  "IndexedEnabling/10/11/Parameter 112",
+                  "IndexedEnabling/2/4/Parameter 110"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "SEND_MOD2_ALGORITHM_TOUCH",
+                "type": "Knob",
+                "data": {
+                  "version": 4,
+                  "knobType": "ValueSlider",
+                  "textStyle": {
+                    "version": 1,
+                    "font": {
+                      "version": 1,
+                      "name": "Nexa",
+                      "style": "Regular",
+                      "height": 19.0
+                    },
+                    "colour": "00ffffff",
+                    "justification": "left verticallyCentred",
+                    "case": "Original"
+                  },
+                  "dragOrientation": "Vertical",
+                  "handleName": "Data"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 104"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "155 486 290 38",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/10/11/Parameter 112",
+                  "IndexedEnabling/3/4/Parameter 110"
                 ]
               }
             }
           ]
         },
         "qlinkBoundsData": [
-          "1011 117 256 465"
+          "1127 218 114 390",
+          "1127 218 114 390",
+          "1127 218 114 390",
+          "1127 218 114 390"
         ]
       }
     ]
