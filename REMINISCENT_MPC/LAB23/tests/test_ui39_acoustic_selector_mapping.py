@@ -23,4 +23,16 @@ for name,handle in (('ACOUSTIC_SOURCE_A','Parameter 128'),('ACOUSTIC_SOURCE_B','
 # Enforce no replacement of the legacy source contract; current saved projects must still refer to historical voices.
 assert '"a","choice",0,26,0,"Piano VEL 3|Mbira de Zimbabue' in contract
 assert '"b","choice",0,26,1,"Piano VEL 3|Mbira de Zimbabue' in contract
-print("PASS: all 27 names, reversible mapping, A/B UI-only handles, legacy sample identifiers unchanged")
+# Native Acoustic ON/OFF buttons must have distinct real status artwork.
+for name,letter,handle in (("ACOUSTIC_POWER_A","a","Parameter 3"),("ACOUSTIC_POWER_B","b","Parameter 4")):
+    c=next(x for x in components if x['componentData']['name']==name)
+    data=c['componentData']['data']
+    assert data['buttonId']==1 and data['numButtonsInGroup']==1
+    assert c['handle remapping']['map']==[{'key':'Data','value':handle}]
+    for state in ("on","off"):
+        expected=f"lab10_acoustic_{letter}_{state}.png"
+        assert data[state+"Image"]==expected
+        assert (root/"skins"/expected).is_file()
+    assert data["onImage"]!=data["offImage"]
+print("PASS: all 27 voices and A/B native visual ON/OFF states")
+
