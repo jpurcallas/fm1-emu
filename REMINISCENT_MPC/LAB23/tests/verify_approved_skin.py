@@ -12,6 +12,15 @@ FILMS = {'acoustic_source_lab10_27.png':(435,1296,27),'osc_lab10_eight_waves.png
 
 def check(root,manifest=None):
     d=json.loads((root/'skins/TUI.json').read_text(encoding='utf8'))
+    # MPC One+ has a physical column of four Q-Links. The on-screen Q1..Q4
+    # were deliberately assigned to SDK virtual slots 13, 14, 15, 16.
+    # These MUST use RowTopDown, not Column: Column splits them into banks.
+    hardware=json.loads((root/'skins/Q-Links.json').read_text(encoding='utf8'))
+    screen=hardware['Screen Mode Q-Links']['map']
+    assert len(screen)==1 and screen[0]['Bank Direction']=='RowTopDown', (
+        'MPC One+ Q-Links 13–16 must occupy one physical bank')
+    assert [screen[0]['Q-Links'][f'Q-Link {n}'] for n in (13,14,15,16)] == [
+        113,114,115,116], 'wrong proxy order for four physical Q-Links'
     assert len(d['pageData']['tabs'])==1, '11 touch pages must be carried in one native host tab'
     comps=d['pageData']['tabs'][0]['componentDefinition']['componentsData']
     entries={c['componentData']['name']:c for c in comps}
