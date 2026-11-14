@@ -55,6 +55,12 @@ struct Params {
  float memoryMix=0.f; int memoryWindow=2048;
  float memorySpeed=.5f,memoryPosition=0.f,memoryShape=.5f;
  bool lowPassOn=false;float lowPassCutoff=20000.f,lowPassMix=1.f;
+ // LAB24 acoustic noise and filter/OSC controls. Defaults preserve LAB23 audio.
+ float oscSpread=64.f/127.f; // centered = original mono OSC
+ float lowPassEnv=56.f/127.f; // neutral at former stored value
+ float lowPassTrack=64.f/127.f; // neutral at former stored value
+ float acousticNoiseLevel=0.f; // independently synthesized, OFF by default
+ int acousticNoiseType=0; // 0=WHITE, 1=PINK Voss-McCartney
  float grainSize=.43f,grainDensity=.35f,grainPos=.54f,grainMix=0.f;
  // UI LAB07 legacy controls; same persistent 102 IDs.
  float resoBody=.57f,resoDecay=.39f,resoExcite=.38f,resoMix=0.f;
@@ -99,6 +105,10 @@ struct Voice {
  const Sample *a=nullptr,*b=nullptr; double posA=0,posB=0,rateA=1,rateB=1,phase=0;
  uint32_t phaseQ32=0,noiseSeed=0x13579bdf;
  int32_t pinkSlow=0,pinkMid=0,pinkFast=0;
+ // Independent of the OSC noise generator, so enabling acoustic noise
+ // never perturbs oscillator noise or the approved PCM voices.
+ uint32_t acousticNoiseSeed=0x91351f17u,acousticPinkCounter=0;
+ std::array<float,16> acousticPinkRows{};float acousticPinkSum=0.f;
  float velocity=1.f,level=0,releaseDelta=0;
  float env2Level=0.f,env2ReleaseDelta=0.f;
  enum class Stage{Attack,Decay,Sustain,Release} stage=Stage::Attack,env2Stage=Stage::Attack;
