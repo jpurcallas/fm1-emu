@@ -21,6 +21,7 @@ struct Bank {
  std::vector<Sample> layers;
  const Sample* nearest(int note) const;
  bool loadWav(const std::string& path,int root,std::string& error);
+ bool loadFlac(const std::string& path,int root,std::string& error);
 };
 enum class Wave : int { Sine=0, Triangle=1, Saw=2, Square=3, Pulse=4, Organ=5, Bright=6, Hollow=7 };
 
