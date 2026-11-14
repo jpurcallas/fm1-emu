@@ -1,0 +1,17 @@
+name: REminiSCENT UI39 acoustic-selector mapping
+on:
+  pull_request:
+    paths:
+      - 'REMINISCENT_MPC/LAB23/src/REminiSCENTMPC.cpp'
+      - 'REMINISCENT_MPC/LAB23/src/ui07_contract_generated.hpp'
+      - 'REMINISCENT_MPC/LAB23/skins/TUI.json'
+      - 'REMINISCENT_MPC/LAB23/tests/test_ui39_acoustic_selector_mapping.py'
+      - '.github/workflows/test-reminiscent-ui39-acoustic.yml'
+  workflow_dispatch:
+jobs:
+  verify-ui-and-bank-identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify all 27 acoustic selectors map to legacy PCM and unchanged DSP
+        run: python3 REMINISCENT_MPC/LAB23/tests/test_ui39_acoustic_selector_mapping.py
