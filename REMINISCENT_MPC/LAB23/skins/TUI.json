@@ -9267,7 +9267,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_04.png"
+                  "image": "ui40_lab10_mpc_04.png"
                 }
               },
               "handle remapping": {
@@ -9354,7 +9354,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_07_0.png"
+                  "image": "ui40_lab10_mpc_07_0.png"
                 }
               },
               "handle remapping": {
@@ -9384,7 +9384,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_07_1.png"
+                  "image": "ui40_lab10_mpc_07_1.png"
                 }
               },
               "handle remapping": {
@@ -9414,7 +9414,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_07_2.png"
+                  "image": "ui40_lab10_mpc_07_2.png"
                 }
               },
               "handle remapping": {
@@ -9444,7 +9444,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_07_3.png"
+                  "image": "ui40_lab10_mpc_07_3.png"
                 }
               },
               "handle remapping": {
@@ -9503,7 +9503,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_09_0.png"
+                  "image": "ui40_lab10_mpc_09_0.png"
                 }
               },
               "handle remapping": {
@@ -9533,7 +9533,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_09_1.png"
+                  "image": "ui40_lab10_mpc_09_1.png"
                 }
               },
               "handle remapping": {
@@ -9563,7 +9563,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_09_2.png"
+                  "image": "ui40_lab10_mpc_09_2.png"
                 }
               },
               "handle remapping": {
@@ -9593,7 +9593,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_10_0.png"
+                  "image": "ui40_lab10_mpc_10_0.png"
                 }
               },
               "handle remapping": {
@@ -9623,7 +9623,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_10_1.png"
+                  "image": "ui40_lab10_mpc_10_1.png"
                 }
               },
               "handle remapping": {
@@ -9653,7 +9653,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_10_2.png"
+                  "image": "ui40_lab10_mpc_10_2.png"
                 }
               },
               "handle remapping": {
@@ -9683,7 +9683,7 @@
                   "version": 2,
                   "imageType": "Regular",
                   "colour": "0",
-                  "image": "lab10_mpc_10_3.png"
+                  "image": "ui40_lab10_mpc_10_3.png"
                 }
               },
               "handle remapping": {
@@ -11805,8 +11805,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_145x93_power_on.png",
+                  "offImage": "ui40_145x93_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -11828,7 +11828,44 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "461 244 145 137",
+                "bounds": "461 289 145 93",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MEMORY_EDIT_FREEZE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "ui40_145x45_edit_selected.png",
+                  "offImage": "ui40_145x45_edit_unselected.png",
+                  "buttonId": 0,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 117"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "461 382 145 45",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -11842,8 +11879,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_145x93_power_on.png",
+                  "offImage": "ui40_145x93_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -11865,7 +11902,44 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "620 244 145 137",
+                "bounds": "620 289 145 93",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MEMORY_EDIT_REVERSE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "ui40_145x45_edit_selected.png",
+                  "offImage": "ui40_145x45_edit_unselected.png",
+                  "buttonId": 1,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 117"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "620 382 145 45",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -11879,8 +11953,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_145x93_power_on.png",
+                  "offImage": "ui40_145x93_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -11902,7 +11976,44 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "779 244 145 137",
+                "bounds": "779 289 145 93",
+                "additionalInvalidatingHandles": [
+                  "IndexedEnabling/4/11/Parameter 112"
+                ]
+              }
+            },
+            {
+              "version": 2,
+              "componentData": {
+                "version": 1,
+                "name": "MEMORY_EDIT_TIDE",
+                "type": "Button",
+                "data": {
+                  "version": 2,
+                  "onImage": "ui40_145x45_edit_selected.png",
+                  "offImage": "ui40_145x45_edit_unselected.png",
+                  "buttonId": 2,
+                  "numButtonsInGroup": 3,
+                  "handleName": "Data",
+                  "gestureBehaviour": "Instant"
+                }
+              },
+              "handle remapping": {
+                "version": 1,
+                "map": [
+                  {
+                    "key": "Data",
+                    "value": "Parameter 117"
+                  }
+                ]
+              },
+              "bounds": {
+                "version": 2,
+                "acceptsHWFocus": "Yes",
+                "showWhenDataModelInvalid": "Hide",
+                "whenVisible": "Always",
+                "boundsType": "Absolute",
+                "bounds": "779 382 145 45",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/4/11/Parameter 112"
                 ]
@@ -12396,8 +12507,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 0,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -12419,7 +12530,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "50 232 164 180",
+                "bounds": "50 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12433,8 +12544,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12456,7 +12567,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "72 429 125 42",
+                "bounds": "50 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12470,8 +12581,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -12493,7 +12604,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "230 232 164 180",
+                "bounds": "230 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12507,8 +12618,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12530,7 +12641,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "252 429 125 42",
+                "bounds": "230 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12544,8 +12655,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 2,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -12567,7 +12678,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "410 232 164 180",
+                "bounds": "410 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12581,8 +12692,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12604,7 +12715,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "432 429 125 42",
+                "bounds": "410 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12618,8 +12729,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 3,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -12641,7 +12752,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "590 232 164 180",
+                "bounds": "590 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12655,8 +12766,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12678,7 +12789,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "612 429 125 42",
+                "bounds": "590 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/7/11/Parameter 112"
                 ]
@@ -12692,8 +12803,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x56_edit_selected.png",
+                  "offImage": "ui40_192x56_edit_unselected.png",
                   "buttonId": 0,
                   "numButtonsInGroup": 3,
                   "handleName": "Data",
@@ -12715,7 +12826,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "48 231 192 159",
+                "bounds": "48 379 192 56",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -12729,8 +12840,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x75_power_on.png",
+                  "offImage": "ui40_192x75_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12752,7 +12863,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "67 403 155 32",
+                "bounds": "48 304 192 75",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -12766,8 +12877,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x56_edit_selected.png",
+                  "offImage": "ui40_192x56_edit_unselected.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 3,
                   "handleName": "Data",
@@ -12789,7 +12900,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "257 231 192 159",
+                "bounds": "257 379 192 56",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -12803,8 +12914,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x75_power_on.png",
+                  "offImage": "ui40_192x75_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12826,7 +12937,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "276 403 155 32",
+                "bounds": "257 304 192 75",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -12840,8 +12951,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x56_edit_selected.png",
+                  "offImage": "ui40_192x56_edit_unselected.png",
                   "buttonId": 2,
                   "numButtonsInGroup": 3,
                   "handleName": "Data",
@@ -12863,7 +12974,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "466 231 192 159",
+                "bounds": "466 379 192 56",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -12877,8 +12988,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_192x75_power_on.png",
+                  "offImage": "ui40_192x75_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -12900,7 +13011,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "485 403 155 32",
+                "bounds": "466 304 192 75",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/9/11/Parameter 112"
                 ]
@@ -13244,8 +13355,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 0,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -13267,7 +13378,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "50 232 164 180",
+                "bounds": "50 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13281,8 +13392,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -13304,7 +13415,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "72 429 125 42",
+                "bounds": "50 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13318,8 +13429,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -13341,7 +13452,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "230 232 164 180",
+                "bounds": "230 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13355,8 +13466,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -13378,7 +13489,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "252 429 125 42",
+                "bounds": "230 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13392,8 +13503,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 2,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -13415,7 +13526,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "410 232 164 180",
+                "bounds": "410 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13429,8 +13540,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -13452,7 +13563,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "432 429 125 42",
+                "bounds": "410 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13466,8 +13577,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x64_edit_selected.png",
+                  "offImage": "ui40_164x64_edit_unselected.png",
                   "buttonId": 3,
                   "numButtonsInGroup": 4,
                   "handleName": "Data",
@@ -13489,7 +13600,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "590 232 164 180",
+                "bounds": "590 410 164 64",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
@@ -13503,8 +13614,8 @@
                 "type": "Button",
                 "data": {
                   "version": 2,
-                  "onImage": "lab10_touch_hit.png",
-                  "offImage": "lab10_touch_hit.png",
+                  "onImage": "ui40_164x104_power_on.png",
+                  "offImage": "ui40_164x104_power_off.png",
                   "buttonId": 1,
                   "numButtonsInGroup": 1,
                   "handleName": "Data",
@@ -13526,7 +13637,7 @@
                 "showWhenDataModelInvalid": "Hide",
                 "whenVisible": "Always",
                 "boundsType": "Absolute",
-                "bounds": "612 429 125 42",
+                "bounds": "590 306 164 104",
                 "additionalInvalidatingHandles": [
                   "IndexedEnabling/10/11/Parameter 112"
                 ]
